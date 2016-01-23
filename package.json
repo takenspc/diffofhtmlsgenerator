@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "Takeshi Kurosawa <taken.spc@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "glob": "^6.0.4",
     "parse5": "^2.1.3",
