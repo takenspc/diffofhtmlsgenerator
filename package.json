@@ -1,0 +1,22 @@
+{
+  "name": "diffofhtmlsgenerator",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Takeshi Kurosawa <taken.spc@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "glob": "^6.0.4",
+    "parse5": "^2.1.3",
+    "request": "^2.67.0"
+  },
+  "devDependencies": {
+    "typescript": "^1.7.5"
+  },
+  "private": true
+}

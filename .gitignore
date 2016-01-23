@@ -1,0 +1,12 @@
+node_modules
+*.js
+*.map
+
+fetcher/data/**/*.html
+fetcher/data/*.json
+
+splitter/data/**/*.html
+splitter/data/**/*.json
+
+formatter/data/**/*.html
+formatter/data/**/*.json
