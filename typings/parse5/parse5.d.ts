@@ -1,6 +1,3 @@
-/// <reference path="../node/node.d.ts" />
-/// <reference path="../domhandler/domhandler.d.ts" />
-
 declare module 'parse5' {
     interface TreeAdapter {
         // TODO
