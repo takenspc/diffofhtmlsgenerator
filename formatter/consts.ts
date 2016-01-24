@@ -1,5 +1,8 @@
 'use strict';
 
+//
+// Formatting
+//
 export const BreakAfterStartTag: Set<string> = new Set([
     "article",
     "aside",
@@ -79,7 +82,11 @@ export const BreakAfterEndTag: Set<string> = new Set([
     'ul',
 ]);
 
-export const VoidElements = new Set([
+//
+// Void elements
+// https://html.spec.whatwg.org/multipage/syntax.html#void-elements
+//
+export const VoidElements: Set<string> = new Set([
     'area',
     'base',
     'br',
@@ -98,7 +105,30 @@ export const VoidElements = new Set([
     'wbr',
 ]);
 
-export const HighlightClassNames: Set<string> = new Set([
+//
+// Heading content
+// https://html.spec.whatwg.org/multipage/dom.html#heading-content
+//
+export const HeadingContent: Set<string> = new Set([
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'hgroup',
+]);
+
+
+//
+// Bikeshed
+//
+export const BikeshedHeadingClassNames: Set<string> = new Set([
+    'secno',
+    'content',
+]);
+
+export const BikeshedHighlightClassNames: Set<string> = new Set([
     'err',
     'c', /* Comment */
     'k', /* Keyword */
@@ -152,4 +182,19 @@ export const HighlightClassNames: Set<string> = new Set([
     'vg', /* Name.Variable.Global */
     'vi', /* Name.Variable.Instance */
     'il', /* Literal.Number.Integer.Long */
+]);
+
+
+//
+// Context
+//
+export const ContextElements: Set<string> = new Set([
+    'pre',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'hgroup',
 ]);

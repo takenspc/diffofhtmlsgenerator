@@ -46,9 +46,8 @@ function formatStartTag(context:FormatContext, node: ASTNode): string {
     buff.push('<');
     buff.push(node.nodeName);
 
-    const attrs = node.attrs.filter(includeAttr).map(modifyAttr).sort(sortAttr);
-
-    if (attrs.length > 0) {
+    if (node.attrs.length > 0) {
+        const attrs = node.attrs.filter(includeAttr).map(modifyAttr).sort(sortAttr);
         buff.push(attrs.map((attr) => {
             return ' ' + attr.name + '="' + escapeHTML(attr.value) + '"';
         }).join(''));
@@ -84,7 +83,7 @@ function formatEndTag(context:FormatContext, node: ASTNode): string {
 function formatText(context: FormatContext, node: ASTNode): string {
     let value = node.value;
     
-    if (context.parent && context.parent.nodeName !== 'pre') {
+    if (!context.parent || context.parent.nodeName !== 'pre') {
         value = value.replace(/\s+/g, ' ');
     }
 
@@ -102,7 +101,7 @@ function formatElement(context: FormatContext, node: ASTNode): string {
         buff.push(formatStartTag(context, node));
     }
 
-    if (node.nodeName === 'pre') {
+    if (consts.ContextElements.has(node.nodeName)) {
         context.parentStack.push(node);
     }
 
@@ -110,7 +109,7 @@ function formatElement(context: FormatContext, node: ASTNode): string {
         buff.push(format(context, childNode));
     }
 
-    if (node.nodeName === 'pre') {
+    if (consts.ContextElements.has(node.nodeName)) {
         context.parentStack.pop();
     }
 

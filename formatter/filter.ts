@@ -22,9 +22,18 @@ export function includeElement(node: ASTNode): boolean {
 //
 export function includeTag(context: FormatContext, node: ASTNode): boolean {
     const parent = context.parent;
-    if (parent && parent.nodeName === 'pre' && getAttribute(parent, 'class') === 'highlight') {
+    if (!parent) {
+        return true;
+    }
+
+    if (parent.nodeName === 'pre' && getAttribute(parent, 'class') === 'highlight') {
         const className = getAttribute(node, 'class');
-        return !consts.HighlightClassNames.has(className)
+        return !consts.BikeshedHighlightClassNames.has(className)
+    }
+
+    if (consts.HeadingContent.has(parent.nodeName)) {
+        const className = getAttribute(node, 'class');
+        return !consts.BikeshedHeadingClassNames.has(className)
     }
 
     return true;
