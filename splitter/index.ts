@@ -28,11 +28,11 @@ function save(root: string, chapterId: string, sectionId: string, text: string):
     });
 }
 
-interface JSONEntry {
+export interface JSONEntry {
     id: string
     heading: string
     htmlPath: string
-    sessions: JSONEntry[]
+    sections: JSONEntry[]
 }
 
 function saveJSON(root: string, json: JSONEntry[]): Promise<void> {
@@ -71,12 +71,12 @@ async function saveSpec(org: string, parser: (Document) => Spec) {
             return save(root, chapterHeadingText, section.heading, section.text);
         }));
 
-        const jsonSessions: JSONEntry[] = sections.map((section, i) => {
+        const jsonSections: JSONEntry[] = sections.map((section, i) => {
             return {
                 id: section.id,
                 heading: section.heading,
                 htmlPath: htmlPaths[i],
-                sessions: null,
+                sections: null,
             };
         });
 
@@ -84,7 +84,7 @@ async function saveSpec(org: string, parser: (Document) => Spec) {
             id: chapter.id,
             heading: chapter.heading,
             htmlPath: null,
-            sessions: jsonSessions,
+            sections: jsonSections,
         };
 
         json.push(jsonChapter);

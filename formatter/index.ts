@@ -41,7 +41,7 @@ async function formatDir(org: string) {
     const outRoot = path.join(__dirname, 'data', org);
 
     // XXX
-    await copyJSON(srcRoot, outRoot);
+    // await copyJSON(srcRoot, outRoot);
 
     const relativePaths = await globHTML(srcRoot);
 
@@ -74,6 +74,7 @@ function globHTML(cwd: string): Promise<string[]> {
     });
 }
 
+/*
 function copyJSON(srcRoot: string, outRoot: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         const srcJSON = path.join(srcRoot, 'index.json');
@@ -97,3 +98,4 @@ function copyJSON(srcRoot: string, outRoot: string): Promise<void> {
         readStream.pipe(writeStream);
     });
 }
+*/
