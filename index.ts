@@ -12,6 +12,9 @@ async function main() {
 
     console.log('format');
     await format();
+
+    console.log('diff');
+    await diff();
 }
 
 

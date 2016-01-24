@@ -84,7 +84,11 @@ function parseMain(mainNode: ASTNode): Chapter[] {
 
             if (childNode.nodeName === 'h3') {
                 const id = getAttribute(childNode, 'id');
-                const headingText = getHeadingText(childNode);
+                let headingText = getHeadingText(childNode);
+
+                // XXX
+                headingText = headingText.replace('Serializing', 'Serialising');
+                
                 section = addSection(chapter, id, headingText, childNode);
                 continue;
             }
