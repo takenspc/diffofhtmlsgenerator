@@ -1,4 +1,5 @@
 'use strict'; // XXX
+import { diff } from './diff';
 import { fetch } from './fetcher';
 import { format }  from './formatter';
 import { split }  from './splitter';
