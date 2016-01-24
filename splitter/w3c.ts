@@ -36,11 +36,10 @@ function getHeadingText(node: ASTNode): string {
 
 
 function* nextElement(rootNode: ASTNode) {
+    // TODO
     for (const childNode of rootNode.childNodes) {
         if (childNode.nodeName === 'div' && getAttribute(childNode, 'class') === 'impl') {
-            for (const grandChildNode of childNode.childNodes) {
-                yield grandChildNode;
-            }
+            yield* nextElement(childNode);
         } else {
             yield childNode;
         }
