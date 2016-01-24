@@ -57,8 +57,8 @@ async function saveSpec(org: string, parser: (Document) => Spec) {
 
     const root = path.join(__dirname, 'data', org);
     const header = spec.header;
-    mkdirp.sync(path.join(root, '__header'));
-    await save(root, '__header', '__header', header.text);
+    mkdirp.sync(path.join(root, '__header__'));
+    await save(root, '__header__', '__header__', header.text);
 
     const json: JSONEntry[] = []
 
