@@ -70,7 +70,12 @@ function formatEndTag(context:FormatContext, node: ASTNode): string {
 
     buff.push('>');
     if (consts.BreakAfterEndTag.has(node.nodeName)) {
-        buff.push('\n');
+        if (node.nodeName === 'p' &&
+            (context.parent && context.parent.nodeName === 'dt')) {
+            // NO OP
+        } else {
+            buff.push('\n');
+        }
     }
 
     return buff.join('');

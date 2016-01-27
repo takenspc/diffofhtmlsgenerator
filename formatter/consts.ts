@@ -4,31 +4,33 @@
 // Formatting
 //
 export const BreakAfterStartTag: Set<string> = new Set([
-    "article",
-    "aside",
-    "blockquote",
-    "body",
-    "details",
-    "dialog",
-    "dl",
-    "fieldset",
-    "figure",
-    "footer",
-    "form",
-    "header",
-    "hgroup",
-    "main",
-    "map",
-    "nav",
-    "ol",
-    "section",
-    "table",
-    "tbody",
-    "tfoot",
-    "thead",
-    "tr",
-    "ul",
+    'article',
+    'aside',
+    'blockquote',
+    'body',
+    'dd',
+    'details',
+    'dialog',
+    'dl',
+    'fieldset',
+    'figure',
+    'footer',
+    'form',
+    'header',
+    'hgroup',
     'hr',
+    'li',
+    'main',
+    'map',
+    'nav',
+    'ol',
+    'section',
+    'table',
+    'tbody',
+    'tfoot',
+    'thead',
+    'tr',
+    'ul',
 ]);
 
 export const BreakAfterEndTag: Set<string> = new Set([
@@ -189,7 +191,10 @@ export const BikeshedHighlightClassNames: Set<string> = new Set([
 // Context
 //
 export const ContextElements: Set<string> = new Set([
+    'dt',
+
     'pre',
+
     'h1',
     'h2',
     'h3',
