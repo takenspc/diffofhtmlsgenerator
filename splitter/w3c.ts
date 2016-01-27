@@ -2,7 +2,7 @@
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
 import { Document, getBody, getAttribute, getText } from './htmlutils';
-import { Spec, Header, Chapter, addChapter, Section, addSection, fillText } from './parserutils';
+import { Spec, Header, Section, addSection, fillText } from './parserutils';
 
 
 function parseHeader(divNode: ASTNode): Header {
@@ -46,10 +46,10 @@ function* nextElement(rootNode: ASTNode) {
     }
 }
 
-function parseMain(mainNode: ASTNode): Chapter[] {
-    const chapters: Chapter[] = [];
-    let chapter: Chapter = null;
+function parseMain(root: Section, mainNode: ASTNode): void {
+    let chapter: Section = null;
     let section: Section = null;
+    let subSection: Section = null;
 
     let inMain = false;
 
@@ -76,7 +76,7 @@ function parseMain(mainNode: ASTNode): Chapter[] {
                 }
 
                 const headingText = getHeadingText(childNode);
-                chapter = addChapter(chapters, id, headingText, childNode);
+                chapter = addSection(root, id, headingText, childNode);
                 section = null;
                 continue;
             }
@@ -105,13 +105,17 @@ function parseMain(mainNode: ASTNode): Chapter[] {
             }
         }
     }
-
-
-    return chapters;
 }
 
 export function parseSpec(doc: Document): Spec {
-    let chapters: Chapter[];
+    const root: Section = {
+        id: '#root#',
+        heading: '#root#',
+        nodes: [],
+        text: null,
+        sections: [],
+    };
+
     let header: Header;
 
     const bodyNode = getBody(doc);
@@ -132,13 +136,13 @@ export function parseSpec(doc: Document): Spec {
         if (childNode.nodeName === 'div' && getAttribute(childNode, 'class') === 'head') {
             header = parseHeader(childNode);
         } else if (childNode.nodeName === 'main') {
-            chapters = parseMain(childNode);
+            parseMain(root, childNode);
         }
     }
 
     const spec: Spec = {
         header: header,
-        chapters: chapters
+        chapters: root.sections
     };
 
     fillText(doc, spec);

@@ -11,12 +11,6 @@ export interface Section {
     heading: string
     nodes: ASTNode[]
     text: string
-}
-
-export interface Chapter {
-    id: string
-    heading: string
-    node: ASTNode
     sections: Section[]
 }
 
@@ -28,7 +22,7 @@ export interface Header {
 
 export interface Spec {
     header: Header
-    chapters: Chapter[]
+    chapters: Section[]
 }
 
 
@@ -49,29 +43,16 @@ export function fillText(doc: Document, spec: Spec): void {
     }
 }
 
-export function addChapter(chapters: Chapter[], id: string, headingText: string, childNode: ASTNode): Chapter {
+export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
     // console.log(id);
-    const chapter = {
-        id: id,
-        heading: headingText,
-        node: childNode,
-        sections: []
-    };
-    chapters.push(chapter);
-    return chapter;
-}
-
-export function addSection(chapter: Chapter, id: string, headingText: string, childNode: ASTNode): Section {
-    // console.log('\t' + id);
-    const section = {
+    const section: Section = {
         id: id,
         heading: headingText,
         nodes: [childNode],
+        sections: [],
         text: null
-    }
-
-    assert(chapter, 'chapter must be initialized before adding a section' + childNode.nodeName)
-    chapter.sections.push(section);
-
+    };
+    assert(parent, 'parent must be initialized before adding a section' + childNode.nodeName)
+    parent.sections.push(section);
     return section;
 }
