@@ -2,7 +2,7 @@
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
 import { Document, getBody, getAttribute, getText } from './htmlutils';
-import { Spec, Header, Section, addSection, fillText } from './parserutils';
+import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
 
 
 function parseHeader(divNode: ASTNode): Header {
@@ -27,7 +27,7 @@ function parseHeader(divNode: ASTNode): Header {
 function getHeadingText(node: ASTNode): string {
     for (const childNode of node.childNodes) {
         if (childNode.nodeName === 'span' && getAttribute(childNode, 'class') === 'content') {
-            return getText(childNode);
+            return getText(childNode).replace(/\s+/g, ' ').trim();
         }
     }
 
@@ -62,6 +62,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
         for (const childNode of nextElement(sectionNode)) {
             if (childNode.nodeName === 'h2') {
                 const id = getAttribute(childNode, 'id');
+                inSemantics = id === 'semantics';
                 // end of the main contents
                 if (id === 'index') {
                     break;
@@ -93,24 +94,22 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 continue;
             }
 
-            section = addChildNode(chapter, section, childNode);
+            // in #semantics, process h4
+            if (inSemantics && (section && section.id !== 'disabled-elements')) {
+                if (childNode.nodeName === 'h4') {
+                    const id = getAttribute(childNode, 'id');
+                    let headingText = getHeadingText(childNode);
+                    
+                    subSection = addSection(section, id, headingText, childNode);
+                    continue;
+                }
+
+                subSection = addChildNode(section, subSection, childNode);
+            } else {
+                section = addChildNode(chapter, section, childNode);
+            }
         }
     }
-}
-
-function addChildNode(chapter: Section, section: Section, childNode: ASTNode): Section {
-    if (!section) {
-        if ((childNode.nodeName === '#text' && childNode.value.trim() === '')) {
-            return section;
-        }
-
-        const id = '__pre__';
-        const headingText = '__pre__';
-        return addSection(chapter, id, headingText, childNode);
-    }
-
-    section.nodes.push(childNode);
-    return section;
 }
 
 export function parseSpec(doc: Document): Spec {
@@ -120,6 +119,7 @@ export function parseSpec(doc: Document): Spec {
         nodes: [],
         text: null,
         sections: [],
+        path: ''
     };
 
     let header: Header;
@@ -148,7 +148,7 @@ export function parseSpec(doc: Document): Spec {
 
     const spec: Spec = {
         header: header,
-        chapters: root.sections
+        section: root
     };
 
     fillText(doc, spec);

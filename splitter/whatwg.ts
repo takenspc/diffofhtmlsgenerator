@@ -2,11 +2,11 @@
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
 import { Document, getBody, getAttribute, getText } from './htmlutils';
-import { Spec, Header, Section, addSection, fillText } from './parserutils';
+import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
 
 function getHeadingText(node: ASTNode) {
     const text = getText(node);
-    return text.replace(/^\d+(?:\.\d+)? /, '');
+    return text.replace(/\s+/g, ' ').replace(/^\d+(?:\.\d+)* /, '').trim();
 }
 
 //
@@ -19,6 +19,7 @@ export function parseSpec(doc: Document): Spec {
         nodes: [],
         text: null,
         sections: [],
+        path: ''
     };
 
     let header: Header;
@@ -27,6 +28,7 @@ export function parseSpec(doc: Document): Spec {
 
     let isHeader = true;
     let inMain = false;
+    let inSemantics = false;
 
     let chapter: Section = null;
     let section: Section = null;
@@ -55,6 +57,7 @@ export function parseSpec(doc: Document): Spec {
 
         if (childNode.nodeName === 'h2') {
             const id = getAttribute(childNode, 'id');
+            inSemantics = id === 'semantics';
             // end of the main contents
             if (id === 'index') {
                 break;
@@ -86,26 +89,29 @@ export function parseSpec(doc: Document): Spec {
             continue;
         }
 
-        if (!section) {
-            if ((childNode.nodeName === '#text' && childNode.value.trim() === '') ||
-                (childNode.nodeName === 'div' && getAttribute(childNode, 'class') === 'status')) {
+        // in #semantics, process h4
+        if (inSemantics && (section && section.id !== 'disabled-elements')) {
+            if (childNode.nodeName === 'h4') {
+                const id = getAttribute(childNode, 'id');
+                let headingText = getHeadingText(childNode);
+                
+                subSection = addSection(section, id, headingText, childNode);
                 continue;
             }
 
-            const id = '__pre__';
-            const headingText = '__pre__';
-            section = addSection(chapter, id, headingText, childNode);
+            subSection = addChildNode(section, subSection, childNode);
         } else {
-            section.nodes.push(childNode);
+            section = addChildNode(chapter, section, childNode);
         }
     }
 
     const spec: Spec = {
         header: header,
-        chapters: root.sections
+        section: root
     };
 
     fillText(doc, spec);
 
     return spec;
 }
+

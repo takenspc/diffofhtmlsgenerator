@@ -3,51 +3,57 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import { parse, Document } from './htmlutils';
-import { Spec } from './parserutils';
+import { Spec, Section } from './parserutils';
+import { readFile, writeFile } from '../utils';
 import * as whatwg from './whatwg';
 import * as w3c from './w3c';
 
-function ntfsSafe(value: string): string {
-    // https://support.microsoft.com/kb/100108
-    const ntfsUnsafe = /[?"/\<>*|:]/g;
-    return value.replace(ntfsUnsafe, '_');
+function saveHTML(root: string, section: Section): Promise<any> {
+    const htmlPath = path.join(root, section.path + '.html');
+    const text = section.text;
+
+    mkdirp.sync(path.dirname(htmlPath));
+
+    return writeFile(htmlPath, text);
 }
 
-function save(root: string, chapterId: string, sectionId: string, text: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const relativePath = path.join(ntfsSafe(chapterId), ntfsSafe(sectionId + '.html'));        
-        const htmlPath = path.join(root, relativePath);
-        fs.writeFile(htmlPath, text, (err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
 
-            resolve(relativePath);
-        })
-    });
+function saveSection(root: string, section: Section): Promise<any> {
+    if (section.sections.length === 0) {
+        return saveHTML(root, section);
+    }
+    
+    return Promise.all(section.sections.map((subSection) => {
+        return saveSection(root, subSection);
+    }));
 }
+
 
 export interface JSONEntry {
     id: string
     heading: string
-    htmlPath: string
+    path: string
     sections: JSONEntry[]
 }
 
-function saveJSON(root: string, json: JSONEntry[]): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        const jsonPath = path.join(root, 'index.json');
+function saveJSON(root: string, json: JSONEntry[]): Promise<any> {
+    const jsonPath = path.join(root, 'index.json');
+    const text = JSON.stringify(json);
 
-        fs.writeFile(jsonPath, JSON.stringify(json), (err) => {
-            if (err) {
-                reject(err);
-            }
-
-            resolve();
-        });
-    });
+    return writeFile(jsonPath, text);
 }
+
+function getJSONData(section: Section): JSONEntry {
+    const sections = section.sections.map(getJSONData);
+    
+    return {
+        id: section.id,
+        heading: section.heading,
+        path: section.path,
+        sections: sections,
+    };
+}
+
 
 async function saveSpec(org: string, parser: (Document) => Spec) {
     const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
@@ -56,41 +62,16 @@ async function saveSpec(org: string, parser: (Document) => Spec) {
 
 
     const root = path.join(__dirname, 'data', org);
-    const header = spec.header;
-    mkdirp.sync(path.join(root, '__header__'));
-    await save(root, '__header__', '__header__', header.text);
+    
+    // const header = spec.header;
+    //mkdirp.sync(path.join(root, '__header__'));
+    //await saveHTML(root, '__header__', '__header__', header.text);
 
-    const json: JSONEntry[] = []
 
-    for (const chapter of spec.chapters) {
-        const chapterHeadingText = chapter.heading;
-        mkdirp.sync(path.join(root, chapterHeadingText));
-        
-        const sections = chapter.sections;
-        const htmlPaths = await Promise.all(sections.map((section) => {
-            return save(root, chapterHeadingText, section.heading, section.text);
-        }));
+    await saveSection(root, spec.section);
 
-        const jsonSections: JSONEntry[] = sections.map((section, i) => {
-            return {
-                id: section.id,
-                heading: section.heading,
-                htmlPath: htmlPaths[i],
-                sections: null,
-            };
-        });
-
-        const jsonChapter: JSONEntry = {
-            id: chapter.id,
-            heading: chapter.heading,
-            htmlPath: null,
-            sections: jsonSections,
-        };
-
-        json.push(jsonChapter);
-    }
-
-    await saveJSON(root, json);
+    const json = getJSONData(spec.section);
+    await saveJSON(root, json.sections);
 }
 
 export function split() {
