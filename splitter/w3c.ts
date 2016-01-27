@@ -35,7 +35,7 @@ function getHeadingText(node: ASTNode): string {
 }
 
 
-function* nextElement(rootNode: ASTNode) {
+function* nextElement(rootNode: ASTNode): Iterable<ASTNode> {
     // TODO
     for (const childNode of rootNode.childNodes) {
         if (childNode.nodeName === 'div' && getAttribute(childNode, 'class') === 'impl') {
@@ -52,6 +52,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
     let subSection: Section = null;
 
     let inMain = false;
+    let inSemantics = false;
 
     for (const sectionNode of mainNode.childNodes) {
         if (sectionNode.nodeName !== 'section') {
@@ -92,19 +93,24 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 continue;
             }
 
-            if (!section) {
-                if ((childNode.nodeName === '#text' && childNode.value.trim() === '')) {
-                    continue;
-                }
-
-                const id = '__pre__';
-                const headingText = '__pre__';
-                section = addSection(chapter, id, headingText, childNode);
-            } else {
-                section.nodes.push(childNode);
-            }
+            section = addChildNode(chapter, section, childNode);
         }
     }
+}
+
+function addChildNode(chapter: Section, section: Section, childNode: ASTNode): Section {
+    if (!section) {
+        if ((childNode.nodeName === '#text' && childNode.value.trim() === '')) {
+            return section;
+        }
+
+        const id = '__pre__';
+        const headingText = '__pre__';
+        return addSection(chapter, id, headingText, childNode);
+    }
+
+    section.nodes.push(childNode);
+    return section;
 }
 
 export function parseSpec(doc: Document): Spec {
