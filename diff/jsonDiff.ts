@@ -12,7 +12,7 @@ export interface DiffEntry {
 function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
     const diffEntry: DiffEntry = {
         heading: jsonEntry.heading,
-        htmlPath: jsonEntry.htmlPath,
+        htmlPath: jsonEntry.path,
         sections: null,
         whatwg: null,
         w3c: null,

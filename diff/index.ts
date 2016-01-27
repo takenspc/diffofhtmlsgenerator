@@ -1,39 +1,10 @@
 'use strict';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import { JSONEntry } from '../splitter';
-import { computeDiff, DiffEntry } from './diff';
-
-//
-// load json
-//
-function loadJSON(srcPath: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-        fs.readFile(srcPath, 'utf-8', (err, str) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            const data = JSON.parse(str);
-            resolve(data);
-        });
-    });    
-}
-
-function saveJSON(outPath: string, str: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.writeFile(outPath, str, (err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            resolve();
-        });
-    });
-}
+import { computeDiff, DiffEntry } from './jsonDiff';
+import { writeFile, readFile } from '../utils';
+import { computeHTMLDiff } from './htmlDiff';
 
 function reorderW3CSemantics(sections: JSONEntry[]): JSONEntry[] {
     // TODO O(2n)
@@ -73,10 +44,14 @@ function reoderW3C(entries: JSONEntry[]): JSONEntry[] {
 
 export async function diff() {
     const srcDir = path.join(__dirname, '..', 'splitter', 'data');
-    const jsonEntries: JSONEntry[][] = await Promise.all([
-        loadJSON(path.join(srcDir, 'whatwg', 'index.json')),
-        loadJSON(path.join(srcDir, 'w3c', 'index.json')),
+    const jsonStrings = await Promise.all([
+        readFile(path.join(srcDir, 'whatwg', 'index.json')),
+        readFile(path.join(srcDir, 'w3c', 'index.json')),
     ]);
+
+    const jsonEntries: JSONEntry[][] = jsonStrings.map((jsonString) => {
+        return JSON.parse(jsonString);
+    });
 
     const whatwg = jsonEntries[0];
     const w3c = reoderW3C(jsonEntries[1]);
@@ -96,5 +71,7 @@ export async function diff() {
     mkdirp.sync(outDir);
 
     const outPath = path.join(outDir, 'index.json');
-    await saveJSON(outPath, JSON.stringify(diffEntries));
+    await writeFile(outPath, JSON.stringify(diffEntries));
+    
+    await computeHTMLDiff(diffEntries);
 }

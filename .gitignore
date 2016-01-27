@@ -3,7 +3,7 @@ node_modules
 *.map
 
 diff/data/**/*.html
-diff/data/*.json
+diff/data/**/*.json
 
 fetcher/data/**/*.html
 fetcher/data/*.json
