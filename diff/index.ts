@@ -6,6 +6,14 @@ import { computeJSONDiff, DiffEntry } from './jsonDiff';
 import { writeFile, readFile } from '../utils';
 import { computeHTMLDiff } from './htmlDiff';
 
+export interface DiffEntry {
+    heading: string
+    path: string
+    sections: DiffEntry[]
+    whatwg: JSONEntry
+    w3c: JSONEntry
+}
+
 function reorderW3CSemantics(sections: JSONEntry[]): JSONEntry[] {
     // TODO O(2n)
 

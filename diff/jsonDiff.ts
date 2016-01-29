@@ -1,13 +1,6 @@
 'use strict';
 import { JSONEntry } from '../jsonEntry';
-
-export interface DiffEntry {
-    heading: string
-    path: string
-    sections: DiffEntry[]
-    whatwg: JSONEntry
-    w3c: JSONEntry
-}
+import { DiffEntry } from './'
 
 function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
     const diffEntry: DiffEntry = {

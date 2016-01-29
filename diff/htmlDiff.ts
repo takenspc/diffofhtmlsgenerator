@@ -2,6 +2,7 @@
 import * as path from 'path';
 import { DiffEntry } from './jsonDiff';
 import { fork, ChildProcess } from 'child_process';
+import { DiffEntry } from './';
 
 export function diffDiffEntry(diffEntry: DiffEntry): Promise<any> {
     return new Promise((resolve, reject) => {
