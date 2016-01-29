@@ -52,7 +52,15 @@ function parseMain(root: Section, mainNode: ASTNode): void {
     let subSection: Section = null;
 
     let inMain = false;
-    let inSemantics = false;
+    let useH4 = false;
+
+    const h4 = new Set(['semantics', 'syntax']);
+    const h3InH4 = new Set([
+        'disabled-elements',
+        'serializing-html-fragments',
+        'parsing-html-fragments',
+        'named-character-references'
+    ]);
 
     for (const sectionNode of mainNode.childNodes) {
         if (sectionNode.nodeName !== 'section') {
@@ -62,7 +70,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
         for (const childNode of nextElement(sectionNode)) {
             if (childNode.nodeName === 'h2') {
                 const id = getAttribute(childNode, 'id');
-                inSemantics = id === 'semantics';
+                useH4 = h4.has(id);
                 // end of the main contents
                 if (id === 'index') {
                     break;
@@ -89,17 +97,17 @@ function parseMain(root: Section, mainNode: ASTNode): void {
 
                 // XXX
                 headingText = headingText.replace('Serializing', 'Serialising');
-                
+
                 section = addSection(chapter, id, headingText, childNode);
                 continue;
             }
 
-            // in #semantics, process h4
-            if (inSemantics && (section && section.id !== 'disabled-elements')) {
+            // in #semantics and #syntax, process h4
+            if (useH4 && (section && !h3InH4.has(section.id))) {
                 if (childNode.nodeName === 'h4') {
                     const id = getAttribute(childNode, 'id');
                     let headingText = getHeadingText(childNode);
-                    
+
                     subSection = addSection(section, id, headingText, childNode);
                     continue;
                 }

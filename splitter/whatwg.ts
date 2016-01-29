@@ -28,7 +28,15 @@ export function parseSpec(doc: Document): Spec {
 
     let isHeader = true;
     let inMain = false;
-    let inSemantics = false;
+    let useH4 = false;
+
+    const h4 = new Set(['semantics', 'syntax']);
+    const h3InH4 = new Set([
+        'disabled-elements',
+        'serialising-html-fragments',
+        'parsing-html-fragments',
+        'named-character-references'
+    ]);
 
     let chapter: Section = null;
     let section: Section = null;
@@ -57,7 +65,7 @@ export function parseSpec(doc: Document): Spec {
 
         if (childNode.nodeName === 'h2') {
             const id = getAttribute(childNode, 'id');
-            inSemantics = id === 'semantics';
+            useH4 = h4.has(id);
             // end of the main contents
             if (id === 'index') {
                 break;
@@ -90,7 +98,7 @@ export function parseSpec(doc: Document): Spec {
         }
 
         // in #semantics, process h4
-        if (inSemantics && (section && section.id !== 'disabled-elements')) {
+        if (useH4 && (section && !h3InH4.has(section.id))) {
             if (childNode.nodeName === 'h4') {
                 const id = getAttribute(childNode, 'id');
                 let headingText = getHeadingText(childNode);
