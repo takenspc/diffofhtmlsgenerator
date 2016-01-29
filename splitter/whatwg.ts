@@ -83,6 +83,7 @@ export function parseSpec(doc: Document): Spec {
             const headingText = getHeadingText(childNode);
             chapter = addSection(root, id, headingText, childNode);
             section = null;
+            subSection = null;
             continue;
         }
 
@@ -94,6 +95,7 @@ export function parseSpec(doc: Document): Spec {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
             section = addSection(chapter, id, headingText, childNode);
+            subSection = null;
             continue;
         }
 

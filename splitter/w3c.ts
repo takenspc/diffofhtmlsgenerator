@@ -88,6 +88,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 const headingText = getHeadingText(childNode);
                 chapter = addSection(root, id, headingText, childNode);
                 section = null;
+                subSection = null;
                 continue;
             }
 
@@ -99,6 +100,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 headingText = headingText.replace('Serializing', 'Serialising');
 
                 section = addSection(chapter, id, headingText, childNode);
+                subSection = null;
                 continue;
             }
 
