@@ -7,7 +7,7 @@ export function diffDiffEntry(diffEntry: DiffEntry): Promise<any> {
     return new Promise((resolve, reject) => {
         const child = fork(path.join(__dirname, 'htmlDiffChild'));
 
-        child.on('finish', () => {
+        child.on('exit', () => {
             resolve();
         });
         
