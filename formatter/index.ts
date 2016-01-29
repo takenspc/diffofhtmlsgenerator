@@ -1,7 +1,6 @@
 'use strict'; // XXX
 import * as fs from 'fs';
 import * as path from 'path';
-import * as glob from 'glob';
 import * as mkdirp from 'mkdirp';
 import * as parse5 from 'parse5';
 import { formatFragment } from './formatter';
