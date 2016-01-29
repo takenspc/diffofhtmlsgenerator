@@ -3,13 +3,25 @@ import * as path from 'path';
 import { DiffEntry } from './jsonDiff';
 import { fork, ChildProcess } from 'child_process';
 
-export function computeHTMLDiff(chapters: DiffEntry[]) {
-    console.log('start');
-    const children = new Set<ChildProcess>();
-    for (const chapter of chapters) {
+export function diffDiffEntry(diffEntry: DiffEntry): Promise<any> {
+    return new Promise((resolve, reject) => {
         const child = fork(path.join(__dirname, 'htmlDiffChild'));
-        child.send(chapter);
-        children.add(child);
-    }
-    console.log('done');
+
+        child.on('finish', () => {
+            resolve();
+        });
+        
+        child.on('error', (err) => {
+            console.log(err);
+            reject(err);
+        })
+        
+        child.send(diffEntry);
+    });
+}
+
+export function computeHTMLDiff(diffEntries: DiffEntry[]) {
+    return Promise.all(diffEntries.map((diffEntry) => {
+        return diffDiffEntry(diffEntry);
+    }));
 }

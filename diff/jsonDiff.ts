@@ -1,9 +1,9 @@
 'use strict';
-import { JSONEntry } from '../splitter';
+import { JSONEntry } from '../jsonEntry';
 
 export interface DiffEntry {
     heading: string
-    htmlPath: string
+    path: string
     sections: DiffEntry[]
     whatwg: JSONEntry
     w3c: JSONEntry
@@ -12,8 +12,8 @@ export interface DiffEntry {
 function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
     const diffEntry: DiffEntry = {
         heading: jsonEntry.heading,
-        htmlPath: jsonEntry.path,
-        sections: null,
+        path: jsonEntry.path,
+        sections: [],
         whatwg: null,
         w3c: null,
     }
@@ -40,8 +40,8 @@ function compare(whatwg: JSONEntry, w3c: JSONEntry): boolean {
     return false;
 }
 
-export function computeDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntry[] {
-    const entries: DiffEntry[] = [];
+export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntry[] {
+    const diffEntries: DiffEntry[] = [];
 
     const whatwgRemains: JSONEntry[] = [].concat(whatwg);
     const w3cRemains: JSONEntry[] = [].concat(w3c);
@@ -77,12 +77,12 @@ export function computeDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntry[] 
 
         // if whatwgEntry == w3cEntry, insert whatwgEntry and w3cEntry
         if (w3cEntry && compare(whatwgEntry, w3cEntry)) {
-            entries.push(createDiffEntry(whatwgEntry, w3cEntry));
+            diffEntries.push(createDiffEntry(whatwgEntry, w3cEntry));
             continue
         }
 
         // if w3cEntry is undefined, insert whatwgEntry
-        entries.push(createDiffEntry(whatwgEntry, null));
+        diffEntries.push(createDiffEntry(whatwgEntry, null));
 
         if (w3cEntry) {
             w3cRemains.unshift(w3cEntry);
@@ -91,8 +91,19 @@ export function computeDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntry[] 
 
     // insert w3cEntry
     for (const w3cEntry of w3cRemains) {
-        entries.push(createDiffEntry(null, w3cEntry));
+        diffEntries.push(createDiffEntry(null, w3cEntry));
     }
 
-    return entries;
+    // process recursively
+    for (const diffEntry of diffEntries) {
+        const whatwg = (diffEntry.whatwg) ? diffEntry.whatwg.sections : [];
+        const w3c = (diffEntry.w3c) ? diffEntry.w3c.sections : [];
+
+        if (whatwg.length > 0 || w3c.length > 0) {
+            diffEntry.sections = computeJSONDiff(whatwg, w3c);
+        }
+    }
+
+
+    return diffEntries;
 }

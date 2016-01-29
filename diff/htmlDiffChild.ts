@@ -4,6 +4,7 @@ import * as diff from 'diff';
 import * as mkdirp from 'mkdirp';
 import { writeFile, readFile } from '../utils';
 import { DiffEntry } from './jsonDiff';
+import { diffDiffEntry } from './htmlDiff';
 
 interface LineDiff {
     a: diff.IDiffResult[]
@@ -40,9 +41,9 @@ function splitDiffIntoLines(rawDiffs: diff.IDiffResult[]) {
                 line.b.push(hunk);
             }
         }
-        
+
     }
-    
+
     return lines;
 }
 
@@ -56,32 +57,44 @@ function computeDiff(a: string, b: string) {
     return lines;
 }
 
+function diffGrandChildren(sections: DiffEntry[]): Promise<any> {
+    return Promise.all(sections.map((section) => {
+        if (section.sections.length > 0) {
+            return diffDiffEntry(section);
+        }
 
-async function computeSectionDiff(section: DiffEntry, srcDir: string, outDir: string) {
-
-    const htmlPath = section.htmlPath;
-    const htmls = await Promise.all([
-        readFile(path.join(srcDir, 'whatwg', htmlPath)),
-        readFile(path.join(srcDir, 'w3c', htmlPath)),
-    ]);
-    const diffs = computeDiff(htmls[0], htmls[1]);
-
-    const jsonPath = path.join(outDir, htmlPath + '.json');
-    mkdirp.sync(path.dirname(jsonPath));
-    await writeFile(jsonPath, JSON.stringify(diffs));
+        return Promise.all([]);
+    }));
 }
 
-async function main(chapter: DiffEntry) {
-    console.log('start', new Date(), chapter.heading);
-
+async function diffChildren(sections: DiffEntry[]): Promise<any> {
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
     const outDir = path.join(__dirname, 'data');
 
-    for (const section of chapter.sections) {
-        await computeSectionDiff(section, srcDir, outDir);
-    };
+    for (const section of sections) {
+        const htmlPath = section.path;
+        const htmls = await Promise.all([
+            readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
+            readFile(path.join(srcDir, 'w3c', htmlPath + '.html')),
+        ]);
+        const diffs = computeDiff(htmls[0], htmls[1]);
 
-    console.log('end', new Date(), chapter.heading);
+        const jsonPath = path.join(outDir, htmlPath + '.json');
+        mkdirp.sync(path.dirname(jsonPath));
+        await writeFile(jsonPath, JSON.stringify(diffs));
+    }
+}
+
+async function main(diffEntry: DiffEntry) {
+    console.log('start', new Date(), diffEntry.heading);
+
+    await Promise.all([
+        diffGrandChildren(diffEntry.sections),
+        diffChildren(diffEntry.sections)
+    ]);
+
+    console.log('end', new Date(), diffEntry.heading);
+    process.exit(0);
 }
 
 process.on('message', main);
