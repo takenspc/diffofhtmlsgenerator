@@ -2,9 +2,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
+import { JSONEntry, writeJSONEntry } from '../jsonEntry';
+import { readFile, writeFile } from '../utils';
 import { parse, Document } from './htmlutils';
 import { Spec, Section } from './parserutils';
-import { readFile, writeFile } from '../utils';
 import * as whatwg from './whatwg';
 import * as w3c from './w3c';
 
@@ -28,20 +29,6 @@ function saveSection(root: string, section: Section): Promise<any> {
     }));
 }
 
-
-export interface JSONEntry {
-    id: string
-    heading: string
-    path: string
-    sections: JSONEntry[]
-}
-
-function saveJSON(root: string, json: JSONEntry[]): Promise<any> {
-    const jsonPath = path.join(root, 'index.json');
-    const text = JSON.stringify(json);
-
-    return writeFile(jsonPath, text);
-}
 
 function getJSONData(section: Section): JSONEntry {
     const sections = section.sections.map(getJSONData);
@@ -71,7 +58,7 @@ async function saveSpec(org: string, parser: (Document) => Spec) {
     await saveSection(root, spec.section);
 
     const json = getJSONData(spec.section);
-    await saveJSON(root, json.sections);
+    await writeJSONEntry(root, json.sections);
 }
 
 export function split() {
