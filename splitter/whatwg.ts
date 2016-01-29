@@ -4,6 +4,9 @@ import { ASTNode } from 'parse5';
 import { Document, getBody, getAttribute, getText } from './htmlutils';
 import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
 
+//
+// Header text
+//
 function getHeadingText(node: ASTNode) {
     const text = getText(node);
     return text.replace(/\s+/g, ' ').replace(/^\d+(?:\.\d+)* /, '').trim();

@@ -28,15 +28,8 @@ export interface Spec {
 
 
 //
-// Utils
+// fill text
 //
-function ntfsSafe(value: string): string {
-    // https://support.microsoft.com/kb/100108
-    const ntfsUnsafe = /[?"/\<>*|:]/g;
-    return value.replace(ntfsUnsafe, '_');
-}
-
-
 export function fillText(doc: Document, spec: Spec): void {
     const header = spec.header;
     // console.log(header.id);
@@ -58,6 +51,10 @@ function fillTextInternal(doc: Document, section: Section) {
     }
 }
 
+
+//
+//
+//
 export function addChildNode(parent: Section, current: Section, childNode: ASTNode): Section {
     if (!current) {
         if ((childNode.nodeName === '#text' && childNode.value.trim() === '')) {
@@ -73,8 +70,14 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
     return current;
 }
 
+// Utils
+function ntfsSafe(value: string): string {
+    // https://support.microsoft.com/kb/100108
+    const ntfsUnsafe = /[?"/\<>*|:]/g;
+    return value.replace(ntfsUnsafe, '_');
+}
+
 export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
-    // console.log(id);
     assert(parent, 'parent must be initialized before adding a section' + childNode.nodeName)
 
     const path = (parent.path !== '') ? parent.path + '/' + ntfsSafe(headingText) : ntfsSafe(headingText);

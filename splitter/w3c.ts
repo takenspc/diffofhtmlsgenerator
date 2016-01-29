@@ -4,7 +4,9 @@ import { ASTNode } from 'parse5';
 import { Document, getBody, getAttribute, getText } from './htmlutils';
 import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
 
-
+//
+// Header
+//
 function parseHeader(divNode: ASTNode): Header {
     let header: Header = null;
 
@@ -24,6 +26,9 @@ function parseHeader(divNode: ASTNode): Header {
 }
 
 
+//
+// Heading text
+//
 function getHeadingText(node: ASTNode): string {
     for (const childNode of node.childNodes) {
         if (childNode.nodeName === 'span' && getAttribute(childNode, 'class') === 'content') {
@@ -35,6 +40,9 @@ function getHeadingText(node: ASTNode): string {
 }
 
 
+//
+// Main
+//
 function* nextElement(rootNode: ASTNode): Iterable<ASTNode> {
     // TODO
     for (const childNode of rootNode.childNodes) {
@@ -122,6 +130,10 @@ function parseMain(root: Section, mainNode: ASTNode): void {
     }
 }
 
+
+//
+// Entry point
+//
 export function parseSpec(doc: Document): Spec {
     const root: Section = {
         id: '#root#',
