@@ -27,7 +27,7 @@ function download(org: string, url: string): Promise<void> {
 
 export function fetch() {
     return Promise.all([
-        download('w3c', 'https://w3c.github.io/html/'),
+        download('w3c', 'https://w3c.github.io/html/single-page.html'),
         download('whatwg', 'https://html.spec.whatwg.org/'),
     ])
 }
