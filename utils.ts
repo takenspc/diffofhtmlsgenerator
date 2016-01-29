@@ -1,6 +1,7 @@
 'use strict';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as mkdirpModule from 'mkdirp';
 
 //
 // I/O
@@ -34,4 +35,26 @@ export function writeFile(outPath: string, str: string): Promise<any> {
             resolve();
         });
     });
+}
+
+export function mkdirp(dirname): Promise<any> {
+    return new Promise((resolve, reject) => {
+        mkdirpModule(dirname, (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve();
+        })
+    })
+}
+
+
+//
+// logging
+//
+export function log(args): void {
+    const message = [new Date()].concat(args).join('\t');
+    console.log(message);
 }
