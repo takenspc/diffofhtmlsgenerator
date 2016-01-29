@@ -1,25 +1,26 @@
 'use strict';
 import * as path from 'path';
 import * as diff from 'diff';
-import * as mkdirp from 'mkdirp';
-import { writeFile, readFile } from '../utils';
-import { DiffEntry } from './jsonDiff';
+import { writeFile, readFile, mkdirp, log } from '../utils';
+import { DiffEntry } from './';
 import { diffDiffEntry } from './htmlDiff';
 
+//
+// Diff
+//
 interface LineDiff {
     a: diff.IDiffResult[]
     b: diff.IDiffResult[]
 }
 
-function splitDiffIntoLines(rawDiffs: diff.IDiffResult[]) {
+function splitDiffResultsIntoLines(rawDiffs: diff.IDiffResult[]) {
+    let line: LineDiff = { a: [], b: [] };
+    const lines: LineDiff[] = [line];
 
-    var line: LineDiff = { a: [], b: [] };
-    var lines: LineDiff[] = [line];
+    for (let i = 0; i < rawDiffs.length; i++) {
+        const rawDiff = rawDiffs[i];
 
-    for (var i = 0; i < rawDiffs.length; i++) {
-        var rawDiff = rawDiffs[i];
-
-        var values = rawDiff.value.split('\n');
+        const values = rawDiff.value.split('\n');
 
         for (var j = 0; j < values.length; j++) {
             if (j > 0) {
@@ -52,26 +53,25 @@ function computeDiff(a: string, b: string) {
         newlineIsToken: true
     });
 
-    var lines = splitDiffIntoLines(rawDiffs);
+    var lines = splitDiffResultsIntoLines(rawDiffs);
 
     return lines;
 }
 
-function diffGrandChildren(sections: DiffEntry[]): Promise<any> {
-    return Promise.all(sections.map((section) => {
-        if (section.sections.length > 0) {
-            return diffDiffEntry(section);
-        }
 
-        return Promise.all([]);
-    }));
-}
-
+//
+// Handle objects
+//
 async function diffChildren(sections: DiffEntry[]): Promise<any> {
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
     const outDir = path.join(__dirname, 'data');
 
     for (const section of sections) {
+        // skip (diffGrandChildren handle this case)
+        if (section.sections.length > 0) {
+            continue;
+        }
+        
         const htmlPath = section.path;
         const htmls = await Promise.all([
             readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
@@ -80,21 +80,41 @@ async function diffChildren(sections: DiffEntry[]): Promise<any> {
         const diffs = computeDiff(htmls[0], htmls[1]);
 
         const jsonPath = path.join(outDir, htmlPath + '.json');
-        mkdirp.sync(path.dirname(jsonPath));
+        await mkdirp(path.dirname(jsonPath));
         await writeFile(jsonPath, JSON.stringify(diffs));
     }
 }
 
-async function main(diffEntry: DiffEntry) {
-    console.log('start', new Date(), diffEntry.heading);
 
-    await Promise.all([
-        diffGrandChildren(diffEntry.sections),
-        diffChildren(diffEntry.sections)
-    ]);
+function diffGrandChildren(sections: DiffEntry[]): Promise<any> {
+    return Promise.all(sections.map((section) => {
+        if (section.sections.length > 0) {
+            return diffDiffEntry(section);
+        }
 
-    console.log('end', new Date(), diffEntry.heading);
-    process.exit(0);
+        return Promise.all([Promise.resolve()]);
+    }));
 }
 
-process.on('message', main);
+
+
+//
+// Entry point
+//
+process.on('message', (diffEntry: DiffEntry) => {
+    const heading = diffEntry.heading;
+    log(['start', heading]);
+
+    Promise.all([
+        // process children and grand children at the same time
+        diffGrandChildren(diffEntry.sections),
+        diffChildren(diffEntry.sections)
+    ]).then(() => {
+        log(['end', heading]);
+        process.exit(0);
+    }).catch((err) => {
+        log(['error', heading]);
+        console.error(heading, err);
+        process.exit(0);
+    });
+});

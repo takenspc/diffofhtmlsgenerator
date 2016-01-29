@@ -1,10 +1,9 @@
 'use strict'; // XXX
 import * as path from 'path';
-import * as mkdirp from 'mkdirp';
 import * as parse5 from 'parse5';
+import { readFile, writeFile, mkdirp } from '../utils';
 import { readJSONEntry, nextJSONEntry } from '../jsonEntry';
 import { formatFragment } from './formatter';
-import { readFile, writeFile } from '../utils';
 
 //
 // Formatter
@@ -18,7 +17,7 @@ async function formatHTML(relativePath: string, srcRoot: string, outRoot: string
     const formatted = formatFragment(fragmentNode);
 
     const outPath = path.join(outRoot, relativePath);
-    mkdirp.sync(path.dirname(outPath));
+    await mkdirp(path.dirname(outPath));
 
     await writeFile(outPath, formatted);
 }

@@ -1,9 +1,8 @@
 'use strict';
 import * as path from 'path';
-import * as mkdirp from 'mkdirp';
+import { writeFile, readFile, mkdirp } from '../utils';
 import { JSONEntry, readJSONEntry } from '../jsonEntry';
-import { computeJSONDiff, DiffEntry } from './jsonDiff';
-import { writeFile, readFile } from '../utils';
+import { computeJSONDiff } from './jsonDiff';
 import { computeHTMLDiff } from './htmlDiff';
 
 export interface DiffEntry {
@@ -14,6 +13,9 @@ export interface DiffEntry {
     w3c: JSONEntry
 }
 
+//
+// XXX Reoder W3C 'Links' of 'The elements of HTML'
+//
 function reorderW3CSemantics(sections: JSONEntry[]): JSONEntry[] {
     // TODO O(2n)
 
@@ -39,7 +41,6 @@ function reorderW3CSemantics(sections: JSONEntry[]): JSONEntry[] {
     return reorderd;
 }
 
-// XXX
 function reoderW3C(entries: JSONEntry[]): JSONEntry[] {
     for (const entry of entries) {
         // 4 The elements of HTML
@@ -50,6 +51,10 @@ function reoderW3C(entries: JSONEntry[]): JSONEntry[] {
     return entries;
 }
 
+
+//
+// Entry point
+//
 export async function diff() {
     const srcDir = path.join(__dirname, '..', 'splitter', 'data');
     const jsonEntries = await Promise.all([
@@ -61,7 +66,7 @@ export async function diff() {
     const w3c = reoderW3C(jsonEntries[1]);
 
     const outDir = path.join(__dirname, 'data');
-    mkdirp.sync(outDir);
+    await mkdirp(outDir);
 
     const diffEntries = computeJSONDiff(whatwg, w3c);
 

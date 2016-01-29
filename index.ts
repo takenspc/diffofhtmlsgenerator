@@ -1,21 +1,27 @@
 'use strict'; // XXX
+import { log } from './utils';
 import { diff } from './diff';
 import { fetch } from './fetcher';
 import { format }  from './formatter';
 import { split }  from './splitter';
 
 async function main() {
-    console.log('fetch');
+    log(['start', 'fetch']);
     await fetch();
+    log(['end', 'fetch']);
 
-    console.log('split');
+    log(['start', 'split']);
     await split();
+    log(['end', 'split']);
 
-    console.log('format');
+
+    log(['start', 'format']);
     await format();
+    log(['end', 'format']);
 
-    console.log('diff');
+    log(['start', 'diff']);
     await diff();
+    log(['end', 'diff']);
 }
 
 

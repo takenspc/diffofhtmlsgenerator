@@ -2,6 +2,9 @@
 import { JSONEntry } from '../jsonEntry';
 import { DiffEntry } from './'
 
+//
+// Utils.
+//
 function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
     const diffEntry: DiffEntry = {
         heading: jsonEntry.heading,
@@ -50,6 +53,9 @@ function findIndexOfTargetEntry(target: JSONEntry, base: JSONEntry[], limit: num
 }
 
 
+//
+// Entry point
+//
 export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntry[] {
     const diffEntries: DiffEntry[] = [];
 

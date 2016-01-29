@@ -1,7 +1,6 @@
 'use strict';
 import * as path from 'path';
-import { DiffEntry } from './jsonDiff';
-import { fork, ChildProcess } from 'child_process';
+import { fork } from 'child_process';
 import { DiffEntry } from './';
 
 export function diffDiffEntry(diffEntry: DiffEntry): Promise<any> {
@@ -21,7 +20,7 @@ export function diffDiffEntry(diffEntry: DiffEntry): Promise<any> {
     });
 }
 
-export function computeHTMLDiff(diffEntries: DiffEntry[]) {
+export function computeHTMLDiff(diffEntries: DiffEntry[]): Promise<any> {
     return Promise.all(diffEntries.map((diffEntry) => {
         return diffDiffEntry(diffEntry);
     }));
