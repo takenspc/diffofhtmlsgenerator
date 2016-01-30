@@ -77,7 +77,7 @@ async function diffChildren(sections: DiffEntry[]): Promise<any> {
             readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
             readFile(path.join(srcDir, 'w3c', htmlPath + '.html')),
         ]);
-        const diffs = computeDiff(htmls[0], htmls[1]);
+        const diffs = computeDiff(htmls[0].trim(), htmls[1].trim());
 
         const jsonPath = path.join(outDir, htmlPath + '.json');
         await mkdirp(path.dirname(jsonPath));
