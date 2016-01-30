@@ -162,6 +162,9 @@ export const BikeshedHighlightClassNames: Set<string> = new Set([
     'vg', /* Name.Variable.Global */
     'vi', /* Name.Variable.Instance */
     'il', /* Literal.Number.Integer.Long */
+    //
+    'nb',
+    'nx',
 ]);
 
 
