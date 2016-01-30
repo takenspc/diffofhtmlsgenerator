@@ -3,51 +3,19 @@
 //
 // Formatting
 //
-export const BreakAfterStartTag: Set<string> = new Set([
-    'article',
-    'aside',
-    'blockquote',
-    'body',
-    'dd',
-    'details',
-    'dialog',
-    'dl',
-    'fieldset',
-    'figure',
-    'footer',
-    'form',
-    'header',
-    'hgroup',
-    'hr',
-    'li',
-    'main',
-    'map',
-    'nav',
-    'ol',
-    'section',
-    'table',
-    'tbody',
-    'tfoot',
-    'thead',
-    'tr',
-    'ul',
-]);
-
-export const BreakAfterEndTag: Set<string> = new Set([
+export const BreakBeforeStartTag: Set<string> = new Set([
     'address',
-    'area',
     'article',
     'aside',
     'blockquote',
     'body',
-    'br',
     'caption',
     'dd',
     'details',
     'dialog',
-    'div',
     'dl',
     'dt',
+    'div',
     'fieldset',
     'figcaption',
     'figure',
@@ -62,7 +30,6 @@ export const BreakAfterEndTag: Set<string> = new Set([
     'header',
     'hgroup',
     'hr',
-    'html',
     'legend',
     'li',
     'main',
@@ -72,16 +39,27 @@ export const BreakAfterEndTag: Set<string> = new Set([
     'p',
     'pre',
     'section',
-    'summary',
     'table',
     'tbody',
     'td',
     'template',
     'tfoot',
-    'th',
     'thead',
     'tr',
     'ul',
+]);
+
+export const BreakBeforeEndTag: Set<string> = new Set([
+    'dl',
+    'dd',
+    'ol',
+    'ul',
+    'table',
+    'tbody',
+    'tfoot',
+    'thead',
+    'tr',
+    'div',
 ]);
 
 //
@@ -192,6 +170,7 @@ export const BikeshedHighlightClassNames: Set<string> = new Set([
 //
 export const ContextElements: Set<string> = new Set([
     'dt',
+    'li',
 
     'pre',
 
