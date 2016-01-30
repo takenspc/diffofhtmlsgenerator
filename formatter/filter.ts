@@ -4,12 +4,22 @@ import { getAttribute } from '../splitter/htmlutils';
 import { FormatContext } from './formatter';
 import * as consts from './consts';
 
+function hasClassName(node: ASTNode, className: string): boolean {
+    let value = getAttribute(node, 'class');
+    if (!value) {
+        return false;
+    }
+    
+    value = ' ' + value.replace(/\s+/g, ' ').trim() + ' ';
+    return value.indexOf(' ' + className + ' ') !== -1;
+}
+
 //
 // Element
 //
 export function includeElement(node: ASTNode): boolean {
-    if ((node.nodeName === 'a' && getAttribute(node, 'class') === 'self-link') ||
-        (node.nodeName === 'div' && getAttribute(node, 'class') === 'status')) {
+    if ((node.nodeName === 'a' && hasClassName(node, 'self-link')) ||
+        (node.nodeName === 'div' && hasClassName(node, 'status'))) {
         return false;
     }
 
@@ -26,7 +36,7 @@ export function includeTag(context: FormatContext, node: ASTNode): boolean {
         return true;
     }
 
-    if (parent.nodeName === 'pre' && getAttribute(parent, 'class') === 'highlight') {
+    if (parent.nodeName === 'pre' && hasClassName(parent, 'highlight')) {
         const className = getAttribute(node, 'class');
         return !consts.BikeshedHighlightClassNames.has(className)
     }
