@@ -13,22 +13,24 @@ interface LineDiff {
     b: diff.IDiffResult[]
 }
 
-function splitDiffResultsIntoLines(rawDiffs: diff.IDiffResult[]) {
+function convertDiffResultsToLineDiffs(rawDiffs: diff.IDiffResult[]): LineDiff[] {
+    const lines: LineDiff[] = [];
+
     let line: LineDiff = { a: [], b: [] };
-    const lines: LineDiff[] = [line];
+    lines.push(line);
 
-    for (let i = 0; i < rawDiffs.length; i++) {
-        const rawDiff = rawDiffs[i];
-
+    for (const rawDiff of rawDiffs) {
         const values = rawDiff.value.split('\n');
 
-        for (var j = 0; j < values.length; j++) {
+        // NEED COMMENT
+        for (let j = 0; j < values.length; j++) {
+            // NEED COMMENT
             if (j > 0) {
                 line = { a: [], b: [] };
                 lines.push(line);
             }
 
-            var hunk = {
+            const hunk = {
                 value: values[j],
                 added: rawDiff.added,
                 removed: rawDiff.removed,
@@ -48,12 +50,73 @@ function splitDiffResultsIntoLines(rawDiffs: diff.IDiffResult[]) {
     return lines;
 }
 
+function splitLineHunkIntoCharHunks(line: LineDiff, hunkA: diff.IDiffResult, hunkB: diff.IDiffResult): void {
+    const rawDiffs = diff.diffChars(hunkA.value, hunkB.value);
+    for (const rawDiff of rawDiffs) {
+        const hunk = {
+            value: rawDiff.value,
+            added: rawDiff.added,
+            removed: rawDiff.removed,
+        };
+
+        if (hunk.removed || (!hunk.added && !hunk.removed)) {
+            line.a.push(hunk);
+        }
+
+        if (hunk.added || (!hunk.added && !hunk.removed)) {
+            line.b.push(hunk);
+        }
+    }
+}
+
+function splitLinesIntoChars(oldLines: LineDiff[]): LineDiff[] {
+    const newLines: LineDiff[] = [];
+
+    for (const oldLine of oldLines) {
+        const newLine: LineDiff = { a: [], b: [] };
+        newLines.push(newLine);
+
+        const a = oldLine.a;
+        const b = oldLine.b;
+        const len = (a.length < b.length) ? b.length : a.length;
+
+        // for each hunk of linediff
+        for (let i = 0; i < len; i++) {
+            // in case there are only b
+            if (a.length <= i) {
+                newLine.b.push(b[i]);
+                continue;
+            }
+
+            // in case there are only a
+            if (b.length <= i) {
+                newLine.a.push(a[i]);
+                continue;
+            }
+
+            // modified skip
+            const hunkA = a[i];
+            const hunkB = b[i];
+            if (!hunkA.added && !hunkA.removed) {
+                newLine.a.push(hunkA);
+                newLine.b.push(hunkB);
+                continue;
+            }
+
+            splitLineHunkIntoCharHunks(newLine, hunkA, hunkB);
+        }
+    }
+
+    return newLines;
+}
+
 function computeDiff(a: string, b: string) {
-    var rawDiffs = diff.diffLines(a, b, {
+    const rawDiffs = diff.diffLines(a, b, {
         newlineIsToken: true
     });
 
-    var lines = splitDiffResultsIntoLines(rawDiffs);
+    let lines = convertDiffResultsToLineDiffs(rawDiffs);
+    lines = splitLinesIntoChars(lines);
 
     return lines;
 }
@@ -71,7 +134,7 @@ async function diffChildren(sections: DiffEntry[]): Promise<any> {
         if (section.sections.length > 0) {
             continue;
         }
-        
+
         const htmlPath = section.path;
         const htmls = await Promise.all([
             readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
