@@ -1,7 +1,7 @@
 'use strict';
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { Document, getAttribute, getText, getHTMLText } from './htmlutils';
+import { Document, getAttribute, hasClassName, getText, getHTMLText } from './htmlutils';
 
 //
 // Interfaces
@@ -57,7 +57,8 @@ function fillTextInternal(doc: Document, section: Section) {
 //
 export function addChildNode(parent: Section, current: Section, childNode: ASTNode): Section {
     if (!current) {
-        if ((childNode.nodeName === '#text' && childNode.value.trim() === '')) {
+        if ((childNode.nodeName === '#text' && childNode.value.trim() === '') ||
+            hasClassName(childNode, 'div', 'status')) {
             return current;
         }
 

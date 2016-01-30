@@ -60,6 +60,21 @@ export function getAttribute(node: parse5.ASTNode, attrName: string): string {
     return null;
 }
 
+export function hasClassName(node: parse5.ASTNode, nodeName: string, className: string): boolean {
+    if (node.nodeName !== nodeName) {
+        return false;
+    }
+    
+    let value = getAttribute(node, 'class');
+    if (!value) {
+        return false;
+    }
+    
+    value = ' ' + value.replace(/\s+/g, ' ').trim() + ' ';
+    return value.indexOf(' ' + className + ' ') !== -1;
+}
+
+
 export function getText(node: parse5.ASTNode): string {
     if (node.nodeName === '#text') {
         return node.value;

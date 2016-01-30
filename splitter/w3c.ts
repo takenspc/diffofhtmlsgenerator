@@ -116,7 +116,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
             if (useH4 && (section && !h3InH4.has(section.id))) {
                 if (childNode.nodeName === 'h4') {
                     const id = getAttribute(childNode, 'id');
-                    let headingText = getHeadingText(childNode);
+                    const headingText = getHeadingText(childNode);
 
                     subSection = addSection(section, id, headingText, childNode);
                     continue;
