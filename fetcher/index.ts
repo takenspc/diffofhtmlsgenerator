@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as request from 'request';
-import { log } from '../utils';
+import { log, writeFile } from '../utils';
 
 function download(org: string, url: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -33,5 +33,11 @@ export function fetch() {
     return Promise.all([
         download('w3c', 'https://w3c.github.io/html/single-page.html'),
         download('whatwg', 'https://html.spec.whatwg.org/'),
-    ])
+    ]).then(() => {
+        const jsonPath = path.join(__dirname, 'data', 'fetch.json');
+        const data = JSON.stringify({
+            time: Date.now(),
+        });
+        return writeFile(jsonPath, data);
+    })
 }
