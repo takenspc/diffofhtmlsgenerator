@@ -38,17 +38,17 @@ declare module JsDiff {
         tokenize(value:string):any; // return types are string or string[]
     }
 
-    function diffChars(oldStr:string, newStr:string, options: Options):IDiffResult[];
+    function diffChars(oldStr:string, newStr:string, options?: Options):IDiffResult[];
 
-    function diffWords(oldStr:string, newStr:string, options: Options):IDiffResult[];
+    function diffWords(oldStr:string, newStr:string, options?: Options):IDiffResult[];
 
-    function diffWordsWithSpace(oldStr:string, newStr:string, options: Options):IDiffResult[];
+    function diffWordsWithSpace(oldStr:string, newStr:string, options?: Options):IDiffResult[];
 
-    function diffJson(oldObj: Object, newObj: Object, options: Options): IDiffResult[];
+    function diffJson(oldObj: Object, newObj: Object, options?: Options): IDiffResult[];
 
-    function diffLines(oldStr:string, newStr:string, options: Options):IDiffResult[];
+    function diffLines(oldStr:string, newStr:string, options?: Options):IDiffResult[];
 
-    function diffCss(oldStr:string, newStr:string, options: Options):IDiffResult[];
+    function diffCss(oldStr:string, newStr:string, options?: Options):IDiffResult[];
 
     function createPatch(fileName:string, oldStr:string, newStr:string, oldHeader:string, newHeader:string):string;
 
