@@ -1,25 +1,15 @@
 'use strict'; // XXX
 import { Attr, ASTNode } from 'parse5';
-import { getAttribute } from '../splitter/htmlutils';
+import { getAttribute, hasClassName } from '../splitter/htmlutils';
 import { FormatContext } from './formatter';
 import * as consts from './consts';
-
-function hasClassName(node: ASTNode, className: string): boolean {
-    let value = getAttribute(node, 'class');
-    if (!value) {
-        return false;
-    }
-    
-    value = ' ' + value.replace(/\s+/g, ' ').trim() + ' ';
-    return value.indexOf(' ' + className + ' ') !== -1;
-}
 
 //
 // Element
 //
 export function includeElement(node: ASTNode): boolean {
-    if ((node.nodeName === 'a' && hasClassName(node, 'self-link')) ||
-        (node.nodeName === 'div' && hasClassName(node, 'status'))) {
+    if (hasClassName(node, 'a', 'self-link') ||
+        hasClassName(node, 'div', 'status')) {
         return false;
     }
 
@@ -31,12 +21,18 @@ export function includeElement(node: ASTNode): boolean {
 // Tag
 //
 export function includeTag(context: FormatContext, node: ASTNode): boolean {
+    if (hasClassName(node, 'div', 'impl') ||
+        hasClassName(node, 'span', 'impl')) {
+        return false;
+    }
+
+
     const parent = context.parent;
     if (!parent) {
         return true;
     }
 
-    if (parent.nodeName === 'pre' && hasClassName(parent, 'highlight')) {
+    if (hasClassName(parent, 'pre', 'highlight')) {
         const className = getAttribute(node, 'class');
         return !consts.BikeshedHighlightClassNames.has(className)
     }
