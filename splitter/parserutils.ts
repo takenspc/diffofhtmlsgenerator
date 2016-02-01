@@ -102,13 +102,14 @@ function replaceHeadingText(original: string): string {
 export function addSection(parent: Section, id: string, headingText: string, originalHeadingText: string, childNode: ASTNode): Section {
     assert(parent, 'parent must be initialized before adding a section' + childNode.nodeName)
 
-    const path = (parent.path !== '') ? parent.path + '/' + ntfsSafe(headingText) : ntfsSafe(headingText);
+    const normalizedHeadingText = replaceHeadingText(headingText);
+    const path = (parent.path !== '') ? parent.path + '/' + ntfsSafe(normalizedHeadingText) : ntfsSafe(headingText);
 
     const section: Section = {
         id: id,
 
         path: path,
-        headingText: replaceHeadingText(headingText),
+        headingText: normalizedHeadingText,
         originalHeadingText: originalHeadingText,
 
         nodes: [childNode],
