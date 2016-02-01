@@ -14,14 +14,14 @@ import * as w3c from './w3c';
 //
 function toJSONEntry(section: Section): JSONEntry {
     const sections = section.sections.map(toJSONEntry);
-    
+
     const jsonEntry: JSONEntry = {
         id: section.id,
         heading: section.heading,
         path: section.path,
         sections: sections,
     };
-    
+
     return jsonEntry;
 }
 
@@ -60,7 +60,7 @@ async function saveSpec(org: string, spec: Spec): Promise<any> {
 async function splitSpec(org: string, parser: (Document) => Spec): Promise<Spec> {
     const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
     const doc = await parse(htmlPath);
-    const spec = parser(doc); 
+    const spec = parser(doc);
 
     return spec
 }
@@ -71,13 +71,13 @@ async function splitSpec(org: string, parser: (Document) => Spec): Promise<Spec>
 //
 function splitAndSaveSpec(org: string, parser: (Document) => Spec): Promise<any> {
     return splitSpec(org, parser).then((spec) => {
-        saveSpec(org, spec)
+        return saveSpec(org, spec)
     });
 }
 
 export function split() {
     return Promise.all([
-       splitAndSaveSpec('whatwg', whatwg.parseSpec), 
-       splitAndSaveSpec('w3c', w3c.parseSpec), 
+       splitAndSaveSpec('whatwg', whatwg.parseSpec),
+       splitAndSaveSpec('w3c', w3c.parseSpec),
     ]);
 }
