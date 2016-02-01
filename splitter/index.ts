@@ -17,8 +17,9 @@ function toJSONEntry(section: Section): JSONEntry {
 
     const jsonEntry: JSONEntry = {
         id: section.id,
-        heading: section.heading,
         path: section.path,
+        headingText: section.headingText,
+        originalHeadingText: section.originalHeadingText,
         sections: sections,
     };
 

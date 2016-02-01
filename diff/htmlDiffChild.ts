@@ -165,7 +165,7 @@ function diffGrandChildren(sections: DiffEntry[]): Promise<any> {
 // Entry point
 //
 process.on('message', (diffEntry: DiffEntry) => {
-    const heading = diffEntry.heading;
+    const heading = diffEntry.headingText;
     log(['start', heading]);
 
     Promise.all([

@@ -6,8 +6,9 @@ import { computeJSONDiff } from './jsonDiff';
 import { computeHTMLDiff } from './htmlDiff';
 
 export interface DiffEntry {
-    heading: string
     path: string
+    headingText: string
+    originalHeadingText: string
     sections: DiffEntry[]
     whatwg: JSONEntry
     w3c: JSONEntry

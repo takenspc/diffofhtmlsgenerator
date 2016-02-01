@@ -7,8 +7,9 @@ import { DiffEntry } from './'
 //
 function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
     const diffEntry: DiffEntry = {
-        heading: jsonEntry.heading,
         path: jsonEntry.path,
+        headingText: jsonEntry.headingText,
+        originalHeadingText: jsonEntry.originalHeadingText,
         sections: [],
         whatwg: null,
         w3c: null,
@@ -26,8 +27,8 @@ function createDiffEntry(whatwg: JSONEntry, w3c: JSONEntry): DiffEntry {
 }
 
 function compare(whatwg: JSONEntry, w3c: JSONEntry): boolean {
-    const whatwgHeading = whatwg.heading;
-    const w3cHeading = w3c.heading;
+    const whatwgHeading = whatwg.headingText;
+    const w3cHeading = w3c.headingText;
     
     if (whatwgHeading === w3cHeading) {
         return true;

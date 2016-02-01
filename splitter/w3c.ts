@@ -133,7 +133,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 }
 
                 const headingText = getHeadingText(childNode);
-                chapter = addSection(root, id, headingText, childNode);
+                chapter = addSection(root, id, headingText, getText(childNode), childNode);
                 section = null;
                 subSection = null;
                 continue;
@@ -146,7 +146,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 // XXX
                 headingText = headingText.replace('Serializing', 'Serialising');
 
-                section = addSection(chapter, id, headingText, childNode);
+                section = addSection(chapter, id, headingText, getText(childNode), childNode);
                 subSection = null;
                 continue;
             }
@@ -157,7 +157,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                     const id = getAttribute(childNode, 'id');
                     const headingText = getHeadingText(childNode);
 
-                    subSection = addSection(section, id, headingText, childNode);
+                    subSection = addSection(section, id, headingText, getText(childNode), childNode);
                     continue;
                 }
 
@@ -176,11 +176,12 @@ function parseMain(root: Section, mainNode: ASTNode): void {
 export function parseSpec(doc: Document): Spec {
     const root: Section = {
         id: '#root#',
-        heading: '#root#',
+        path: '',
+        headingText: '#root#',
+        originalHeadingText: '#roort#',
         nodes: [],
         text: null,
         sections: [],
-        path: ''
     };
 
     let header: Header;

@@ -8,11 +8,15 @@ import { Document, getAttribute, hasClassName, getText, getHTMLText } from './ht
 //
 export interface Section {
     id: string
-    heading: string
+
+    path: string
+    headingText: string
+    originalHeadingText: string
+
     nodes: ASTNode[]
     text: string
+
     sections: Section[]
-    path: string
 }
 
 export interface Header {
@@ -63,8 +67,9 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
         }
 
         const id = '__pre__';
-        const headingText = '__pre__';
-        return addSection(parent, id, headingText, childNode);
+        const headingText = '(preface)';
+        const originalHeadingText = '(preface)';
+        return addSection(parent, id, headingText, originalHeadingText, childNode);
     }
 
     current.nodes.push(childNode);
@@ -78,18 +83,23 @@ function ntfsSafe(value: string): string {
     return value.replace(ntfsUnsafe, '_');
 }
 
-export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
+export function addSection(parent: Section, id: string, headingText: string, originalHeadingText: string, childNode: ASTNode): Section {
     assert(parent, 'parent must be initialized before adding a section' + childNode.nodeName)
 
     const path = (parent.path !== '') ? parent.path + '/' + ntfsSafe(headingText) : ntfsSafe(headingText);
 
     const section: Section = {
         id: id,
-        heading: headingText,
-        nodes: [childNode],
-        sections: [],
-        text: null,
+
+
         path: path,
+        headingText: headingText,
+        originalHeadingText: originalHeadingText,
+
+        nodes: [childNode],
+        text: null,
+
+        sections: [],
     };
     
     parent.sections.push(section);

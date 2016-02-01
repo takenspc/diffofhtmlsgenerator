@@ -4,8 +4,9 @@ import { readFile, writeFile} from './utils';
 
 export interface JSONEntry {
     id: string
-    heading: string
     path: string
+    headingText: string
+    originalHeadingText: string
     sections: JSONEntry[]
 }
 
