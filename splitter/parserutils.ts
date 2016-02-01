@@ -67,7 +67,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
         }
 
         const id = '__pre__';
-        const headingText = '__pre__';
+        const headingText = '(preface)';
         const originalHeadingText = '(preface)';
         return addSection(parent, id, headingText, originalHeadingText, childNode);
     }
