@@ -74,7 +74,7 @@ export function parseSpec(doc: Document): Spec {
         'animation-frames',
 
         // 'syntax'
-        'serializing-html-fragments',
+        'serialising-html-fragments',
         'parsing-html-fragments',
         'named-character-references',
 

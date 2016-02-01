@@ -146,9 +146,6 @@ function parseMain(root: Section, mainNode: ASTNode): void {
                 const id = getAttribute(childNode, 'id');
                 let headingText = getHeadingText(childNode);
 
-                // XXX
-                headingText = headingText.replace('Serializing', 'Serialising');
-
                 section = addSection(chapter, id, headingText, getText(childNode), childNode);
                 subSection = null;
                 continue;

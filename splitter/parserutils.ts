@@ -83,6 +83,22 @@ function ntfsSafe(value: string): string {
     return value.replace(ntfsUnsafe, '_');
 }
 
+function replaceHeadingText(original: string): string {
+    let headingText = original;
+
+    // Common infrastructure → Terminology → Plugins
+    headingText = headingText.replace('Plugin Content Handlers', 'Plugins');
+
+    // Common infrastructure → Common microsyntaxes → Colours
+    headingText = headingText.replace('Colors', 'Colours');
+    
+    // The HTML syntax
+    // The XHTML syntax
+    headingText = headingText.replace('Serializing', 'Serialising');
+    return headingText;
+}
+
+
 export function addSection(parent: Section, id: string, headingText: string, originalHeadingText: string, childNode: ASTNode): Section {
     assert(parent, 'parent must be initialized before adding a section' + childNode.nodeName)
 
@@ -91,9 +107,8 @@ export function addSection(parent: Section, id: string, headingText: string, ori
     const section: Section = {
         id: id,
 
-
         path: path,
-        headingText: headingText,
+        headingText: replaceHeadingText(headingText),
         originalHeadingText: originalHeadingText,
 
         nodes: [childNode],
