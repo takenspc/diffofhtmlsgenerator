@@ -1,6 +1,7 @@
 'use strict'; // XXX
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
+import { hasClassName } from '../splitter/htmlutils';
 import { includeElement, includeTag, includeAttr, modifyAttr, sortAttr } from './filter';
 import * as consts from './consts';
 
@@ -41,17 +42,12 @@ function escapeHTML(text: string): string {
 //
 // Tag
 //
-function breakLineAndIndent(context: FormatContext, node: ASTNode, depth: number) {
+function breakLineAndIndent(depth: number) {
     const buff: string[] = [];
 
-    if (node.nodeName === 'p' &&
-        (context.parent && (context.parent.nodeName === 'dt' || context.parent.nodeName === 'li'))) {
-        // NO OP
-    } else {
-        buff.push('\n');
-        for (let i = 0; i < depth; i++) {
-            buff.push(' ');
-        }
+    buff.push('\n');
+    for (let i = 0; i < depth; i++) {
+        buff.push(' ');
     }
 
     return buff.join('');
@@ -60,7 +56,13 @@ function breakLineAndIndent(context: FormatContext, node: ASTNode, depth: number
 function formatStartTag(context: FormatContext, node: ASTNode, depth: number): string {
     const buff: string[] = []
     if (consts.BreakBeforeStartTag.has(node.nodeName)) {
-        buff.push(breakLineAndIndent(context, node, depth));
+        if (node.nodeName === 'p' && context.parent &&
+           (context.parent.nodeName === 'dt' ||
+            context.parent.nodeName === 'li')) {
+            // NO OP
+        } else {               
+            buff.push(breakLineAndIndent(depth));
+        }
     }
 
     buff.push('<');
@@ -82,7 +84,7 @@ function formatEndTag(context: FormatContext, node: ASTNode, depth: number): str
     const buff: string[] = [];
 
     if (consts.BreakBeforeEndTag.has(node.nodeName)) {
-        buff.push(breakLineAndIndent(context, node, depth));
+        buff.push(breakLineAndIndent(depth));
     }
 
     buff.push('</');
@@ -106,6 +108,14 @@ function formatText(context: FormatContext, node: ASTNode): string {
     return escapeHTML(value)
 }
 
+// XXX THIS IS TOTALLY WRONG
+function needLineBreakAfterStartTag(node: ASTNode): boolean {
+    const nodeNames: Set<string> = new Set([
+        'dd',
+    ]);
+    return nodeNames.has(node.nodeName) || hasClassName(node, 'div', 'example');
+}
+
 function formatElement(context: FormatContext, node: ASTNode, depth: number): string {
     if (!includeElement(node)) {
         return '';
@@ -115,14 +125,36 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
 
     if (includeTag(context, node)) {
         buff.push(formatStartTag(context, node, depth));
+    } else {
+        // TODO THIS IS TOTALLY WRONG
+        if (hasClassName(node, 'div', 'impl')) {
+            buff.push(breakLineAndIndent(depth));
+        }
     }
 
     if (consts.ContextElements.has(node.nodeName)) {
         context.parentStack.push(node);
     }
 
+    // TODO THIS IS TOTALLY WRONG
+    const shouldLineBreakAfterStartTag = needLineBreakAfterStartTag(node);
+    let didLineBreakAfterStartTag = false;
+
     for (const childNode of node.childNodes) {
-        buff.push(format(context, childNode, depth + 1));
+        const text = format(context, childNode, depth + 1);
+
+        // TODO THIS IS TOTALLY WRONG
+        if (shouldLineBreakAfterStartTag && !didLineBreakAfterStartTag) {
+            if (text.trim() !== '') {
+                // insert line break manually
+                if (!text.startsWith('\n')) {
+                    buff.push(breakLineAndIndent(depth + 1));
+                }
+                didLineBreakAfterStartTag = true;
+            }
+        }
+
+        buff.push(text);
     }
 
     if (consts.ContextElements.has(node.nodeName)) {
