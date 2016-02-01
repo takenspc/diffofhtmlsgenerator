@@ -152,7 +152,7 @@ async function diffChildren(sections: DiffEntry[]): Promise<any> {
 function diffGrandChildren(sections: DiffEntry[]): Promise<any> {
     return Promise.all(sections.map((section) => {
         if (section.sections.length > 0) {
-            return diffDiffEntry(section);
+            return diffChildren(section.sections);
         }
 
         return Promise.all([Promise.resolve()]);
