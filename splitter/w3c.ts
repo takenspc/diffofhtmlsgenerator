@@ -64,7 +64,7 @@ function parseMain(root: Section, mainNode: ASTNode): void {
 
     const h4 = new Set([
         // 'introduction',
-        // 'infrastructure',
+        'infrastructure',
         'dom',
         'semantics',
         'editing',
@@ -80,6 +80,9 @@ function parseMain(root: Section, mainNode: ASTNode): void {
     const h3InH4 = new Set([
         // 'introduction',
         // 'infrastructure',
+        'case-sensitivity-and-string-comparison',
+        'namespaces',
+
         // 'dom',
 
         // 'semantics',

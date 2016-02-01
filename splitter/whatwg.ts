@@ -36,7 +36,7 @@ export function parseSpec(doc: Document): Spec {
 
     const h4 = new Set([
         // 'introduction',
-        // 'infrastructure',
+        'infrastructure',
         'dom',
         'semantics',
         'editing',
@@ -52,6 +52,8 @@ export function parseSpec(doc: Document): Spec {
     const h3InH4 = new Set([
         // 'introduction',
         // 'infrastructure',
+        'case-sensitivity-and-string-comparison',
+        'namespaces',
         // 'dom',
 
         // 'semantics',
