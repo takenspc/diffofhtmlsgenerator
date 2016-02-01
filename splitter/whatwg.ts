@@ -33,12 +33,52 @@ export function parseSpec(doc: Document): Spec {
     let inMain = false;
     let useH4 = false;
 
-    const h4 = new Set(['semantics', 'syntax']);
+    const h4 = new Set([
+        // 'introduction',
+        // 'infrastructure',
+        'dom',
+        'semantics',
+        'editing',
+        'browsers',
+        'webappapis',
+        'syntax'
+        // 'the-xhtml-syntax',
+        // 'rendering',
+        // 'obsolete',
+        // 'iana',
+
+    ]);
     const h3InH4 = new Set([
+        // 'introduction',
+        // 'infrastructure',
+        // 'dom',
+
+        // 'semantics',
         'disabled-elements',
-        'serialising-html-fragments',
+
+        // 'editing',
+        'the-hidden-attribute',
+        'inert-subtrees',
+        'activation',
+
+        // 'browsers'
+        'sandboxing',
+
+        // 'webappapis',
+        'atob',
+        'timers',
+        'images',
+        'animation-frames',
+
+        // 'syntax'
+        'serializing-html-fragments',
         'parsing-html-fragments',
-        'named-character-references'
+        'named-character-references',
+
+        // 'the-xhtml-syntax',
+        // 'rendering',
+        // 'obsolete',
+        // 'iana',
     ]);
 
     let chapter: Section = null;
@@ -47,7 +87,7 @@ export function parseSpec(doc: Document): Spec {
     for (const childNode of body.childNodes) {
         //
         // The structure of WHATWG HTML Standard
-        // 
+        //
         // body
         //   header
         //   h2
@@ -107,7 +147,7 @@ export function parseSpec(doc: Document): Spec {
             if (childNode.nodeName === 'h4') {
                 const id = getAttribute(childNode, 'id');
                 const headingText = getHeadingText(childNode);
-                
+
                 subSection = addSection(section, id, headingText, childNode);
                 continue;
             }

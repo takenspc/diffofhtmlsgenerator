@@ -62,12 +62,51 @@ function parseMain(root: Section, mainNode: ASTNode): void {
     let inMain = false;
     let useH4 = false;
 
-    const h4 = new Set(['semantics', 'syntax']);
+    const h4 = new Set([
+        // 'introduction',
+        // 'infrastructure',
+        'dom',
+        'semantics',
+        'editing',
+        'browsers',
+        'webappapis',
+        'syntax'
+        // 'the-xhtml-syntax',
+        // 'rendering',
+        // 'obsolete',
+        // 'iana',
+
+    ]);
     const h3InH4 = new Set([
+        // 'introduction',
+        // 'infrastructure',
+        // 'dom',
+
+        // 'semantics',
         'disabled-elements',
+
+        // 'editing',
+        'the-hidden-attribute',
+        'inert-subtrees',
+        'activation',
+
+        // 'browsers'
+        'sandboxing',
+
+        // 'webappapis',
+        'base64-utility-methods',
+        'timers',
+        'webappapis-images',
+
+        // 'syntax'
         'serializing-html-fragments',
         'parsing-html-fragments',
-        'named-character-references'
+        'named-character-references',
+
+        // 'the-xhtml-syntax',
+        // 'rendering',
+        // 'obsolete',
+        // 'iana',
     ]);
 
     for (const sectionNode of mainNode.childNodes) {
@@ -151,7 +190,7 @@ export function parseSpec(doc: Document): Spec {
     for (const childNode of bodyNode.childNodes) {
         //
         // The structure of W3C HTML 5.1
-        // 
+        //
         // body
         //   div.head
         //     header
