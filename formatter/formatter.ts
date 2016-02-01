@@ -112,8 +112,12 @@ function formatText(context: FormatContext, node: ASTNode): string {
 function needLineBreakAfterStartTag(node: ASTNode): boolean {
     const nodeNames: Set<string> = new Set([
         'dd',
+        'blockquote',
     ]);
-    return nodeNames.has(node.nodeName) || hasClassName(node, 'div', 'example');
+    return nodeNames.has(node.nodeName) ||
+           hasClassName(node, 'div', 'example') ||
+           hasClassName(node, 'div', 'note') ||
+           hasClassName(node, 'div', 'impl');
 }
 
 function formatElement(context: FormatContext, node: ASTNode, depth: number): string {
@@ -125,11 +129,6 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
 
     if (includeTag(context, node)) {
         buff.push(formatStartTag(context, node, depth));
-    } else {
-        // TODO THIS IS TOTALLY WRONG
-        if (hasClassName(node, 'div', 'impl')) {
-            buff.push(breakLineAndIndent(depth));
-        }
     }
 
     if (consts.ContextElements.has(node.nodeName)) {
