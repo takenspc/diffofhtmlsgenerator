@@ -65,7 +65,7 @@ export function computeHTMLDiff(sections: DiffEntry[]): Promise<any> {
     const collected: DiffEntry[] = collectSections(sections);
     
     const promises: Promise<any>[] = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 8; i++) {
         promises.push(diffChildProcess(collected));
     }
 
