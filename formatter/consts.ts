@@ -13,9 +13,9 @@ export const BreakBeforeStartTag: Set<string> = new Set([
     'dd',
     'details',
     'dialog',
+    'div',
     'dl',
     'dt',
-    'div',
     'fieldset',
     'figcaption',
     'figure',
@@ -50,16 +50,18 @@ export const BreakBeforeStartTag: Set<string> = new Set([
 ]);
 
 export const BreakBeforeEndTag: Set<string> = new Set([
-    'dl',
     'dd',
+    'div',
+    'dl',
+    'dt',
+    'li',
     'ol',
-    'ul',
     'table',
     'tbody',
     'tfoot',
     'thead',
     'tr',
-    'div',
+    'ul',
 ]);
 
 //

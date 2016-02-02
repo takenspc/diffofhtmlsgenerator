@@ -56,13 +56,7 @@ function breakLineAndIndent(depth: number) {
 function formatStartTag(context: FormatContext, node: ASTNode, depth: number): string {
     const buff: string[] = []
     if (consts.BreakBeforeStartTag.has(node.nodeName)) {
-        if (node.nodeName === 'p' && context.parent &&
-           (context.parent.nodeName === 'dt' ||
-            context.parent.nodeName === 'li')) {
-            // NO OP
-        } else {               
-            buff.push(breakLineAndIndent(depth));
-        }
+        buff.push(breakLineAndIndent(depth));
     }
 
     buff.push('<');
@@ -111,8 +105,10 @@ function formatText(context: FormatContext, node: ASTNode): string {
 // XXX THIS IS TOTALLY WRONG
 function needLineBreakAfterStartTag(node: ASTNode): boolean {
     const nodeNames: Set<string> = new Set([
-        'dd',
         'blockquote',
+        'dd',
+        'dt',
+        'li',
     ]);
     return nodeNames.has(node.nodeName) ||
            hasClassName(node, 'div', 'example') ||
