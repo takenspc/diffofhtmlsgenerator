@@ -151,6 +151,14 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
 
         buff.push(text);
     }
+    
+    // TODO THIS IS TOTALLY WRONG
+    if (node.nodeName === 'pre') {
+        // remove line break before </pre>
+        let lastText = buff.pop();
+        lastText = lastText.replace(/\r?\n$/, '');
+        buff.push(lastText);
+    }
 
     if (consts.ContextElements.has(node.nodeName)) {
         context.parentStack.pop();
