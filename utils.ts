@@ -2,6 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirpModule from 'mkdirp';
+import * as moment from 'moment';
 
 //
 // I/O
@@ -55,6 +56,6 @@ export function mkdirp(dirname): Promise<any> {
 // logging
 //
 export function log(args): void {
-    const message = [new Date()].concat(args).join('\t');
+    const message = [moment().format()].concat(args).join('\t');
     console.log(message);
 }
