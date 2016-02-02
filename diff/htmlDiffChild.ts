@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
 import { DiffEntry } from './';
-import { diffDiffEntry } from './htmlDiff';
+import { Message } from './htmlDiff';
 
 //
 // Diff
@@ -125,59 +125,40 @@ function computeDiff(a: string, b: string) {
 //
 // Handle objects
 //
-async function diffChildren(sections: DiffEntry[]): Promise<any> {
+async function diffSection(section: DiffEntry): Promise<any> {
+    const heading = section.headingText;
+    log(['start', heading]);
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
     const outDir = path.join(__dirname, 'data');
 
-    for (const section of sections) {
-        // skip (diffGrandChildren handle this case)
-        if (section.sections.length > 0) {
-            continue;
-        }
+    const htmlPath = section.path;
+    const htmls = await Promise.all([
+        readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
+        readFile(path.join(srcDir, 'w3c', htmlPath + '.html')),
+    ]);
+    const diffs = computeDiff(htmls[0].trim(), htmls[1].trim());
 
-        const htmlPath = section.path;
-        const htmls = await Promise.all([
-            readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
-            readFile(path.join(srcDir, 'w3c', htmlPath + '.html')),
-        ]);
-        const diffs = computeDiff(htmls[0].trim(), htmls[1].trim());
-
-        const jsonPath = path.join(outDir, htmlPath + '.json');
-        await mkdirp(path.dirname(jsonPath));
-        await writeFile(jsonPath, JSON.stringify(diffs));
-    }
+    const jsonPath = path.join(outDir, htmlPath + '.json');
+    await mkdirp(path.dirname(jsonPath));
+    await writeFile(jsonPath, JSON.stringify(diffs));
+    log(['end', heading]);
 }
-
-
-function diffGrandChildren(sections: DiffEntry[]): Promise<any> {
-    return Promise.all(sections.map((section) => {
-        if (section.sections.length > 0) {
-            return diffChildren(section.sections);
-        }
-
-        return Promise.all([Promise.resolve()]);
-    }));
-}
-
 
 
 //
 // Entry point
 //
-process.on('message', (diffEntry: DiffEntry) => {
-    const heading = diffEntry.headingText;
-    log(['start', heading]);
 
-    Promise.all([
-        // process children and grand children at the same time
-        diffGrandChildren(diffEntry.sections),
-        diffChildren(diffEntry.sections)
-    ]).then(() => {
-        log(['end', heading]);
+
+process.on('message', (message: Message) => {
+    if (message.type === 'diff') {
+        diffSection(message.section).then(() => {
+            process.send({
+                type: 'finish',
+                section: null
+            });
+        })
+    } else if (message.type === 'exit') {
         process.exit(0);
-    }).catch((err) => {
-        log(['error', heading]);
-        console.error(heading, err);
-        process.exit(0);
-    });
+    }
 });
