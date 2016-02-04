@@ -43,12 +43,31 @@ export function includeTag(context: FormatContext, node: ASTNode): boolean {
 //
 // Attr
 //
+const noisyAttributes = new Set([
+    'id',
+    'role',
+]);
+
+const noisyClasses = new Set([
+    'idl',
+    'idl-code',
+    'heading settled',
+]);
 export function includeAttr(attr: Attr): boolean {
-    if (attr.name.startsWith('data-') ||
-        attr.name === 'id' ||
-        attr.name === 'role') {
+    const name = attr.name;
+    if (name.startsWith('data-')) {
         return false;
     }
+
+    if (noisyAttributes.has(name)) {
+        return false;
+    }
+
+    if (name === 'class' || noisyClasses.has(attr.value)) {
+        return false;
+    }
+
+
     return true;
 }
 
