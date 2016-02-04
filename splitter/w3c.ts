@@ -1,7 +1,7 @@
 'use strict'; // XXX
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { Document, getBody, getAttribute, getText } from './htmlutils';
+import { Document, getBody, getAttribute, hasClassName, getText } from './htmlutils';
 import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
 
 //
@@ -27,11 +27,65 @@ function parseHeader(divNode: ASTNode): Header {
 
 
 //
+// Config
+//
+const chapterHavingSubSections = new Set([
+    // 'introduction',
+    'infrastructure',
+    'dom',
+    'semantics',
+    'editing',
+    'browsers',
+    'webappapis',
+    'syntax'
+    // 'the-xhtml-syntax',
+    // 'rendering',
+    // 'obsolete',
+    // 'iana',
+
+]);
+const sectionNotHavingSubSections = new Set([
+    // 'introduction',
+    // 'infrastructure',
+    'case-sensitivity-and-string-comparison',
+    'namespaces',
+
+    // 'dom',
+
+    // 'semantics',
+    'disabled-elements',
+
+    // 'editing',
+    'the-hidden-attribute',
+    'inert-subtrees',
+    'activation',
+
+    // 'browsers'
+    'sandboxing',
+
+    // 'webappapis',
+    'base64-utility-methods',
+    'timers',
+    'webappapis-images',
+
+    // 'syntax'
+    'serializing-html-fragments',
+    'parsing-html-fragments',
+    'named-character-references',
+
+    // 'the-xhtml-syntax',
+    // 'rendering',
+    // 'obsolete',
+    // 'iana',
+]);
+
+
+//
 // Heading text
 //
 function getHeadingText(node: ASTNode): string {
     for (const childNode of node.childNodes) {
-        if (childNode.nodeName === 'span' && getAttribute(childNode, 'class') === 'content') {
+        if (hasClassName(childNode, 'span', 'content')) {
             return getText(childNode).replace(/\s+/g, ' ').trim();
         }
     }
@@ -41,12 +95,13 @@ function getHeadingText(node: ASTNode): string {
 
 
 //
-// Main
+// Iterate child node of sectionElement
 //
-function* nextElement(rootNode: ASTNode): Iterable<ASTNode> {
+function* nextElement(sectionElement: ASTNode): Iterable<ASTNode> {
     // TODO
-    for (const childNode of rootNode.childNodes) {
-        if (childNode.nodeName === 'div' && getAttribute(childNode, 'class') === 'impl') {
+    for (const childNode of sectionElement.childNodes) {
+        if (hasClassName(childNode, 'div', 'impl') ||
+            (childNode.nodeName === 'div' && getAttribute(childNode, 'data-fill-with'))) {
             yield* nextElement(childNode);
         } else {
             yield childNode;
@@ -54,116 +109,83 @@ function* nextElement(rootNode: ASTNode): Iterable<ASTNode> {
     }
 }
 
-function parseMain(root: Section, mainNode: ASTNode): void {
+
+//
+// parse section element
+//
+function parseSectionElement(sectionNode: ASTNode): Section {
     let chapter: Section = null;
     let section: Section = null;
     let subSection: Section = null;
+    let processSubSections = false;
 
-    let inMain = false;
-    let useH4 = false;
+    //
+    // section
+    //   h2
+    //   h3
+    //   ...
+    //   h4
+    //   ...
+    //
+    for (const childNode of nextElement(sectionNode)) {
+        const nodeName = childNode.nodeName;
 
-    const h4 = new Set([
-        // 'introduction',
-        'infrastructure',
-        'dom',
-        'semantics',
-        'editing',
-        'browsers',
-        'webappapis',
-        'syntax'
-        // 'the-xhtml-syntax',
-        // 'rendering',
-        // 'obsolete',
-        // 'iana',
+        if (nodeName === 'h2') {
+            const id = getAttribute(childNode, 'id');
 
-    ]);
-    const h3InH4 = new Set([
-        // 'introduction',
-        // 'infrastructure',
-        'case-sensitivity-and-string-comparison',
-        'namespaces',
+            assert(chapter === null, 'Chapter must be null before h2');
 
-        // 'dom',
+            // end of the main contents
+            if (id === 'index') {
+                return null;
+            }
 
-        // 'semantics',
-        'disabled-elements',
-
-        // 'editing',
-        'the-hidden-attribute',
-        'inert-subtrees',
-        'activation',
-
-        // 'browsers'
-        'sandboxing',
-
-        // 'webappapis',
-        'base64-utility-methods',
-        'timers',
-        'webappapis-images',
-
-        // 'syntax'
-        'serializing-html-fragments',
-        'parsing-html-fragments',
-        'named-character-references',
-
-        // 'the-xhtml-syntax',
-        // 'rendering',
-        // 'obsolete',
-        // 'iana',
-    ]);
-
-    for (const sectionNode of mainNode.childNodes) {
-        if (sectionNode.nodeName !== 'section') {
+            const headingText = getHeadingText(childNode);
+            chapter = addSection(null, id, headingText, getText(childNode), childNode);
+            section = null;
+            subSection = null;
+            processSubSections = chapterHavingSubSections.has(id);
             continue;
         }
 
-        for (const childNode of nextElement(sectionNode)) {
-            if (childNode.nodeName === 'h2') {
+        if (nodeName === 'h3') {
+            const id = getAttribute(childNode, 'id');
+            let headingText = getHeadingText(childNode);
+
+            assert(chapter, `chapter must be initialized before adding a section: ${headingText}`)
+            section = addSection(chapter, id, headingText, getText(childNode), childNode);
+            subSection = null;
+            continue;
+        }
+
+        if (processSubSections && (section && !sectionNotHavingSubSections.has(section.id))) {
+            if (nodeName === 'h4') {
                 const id = getAttribute(childNode, 'id');
-                useH4 = h4.has(id);
-                // end of the main contents
-                if (id === 'index') {
-                    break;
-                }
-
-                // begining of the main contents
-                if (id === 'introduction') {
-                    inMain = true;
-                }
-
-                if (!inMain) {
-                    continue;
-                }
-
                 const headingText = getHeadingText(childNode);
-                chapter = addSection(root, id, headingText, getText(childNode), childNode);
-                section = null;
-                subSection = null;
+
+                assert(section, `section must be initialized before adding a sub section: ${headingText}`)
+                subSection = addSection(section, id, headingText, getText(childNode), childNode);
                 continue;
             }
 
-            if (childNode.nodeName === 'h3') {
-                const id = getAttribute(childNode, 'id');
-                let headingText = getHeadingText(childNode);
+            subSection = addChildNode(section, subSection, childNode);
+        } else {
+            section = addChildNode(chapter, section, childNode);
+        }
+    }
 
-                section = addSection(chapter, id, headingText, getText(childNode), childNode);
-                subSection = null;
-                continue;
-            }
+    return chapter;
+}
 
-            // in #semantics and #syntax, process h4
-            if (useH4 && (section && !h3InH4.has(section.id))) {
-                if (childNode.nodeName === 'h4') {
-                    const id = getAttribute(childNode, 'id');
-                    const headingText = getHeadingText(childNode);
 
-                    subSection = addSection(section, id, headingText, getText(childNode), childNode);
-                    continue;
-                }
-
-                subSection = addChildNode(section, subSection, childNode);
+function parseMainElement(root: Section, mainNode: ASTNode): void {
+    for (const sectionNode of mainNode.childNodes) {
+        if (sectionNode.nodeName === 'section') {
+            const section = parseSectionElement(sectionNode);
+            if (section) {
+                root.sections.push(section);
             } else {
-                section = addChildNode(chapter, section, childNode);
+                return;
             }
         }
     }
@@ -194,17 +216,20 @@ export function parseSpec(doc: Document): Spec {
         //
         // body
         //   div.head
-        //     header
-        //   h2
-        //   h3
+        //   h2#abstract
+        //   div[data-fill-with="abstract"]
+        //   h2#status
+        //   div[data-fill-with="status"]
+        //   div[data-fill-with="at-risk"]
+        //   nav#toc[data-fill-with="table-of-contents"]
         //   main
         //     section
-        //   ...
+        //     ...
         //
-        if (childNode.nodeName === 'div' && getAttribute(childNode, 'class') === 'head') {
+        if (hasClassName(childNode, 'div', 'head')) {
             header = parseHeader(childNode);
         } else if (childNode.nodeName === 'main') {
-            parseMain(root, childNode);
+            parseMainElement(root, childNode);
         }
     }
 

@@ -5,6 +5,60 @@ import { Document, getBody, getAttribute, getText } from './htmlutils';
 import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
 
 //
+// Config
+//
+const chapterHavingSubSections = new Set([
+    // 'introduction',
+    'infrastructure',
+    'dom',
+    'semantics',
+    'editing',
+    'browsers',
+    'webappapis',
+    'syntax'
+    // 'the-xhtml-syntax',
+    // 'rendering',
+    // 'obsolete',
+    // 'iana',
+
+]);
+const sectionNotHavingSubSections = new Set([
+    // 'introduction',
+    // 'infrastructure',
+    'case-sensitivity-and-string-comparison',
+    'namespaces',
+    // 'dom',
+
+    // 'semantics',
+    'disabled-elements',
+
+    // 'editing',
+    'the-hidden-attribute',
+    'inert-subtrees',
+    'activation',
+
+    // 'browsers'
+    'sandboxing',
+
+    // 'webappapis',
+    'atob',
+    'timers',
+    'images',
+    'animation-frames',
+
+    // 'syntax'
+    'serialising-html-fragments',
+    'parsing-html-fragments',
+    'named-character-references',
+
+    // 'the-xhtml-syntax',
+    // 'rendering',
+    // 'obsolete',
+    // 'iana',
+]);
+
+
+//
 // Header text
 //
 function getHeadingText(node: ASTNode) {
@@ -28,65 +82,16 @@ export function parseSpec(doc: Document): Spec {
 
     let header: Header;
 
-    const body = getBody(doc);
 
     let isHeader = true;
     let inMain = false;
-    let useH4 = false;
-
-    const h4 = new Set([
-        // 'introduction',
-        'infrastructure',
-        'dom',
-        'semantics',
-        'editing',
-        'browsers',
-        'webappapis',
-        'syntax'
-        // 'the-xhtml-syntax',
-        // 'rendering',
-        // 'obsolete',
-        // 'iana',
-
-    ]);
-    const h3InH4 = new Set([
-        // 'introduction',
-        // 'infrastructure',
-        'case-sensitivity-and-string-comparison',
-        'namespaces',
-        // 'dom',
-
-        // 'semantics',
-        'disabled-elements',
-
-        // 'editing',
-        'the-hidden-attribute',
-        'inert-subtrees',
-        'activation',
-
-        // 'browsers'
-        'sandboxing',
-
-        // 'webappapis',
-        'atob',
-        'timers',
-        'images',
-        'animation-frames',
-
-        // 'syntax'
-        'serialising-html-fragments',
-        'parsing-html-fragments',
-        'named-character-references',
-
-        // 'the-xhtml-syntax',
-        // 'rendering',
-        // 'obsolete',
-        // 'iana',
-    ]);
 
     let chapter: Section = null;
     let section: Section = null;
     let subSection: Section = null;
+    let processSubSections = false;
+
+    const body = getBody(doc);
     for (const childNode of body.childNodes) {
         //
         // The structure of WHATWG HTML Standard
@@ -98,7 +103,8 @@ export function parseSpec(doc: Document): Spec {
         //   p
         //   ...
         //
-        if (isHeader && childNode.nodeName === 'header') {
+        const nodeName = childNode.nodeName;
+        if (isHeader && nodeName === 'header') {
             const id = getAttribute(childNode, 'id');
             header = {
                 id: id,
@@ -109,15 +115,14 @@ export function parseSpec(doc: Document): Spec {
             continue;
         }
 
-        if (childNode.nodeName === 'h2') {
+        if (nodeName === 'h2') {
             const id = getAttribute(childNode, 'id');
-            useH4 = h4.has(id);
             // end of the main contents
             if (id === 'index') {
                 break;
             }
 
-            // begining of the main contents
+            // beginning of the main contents
             if (id === 'introduction') {
                 inMain = true;
             }
@@ -127,9 +132,12 @@ export function parseSpec(doc: Document): Spec {
             }
 
             const headingText = getHeadingText(childNode);
-            chapter = addSection(root, id, headingText, getText(childNode), childNode);
+            chapter = addSection(null, id, headingText, getText(childNode), childNode);
             section = null;
             subSection = null;
+            processSubSections = chapterHavingSubSections.has(id);
+            // TODO
+            root.sections.push(chapter);
             continue;
         }
 
@@ -137,7 +145,7 @@ export function parseSpec(doc: Document): Spec {
             continue;
         }
 
-        if (childNode.nodeName === 'h3') {
+        if (nodeName === 'h3') {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
             section = addSection(chapter, id, headingText, getText(childNode), childNode);
@@ -146,8 +154,8 @@ export function parseSpec(doc: Document): Spec {
         }
 
         // in #semantics, process h4
-        if (useH4 && (section && !h3InH4.has(section.id))) {
-            if (childNode.nodeName === 'h4') {
+        if (processSubSections && (section && !sectionNotHavingSubSections.has(section.id))) {
+            if (nodeName === 'h4') {
                 const id = getAttribute(childNode, 'id');
                 const headingText = getHeadingText(childNode);
 

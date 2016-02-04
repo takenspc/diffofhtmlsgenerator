@@ -59,51 +59,72 @@ function fillTextInternal(doc: Document, section: Section) {
 //
 //
 //
+function formatStartTag(node: ASTNode) {
+    return `<${node.tagName} ${node.attrs.map((attr) => {
+        return `${attr.name}="${attr.value}"`;
+    }).join(' ')}>`
+}
+
 export function addChildNode(parent: Section, current: Section, childNode: ASTNode): Section {
+    // adding preface contents
     if (!current) {
         if ((childNode.nodeName === '#text' && childNode.value.trim() === '') ||
             hasClassName(childNode, 'div', 'status')) {
             return current;
         }
 
+        assert(parent, '__pre__ must have a parent:' + formatStartTag(childNode));
         const id = '__pre__';
-        const headingText = '(preface)';
-        const originalHeadingText = '(preface)';
+        const headingText = '__pre__';
+        const originalHeadingText = '__pre__';
         return addSection(parent, id, headingText, originalHeadingText, childNode);
     }
 
+    // normal
     current.nodes.push(childNode);
     return current;
 }
 
-// Utils
-function ntfsSafe(value: string): string {
-    // https://support.microsoft.com/kb/100108
-    const ntfsUnsafe = /[?"/\<>*|:]/g;
-    return value.replace(ntfsUnsafe, '_');
-}
 
-function replaceHeadingText(original: string): string {
+//
+//
+//
+function normalizeHeadingText(original: string): string {
     let headingText = original;
+
+    // ’ → '
+    headingText = headingText.replace('’', '\'');
 
     // Common infrastructure → Terminology → Plugins
     headingText = headingText.replace('Plugin Content Handlers', 'Plugins');
 
     // Common infrastructure → Common microsyntaxes → Colours
     headingText = headingText.replace('Colors', 'Colours');
-    
+
     // The HTML syntax
     // The XHTML syntax
     headingText = headingText.replace('Serializing', 'Serialising');
     return headingText;
 }
 
+function ntfsSafe(value: string): string {
+    // https://support.microsoft.com/kb/100108
+    const ntfsUnsafe = /[?"/\<>*|:]/g;
+    return value.replace(ntfsUnsafe, '_');
+}
 
 export function addSection(parent: Section, id: string, headingText: string, originalHeadingText: string, childNode: ASTNode): Section {
-    assert(parent, 'parent must be initialized before adding a section' + childNode.nodeName)
+    let normalizedHeadingText = normalizeHeadingText(headingText);
 
-    const normalizedHeadingText = replaceHeadingText(headingText);
-    const path = (parent.path !== '') ? parent.path + '/' + ntfsSafe(normalizedHeadingText) : ntfsSafe(headingText);
+    // path is not for human, for system
+    const path = (parent) ? parent.path + '/' + ntfsSafe(normalizedHeadingText) : ntfsSafe(normalizedHeadingText);
+
+    // preface
+    if (id === '__pre__') {
+        id = parent.id;
+        normalizedHeadingText = '(preface)';
+        originalHeadingText = `(preface of ${parent.originalHeadingText})`;
+    }
 
     const section: Section = {
         id: id,
@@ -118,6 +139,8 @@ export function addSection(parent: Section, id: string, headingText: string, ori
         sections: [],
     };
     
-    parent.sections.push(section);
+    if (parent) {
+        parent.sections.push(section);
+    }
     return section;
 }
