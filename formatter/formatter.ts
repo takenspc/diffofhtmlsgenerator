@@ -53,9 +53,17 @@ function breakLineAndIndent(depth: number) {
     return buff.join('');
 }
 
+function willBreakLineAndIndent(node: ASTNode, setting: Set<string>) {
+    if (hasClassName(node, 'div', 'impl')) {
+        return false;
+    }
+    
+    return setting.has(node.nodeName);
+}
+
 function formatStartTag(context: FormatContext, node: ASTNode, depth: number): string {
     const buff: string[] = []
-    if (consts.BreakBeforeStartTag.has(node.nodeName)) {
+    if (willBreakLineAndIndent(node, consts.BreakBeforeStartTag)) {
         buff.push(breakLineAndIndent(depth));
     }
 
@@ -77,7 +85,7 @@ function formatStartTag(context: FormatContext, node: ASTNode, depth: number): s
 function formatEndTag(context: FormatContext, node: ASTNode, depth: number): string {
     const buff: string[] = [];
 
-    if (consts.BreakBeforeEndTag.has(node.nodeName)) {
+    if (willBreakLineAndIndent(node, consts.BreakBeforeEndTag)) {
         buff.push(breakLineAndIndent(depth));
     }
 
@@ -112,6 +120,7 @@ function needLineBreakAfterStartTag(node: ASTNode): boolean {
     ]);
     return nodeNames.has(node.nodeName) ||
            hasClassName(node, 'div', 'example') ||
+           hasClassName(node, 'p', 'example') ||
            hasClassName(node, 'div', 'note') ||
            hasClassName(node, 'div', 'impl');
 }

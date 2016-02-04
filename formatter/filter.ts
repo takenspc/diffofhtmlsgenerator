@@ -21,12 +21,6 @@ export function includeElement(node: ASTNode): boolean {
 // Tag
 //
 export function includeTag(context: FormatContext, node: ASTNode): boolean {
-    if (hasClassName(node, 'div', 'impl') ||
-        hasClassName(node, 'span', 'impl')) {
-        return false;
-    }
-
-
     const parent = context.parent;
     if (!parent) {
         return true;

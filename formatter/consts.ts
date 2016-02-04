@@ -44,12 +44,14 @@ export const BreakBeforeStartTag: Set<string> = new Set([
     'td',
     'template',
     'tfoot',
+    'th',
     'thead',
     'tr',
     'ul',
 ]);
 
 export const BreakBeforeEndTag: Set<string> = new Set([
+    'blockquote',
     'dd',
     'div',
     'dl',
@@ -174,9 +176,6 @@ export const BikeshedHighlightClassNames: Set<string> = new Set([
 // Context
 //
 export const ContextElements: Set<string> = new Set([
-    'dt',
-    'li',
-
     'pre',
 
     'h1',
