@@ -61,11 +61,8 @@ function willBreakLineAndIndent(node: ASTNode, setting: Set<string>) {
     return setting.has(node.nodeName);
 }
 
-function formatStartTag(context: FormatContext, node: ASTNode, depth: number): string {
+function formatStartTag(context: FormatContext, node: ASTNode): string {
     const buff: string[] = []
-    if (willBreakLineAndIndent(node, consts.BreakBeforeStartTag)) {
-        buff.push(breakLineAndIndent(depth));
-    }
 
     buff.push('<');
     buff.push(node.nodeName);
@@ -82,12 +79,8 @@ function formatStartTag(context: FormatContext, node: ASTNode, depth: number): s
     return buff.join('');
 }
 
-function formatEndTag(context: FormatContext, node: ASTNode, depth: number): string {
+function formatEndTag(context: FormatContext, node: ASTNode): string {
     const buff: string[] = [];
-
-    if (willBreakLineAndIndent(node, consts.BreakBeforeEndTag)) {
-        buff.push(breakLineAndIndent(depth));
-    }
 
     buff.push('</');
     buff.push(node.nodeName);
@@ -132,8 +125,15 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
 
     const buff: string[] = [];
 
+    let newDepth = depth;
+
     if (includeTag(context, node)) {
-        buff.push(formatStartTag(context, node, depth));
+        if (willBreakLineAndIndent(node, consts.BreakBeforeStartTag)) {
+            newDepth += 1;
+            buff.push(breakLineAndIndent(newDepth));
+        }
+
+        buff.push(formatStartTag(context, node));
     }
 
     if (consts.ContextElements.has(node.nodeName)) {
@@ -145,14 +145,14 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
     let didLineBreakAfterStartTag = false;
 
     for (const childNode of node.childNodes) {
-        const text = format(context, childNode, depth + 1);
+        const text = format(context, childNode, newDepth);
 
         // TODO THIS IS TOTALLY WRONG
         if (shouldLineBreakAfterStartTag && !didLineBreakAfterStartTag) {
             if (text.trim() !== '') {
                 // insert line break manually
                 if (!text.startsWith('\n')) {
-                    buff.push(breakLineAndIndent(depth + 1));
+                    buff.push(breakLineAndIndent(newDepth));
                 }
                 didLineBreakAfterStartTag = true;
             }
@@ -174,7 +174,11 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
     }
 
     if (!consts.VoidElements.has(node.nodeName) && includeTag(context, node)) {
-        buff.push(formatEndTag(context, node, depth));
+        if (willBreakLineAndIndent(node, consts.BreakBeforeEndTag)) {
+            buff.push(breakLineAndIndent(newDepth));
+        }
+
+        buff.push(formatEndTag(context, node));
     }
 
     return buff.join('');
