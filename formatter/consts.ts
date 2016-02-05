@@ -48,6 +48,7 @@ export const BreakBeforeStartTag: Set<string> = new Set([
     'thead',
     'tr',
     'ul',
+    'svg',
 ]);
 
 export const BreakBeforeEndTag: Set<string> = new Set([
@@ -103,6 +104,24 @@ export const HeadingContent: Set<string> = new Set([
     'hgroup',
 ]);
 
+
+
+//
+//
+//
+export const TextLevelElements: Set<string> = new Set([
+    'a',
+    'b',
+    'cite', 
+    'code',
+    'dfn',
+    'em',
+    'i',
+    'kbd',
+    'samp',   
+    'strong',
+    'var',
+]);
 
 //
 // Bikeshed

@@ -21,6 +21,10 @@ export function includeElement(node: ASTNode): boolean {
 // Tag
 //
 export function includeTag(context: FormatContext, node: ASTNode): boolean {
+    if (consts.TextLevelElements.has(node.nodeName)) {
+        return false;
+    }
+
     const parent = context.parent;
     if (!parent) {
         return true;
