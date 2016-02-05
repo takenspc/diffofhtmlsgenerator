@@ -63,7 +63,7 @@ export function includeAttr(attr: Attr): boolean {
         return false;
     }
 
-    if (name === 'class' || noisyClasses.has(attr.value)) {
+    if (name === 'class' && noisyClasses.has(attr.value)) {
         return false;
     }
 
