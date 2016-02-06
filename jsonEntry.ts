@@ -33,4 +33,3 @@ export function* nextJSONEntry(entries: JSONEntry[]): Iterable<JSONEntry> {
         }
     }
 }
-

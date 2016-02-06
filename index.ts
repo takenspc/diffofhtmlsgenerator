@@ -14,7 +14,6 @@ async function main() {
     await split();
     log(['end', 'split']);
 
-
     log(['start', 'format']);
     await format();
     log(['end', 'format']);

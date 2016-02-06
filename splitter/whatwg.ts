@@ -136,7 +136,7 @@ export function parseSpec(doc: Document): Spec {
             section = null;
             subSection = null;
             processSubSections = chapterHavingSubSections.has(id);
-            // TODO
+            // XXX split parseSpec into functions
             root.sections.push(chapter);
             continue;
         }

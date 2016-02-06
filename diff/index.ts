@@ -18,8 +18,6 @@ export interface DiffEntry {
 // XXX Reoder W3C 'Links' of 'The elements of HTML'
 //
 function reorderW3CSemantics(sections: JSONEntry[]): JSONEntry[] {
-    // TODO O(2n)
-
     const tmp: JSONEntry[] = [];
     let links: JSONEntry;
     for (const section of sections) {
