@@ -43,15 +43,38 @@ function includeAttr(attr: Attr): boolean {
         return false;
     }
 
-    if (name === 'class' && consts.excludeClassNames.has(value)) {
+    if (name === 'class' && value === '') {
         return false;
     }
 
     return true;
 }
 
+function filterAttrValue(attr: Attr): void {
+    const name = attr.name;
+    const value = attr.value;
+    
+    if (name === 'class') {
+        let values = value.trim().replace(/\s+/g, ' ').split(' ');
+        values = values.filter((value) => {
+            return !consts.excludeClassNames.has(value);
+        });
+        attr.value = values.join(' ');
+    }
+}
+
 function filterAttrs(context: FilterContext, node: ASTNode): void {
-    node.attrs = node.attrs.filter(includeAttr);
+    const newAttrs: Attr[] = []
+
+    for (const attr of node.attrs) {
+        filterAttrValue(attr);
+
+        if (includeAttr(attr)) {
+            newAttrs.push(attr);
+        }
+    }
+
+    node.attrs = newAttrs;
 }
 
 

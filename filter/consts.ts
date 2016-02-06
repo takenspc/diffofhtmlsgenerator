@@ -9,7 +9,9 @@ export const excludeAttrs = new Set([
 ]);
 
 export const excludeClassNames = new Set([
-    'heading settled',
+    'heading',
+    'settled',
+    'highlight',
 ]);
 
 
