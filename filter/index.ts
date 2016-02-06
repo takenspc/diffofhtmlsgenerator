@@ -2,6 +2,7 @@
 import { Attr, ASTNode } from 'parse5';
 import { getAttribute, hasClassName } from '../splitter/htmlutils';
 import * as consts from './consts';
+import * as elementInfo from './elementInfo';
 
 //
 // Context
@@ -133,11 +134,17 @@ function filterNode(context: FilterContext, node: ASTNode): void {
     }
     
     if (node.childNodes) {
-        const newChildNodes = [];
+        let newChildNodes = [];
         for (const childNode of nextElement(context, node)) {
             newChildNodes.push(childNode);
             filterNode(context, childNode);
         }
+        
+        // XXX Reorder dl.element
+        if (hasClassName(node, 'dl', 'element')) {
+            newChildNodes = elementInfo.reorder(newChildNodes);
+        }
+        
         node.childNodes = newChildNodes;
     }
 
