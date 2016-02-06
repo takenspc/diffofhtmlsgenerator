@@ -6,21 +6,21 @@ import { format }  from './formatter';
 import { split }  from './splitter';
 
 async function main() {
-    log(['start', 'fetch']);
+    log(['fetch', '', 'start']);
     await fetch();
-    log(['end', 'fetch']);
+    log(['fetch', '', 'end']);
 
-    log(['start', 'split']);
+    log(['split', '', 'start']);
     await split();
-    log(['end', 'split']);
+    log(['split', '', 'end']);
 
-    log(['start', 'format']);
+    log(['format', '', 'start']);
     await format();
-    log(['end', 'format']);
+    log(['format', '', 'end']);
 
-    log(['start', 'diff']);
+    log(['diff', '', 'start']);
     await diff();
-    log(['end', 'diff']);
+    log(['diff', '', 'end']);
 }
 
 

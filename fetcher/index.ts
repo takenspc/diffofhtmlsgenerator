@@ -7,7 +7,7 @@ import { log, writeFile } from '../utils';
 
 function download(org: string, url: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        log(['start', org]);
+        log(['fetch', org, 'start']);
         const dirPath = path.join(__dirname, 'data', org);
         mkdirp.sync(dirPath);
 
@@ -21,7 +21,7 @@ function download(org: string, url: string): Promise<void> {
         });
         
         writeStream.on('finish', () => {
-            log(['end', org]);
+            log(['fetch', org, 'end']);
             resolve();
         });
 

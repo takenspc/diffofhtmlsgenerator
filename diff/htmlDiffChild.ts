@@ -133,7 +133,7 @@ function computeDiff(a: string, b: string) {
 //
 async function diffSection(section: DiffEntry): Promise<any> {
     const heading = section.headingText;
-    log(['start', heading]);
+    log(['diff', heading, 'start']);
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
     const outDir = path.join(__dirname, 'data');
 
@@ -147,7 +147,7 @@ async function diffSection(section: DiffEntry): Promise<any> {
     const jsonPath = path.join(outDir, htmlPath + '.json');
     await mkdirp(path.dirname(jsonPath));
     await writeFile(jsonPath, JSON.stringify(diffs));
-    log(['end', heading]);
+    log(['diff', heading, 'end']);
 }
 
 
