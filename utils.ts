@@ -56,6 +56,6 @@ export function mkdirp(dirname): Promise<any> {
 // logging
 //
 export function log(args): void {
-    const message = [moment().format()].concat(args).join('\t');
+    const message = [moment().utc().format()].concat(args).join('\t');
     console.log(message);
 }
