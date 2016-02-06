@@ -87,7 +87,7 @@ function includeElement(context: FilterContext, node: ASTNode): boolean {
         return false;
     }
     
-    // TODO splitter shouldn't include <div class='impl'>
+    // XXX splitter should not include <div class='impl'>
     if (hasClassName(node, 'div', 'impl')) {
         for (const childNode of node.childNodes) {
             if (!childNode.nodeName.startsWith('#')) {
@@ -95,6 +95,13 @@ function includeElement(context: FilterContext, node: ASTNode): boolean {
             }
         }
         return false;
+    }
+
+    // XXX Remove ARIA Info for now
+    if (hasClassName(node, 'div', 'note')) {
+        if (elementInfo.containsOnlyARIAInfo(node)) {
+            return false;
+        }
     }
 
     return true;
@@ -172,7 +179,7 @@ function filterNode(context: FilterContext, node: ASTNode): void {
         if (hasClassName(node, 'dl', 'element')) {
             newChildNodes = elementInfo.reorder(newChildNodes);
         }
-        
+
         node.childNodes = newChildNodes;
     }
 

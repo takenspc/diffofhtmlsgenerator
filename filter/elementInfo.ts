@@ -1,4 +1,5 @@
 'use strict'; // XXX
+import * as assert from 'assert';
 import { getText } from '../splitter/htmlutils';
 import { ASTNode } from 'parse5';
 
@@ -22,7 +23,6 @@ const keys: string[] = [
     'DOM interface:',
 ]
 
-
 export function reorder(childNodes: ASTNode[]) {
     const dl = new Map<string, ASTNode[]>();
 
@@ -41,7 +41,11 @@ export function reorder(childNodes: ASTNode[]) {
     }
 
     let reordered = [];
+    // check unknown keys
+    const foundKeys = new Set(dl.keys());
     for (const key of keys) {
+        foundKeys.delete(key);
+
         // XXX SKIP ARIA INFO
         if (key.startsWith('Allowed ARIA')) {
             continue;
@@ -51,7 +55,35 @@ export function reorder(childNodes: ASTNode[]) {
             reordered = reordered.concat(dl.get(key));
         }
     }
+    assert(foundKeys.size === 0, 'There are unknown dt in dl.element: ' + foundKeys);
 
     return reordered;
 }
 
+export function containsOnlyARIAInfo(node: ASTNode): boolean {
+    let dl: ASTNode = null;
+
+    for (const childNode of node.childNodes) {
+        if (childNode.nodeName === '#text') {
+            continue;
+        }
+        
+        if (childNode.nodeName !== 'dl') {
+            return false;
+        }
+
+        dl = childNode;
+        break;
+    }
+
+    for (const childNode of dl.childNodes) {
+        if (childNode.nodeName === 'dt') {
+            const key = getText(childNode).trim();
+            if (!key.startsWith('Allowed ARIA')) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
