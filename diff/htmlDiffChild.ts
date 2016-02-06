@@ -2,7 +2,7 @@
 import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
-import { DiffEntry } from './';
+import { DiffEntry } from '../diffEntry';
 import { Message } from './htmlDiff';
 
 //

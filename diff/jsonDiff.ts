@@ -1,21 +1,10 @@
 'use strict';
 import { JSONEntry } from '../jsonEntry';
-import { DiffEntry } from './'
+import { DiffEntry, createStubDiffEntry } from '../diffEntry'
 
 //
 // Utils.
 //
-function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
-    const diffEntry: DiffEntry = {
-        path: jsonEntry.path,
-        headingText: jsonEntry.headingText,
-        originalHeadingText: jsonEntry.originalHeadingText,
-        sections: [],
-        whatwg: null,
-        w3c: null,
-    }
-    return diffEntry;
-}
 
 function createDiffEntry(whatwg: JSONEntry, w3c: JSONEntry): DiffEntry {
     const diffEntry: DiffEntry = createStubDiffEntry(whatwg ? whatwg : w3c);

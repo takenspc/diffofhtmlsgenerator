@@ -1,8 +1,7 @@
 'use strict'; // XXX
 import * as path from 'path';
 import { readFile } from '../utils';
-import { DiffEntry } from '../diff';
-import { nextLeafSection } from './';
+import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 
 
 //
@@ -21,7 +20,7 @@ async function deployDiffSection(srcRoot: string, section: DiffEntry, diffRef: F
 
 export async function deployDiff(srcRoot: string, diffEntries: DiffEntry[], diffRef: Firebase): Promise<void[]> {
     const sections = [];
-    for (const section of nextLeafSection(diffEntries)) {
+    for (const section of nextLeafDiffEntry(diffEntries)) {
         sections.push(section);
     }
 

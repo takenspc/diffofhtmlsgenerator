@@ -1,7 +1,7 @@
 'use strict';
 import * as path from 'path';
 import { fork, ChildProcess } from 'child_process';
-import { DiffEntry } from './';
+import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 
 export interface Message {
     type: string
@@ -49,12 +49,8 @@ function diffChildProcess(sections: DiffEntry[]) {
 function collectSections(sections: DiffEntry[]): DiffEntry[] {
     let collected = [];
     
-    for (const section of sections) {
-        if (section.sections.length === 0) {
-            collected.push(section);
-        } else {
-            collected = collected.concat(collectSections(section.sections));
-        }
+    for (const section of nextLeafDiffEntry(sections)) {
+        collected.push(section);
     }
     
     return collected;

@@ -2,7 +2,7 @@
 import * as path from 'path';
 import * as Firebase from 'firebase';
 import { readFile, log } from '../utils';
-import { DiffEntry } from '../diff/';
+import { DiffEntry, nextLeafDiffEntry, readDiffEntry } from '../diffEntry';
 import { deployDiff } from './diff';
 import { deployUpdate} from './update';
 
@@ -10,30 +10,6 @@ import { deployUpdate} from './update';
 //
 // Index
 //
-export function* nextLeafSection(sections: DiffEntry[]): Iterable<DiffEntry> {
-    for (const section of sections) {
-        // XXX Firebase makes empty array be undefined
-        // XXX section.sections must be always an array
-        if (!section.sections) {
-            section.sections = [];
-        }
-
-        if (section.sections.length === 0) {
-            yield section;
-        } else {
-            yield* nextLeafSection(section.sections);
-        }
-    }
-}
-
-function readDiffEntriesFromDisk(srcRoot: string): Promise<DiffEntry[]> {
-    const indexPath = path.join(srcRoot, 'index.json');
-    return readFile(indexPath).then((text) => {
-        const diffEntries = JSON.parse(text);
-        return diffEntries;
-    });
-}
-
 function readDiffEntriesFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
     return new Promise((resolve, reject) => {
         indexRef.once('value', (dataSnapshot) => {
@@ -65,7 +41,7 @@ export async function deploy(): Promise<void> {
     const oldDiffEntries = await readDiffEntriesFromFirebase(indexRef);
     
     const diffRoot = path.join(__dirname, '..', 'diff', 'data');
-    const diffEntries = await readDiffEntriesFromDisk(diffRoot);
+    const diffEntries = await readDiffEntry(diffRoot);
     indexRef.set(diffEntries);
     log(['deploy', 'index', 'end']);
 

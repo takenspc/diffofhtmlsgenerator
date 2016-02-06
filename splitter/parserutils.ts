@@ -27,7 +27,7 @@ export interface Header {
 
 export interface Spec {
     header: Header
-    section: Section 
+    section: Section
 }
 
 
@@ -107,17 +107,24 @@ function normalizeHeadingText(original: string): string {
     return headingText;
 }
 
-function ntfsSafe(value: string): string {
+function getSafePath(value: string): string {
+    let safePath = value;
     // https://support.microsoft.com/kb/100108
     const ntfsUnsafe = /[?"/\<>*|:]/g;
-    return value.replace(ntfsUnsafe, '_');
+    safePath = value.replace(ntfsUnsafe, '_')
+
+    // Firebase
+    const firebaseUnsafe = /[.#$\[\]]/g;
+    safePath = safePath.replace(firebaseUnsafe, '_')
+    return safePath;
 }
 
 export function addSection(parent: Section, id: string, headingText: string, originalHeadingText: string, childNode: ASTNode): Section {
     let normalizedHeadingText = normalizeHeadingText(headingText);
 
     // path is not for human, for system
-    const path = (parent) ? parent.path + '/' + ntfsSafe(normalizedHeadingText) : ntfsSafe(normalizedHeadingText);
+    let path = getSafePath(normalizedHeadingText);
+    path = (parent) ? parent.path + '/' + path : path;
 
     // preface
     if (id === '__pre__') {
@@ -138,7 +145,7 @@ export function addSection(parent: Section, id: string, headingText: string, ori
 
         sections: [],
     };
-    
+
     if (parent) {
         parent.sections.push(section);
     }

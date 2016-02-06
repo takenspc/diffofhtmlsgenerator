@@ -2,8 +2,7 @@
 import * as path from 'path';
 import { readFile } from '../utils';
 import { JSONEntry } from '../jsonEntry';
-import { DiffEntry } from '../diff';
-import { nextLeafSection } from './';
+import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 
 
 //
@@ -42,7 +41,7 @@ function createHashData(diffEntries: DiffEntry[]): HashData {
     const paths: string[] = [];
     const path2HashEntry = new Map<string, HashEntry>();
 
-    for (const diffEntry of nextLeafSection(diffEntries)) {
+    for (const diffEntry of nextLeafDiffEntry(diffEntries)) {
         const path = diffEntry.path;
         paths.push(path);
 
