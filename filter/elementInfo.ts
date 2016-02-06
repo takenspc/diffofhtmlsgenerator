@@ -42,6 +42,11 @@ export function reorder(childNodes: ASTNode[]) {
 
     let reordered = [];
     for (const key of keys) {
+        // XXX SKIP ARIA INFO
+        if (key.startsWith('Allowed ARIA')) {
+            continue;
+        }
+        
         if (dl.has(key)) {
             reordered = reordered.concat(dl.get(key));
         }
