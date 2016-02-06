@@ -1,27 +1,29 @@
 'use strict'; // XXX
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { hasClassName } from '../splitter/htmlutils';
-import { includeElement, includeTag, includeAttr, modifyAttr, sortAttr } from './filter';
+import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
 
 //
 // Context
 //
-export class FormatContext {
-    parentStack: ASTNode[]
-
-    constructor() {
-        this.parentStack = [];
-    }
-
+class FormatContext {
+    parentStack: ASTNode[] = []
+    
     get parent(): ASTNode {
         const length = this.parentStack.length;
         if (length === 0) {
-            null;
+            return null;
         }
-
         return this.parentStack[length - 1];
+    }
+    
+    push(parent: ASTNode) {
+        this.parentStack.push(parent);
+    }
+    
+    pop() {
+        this.parentStack.pop();
     }
 }
 
@@ -34,33 +36,36 @@ function escapeHTML(text: string): string {
     escaped = escaped.replace(/&/g, '&amp;');
     escaped = escaped.replace(/>/g, '&gt;');
     escaped = escaped.replace(/</g, '&lt;');
+    return escaped;
+}
+
+
+//
+// Attr
+//
+function escapeAttrValue(text: string): string {
+    let escaped = text;
+    escaped = escapeHTML(escaped);
     escaped = escaped.replace(/"/g, '&quot;');
     return escaped;
+}
+
+function sortAttr(a: Attr, b: Attr): number {
+    if (a.name < b.name) {
+        return -1;
+    }
+
+    if (a.name > b.name) {
+        return 1;
+    }
+
+    return 0;
 }
 
 
 //
 // Tag
 //
-function breakLineAndIndent(depth: number) {
-    const buff: string[] = [];
-
-    buff.push('\n');
-    for (let i = 0; i < depth; i++) {
-        buff.push(' ');
-    }
-
-    return buff.join('');
-}
-
-function willBreakLineAndIndent(node: ASTNode, setting: Set<string>) {
-    if (hasClassName(node, 'div', 'impl')) {
-        return false;
-    }
-    
-    return setting.has(node.nodeName);
-}
-
 function formatStartTag(context: FormatContext, node: ASTNode): string {
     const buff: string[] = []
 
@@ -68,9 +73,10 @@ function formatStartTag(context: FormatContext, node: ASTNode): string {
     buff.push(node.nodeName);
 
     if (node.attrs.length > 0) {
-        const attrs = node.attrs.filter(includeAttr).map(modifyAttr).sort(sortAttr);
+        const attrs = node.attrs.sort(sortAttr);
+
         buff.push(attrs.map((attr) => {
-            return ' ' + attr.name + '="' + escapeHTML(attr.value) + '"';
+            return ` ${attr.name}="${escapeAttrValue(attr.value)}"`;
         }).join(''));
     }
 
@@ -103,82 +109,42 @@ function formatText(context: FormatContext, node: ASTNode): string {
     return escapeHTML(value)
 }
 
-// XXX THIS IS TOTALLY WRONG
-function needLineBreakAfterStartTag(node: ASTNode): boolean {
-    const nodeNames: Set<string> = new Set([
-        'blockquote',
-        'dd',
-        'dt',
-        'li',
-    ]);
-    return nodeNames.has(node.nodeName) ||
-           hasClassName(node, 'div', 'example') ||
-           hasClassName(node, 'p', 'example') ||
-           hasClassName(node, 'div', 'note') ||
-           hasClassName(node, 'div', 'impl');
-}
 
 function formatElement(context: FormatContext, node: ASTNode, depth: number): string {
-    if (!includeElement(node)) {
-        return '';
-    }
-
     const buff: string[] = [];
 
-    let newDepth = depth;
-
-    if (includeTag(context, node)) {
-        if (willBreakLineAndIndent(node, consts.BreakBeforeStartTag)) {
-            newDepth += 1;
-            buff.push(breakLineAndIndent(newDepth));
-        }
-
-        buff.push(formatStartTag(context, node));
+    const createContext = consts.contextElements.has(node.nodeName);
+    if (createContext) {
+        context.push(node);
     }
 
-    if (consts.ContextElements.has(node.nodeName)) {
-        context.parentStack.push(node);
-    }
+    const lineBreaker = new LineBreaker(node, depth);
 
-    // TODO THIS IS TOTALLY WRONG
-    const shouldLineBreakAfterStartTag = needLineBreakAfterStartTag(node);
-    let didLineBreakAfterStartTag = false;
+    buff.push(lineBreaker.breakBeforeStartTag());
+    buff.push(formatStartTag(context, node));
 
-    for (const childNode of node.childNodes) {
+    const newDepth = lineBreaker.depth;
+    const childNodes = node.childNodes;
+    for (let i = 0; i < childNodes.length; i++) {
+        const childNode = childNodes[i];
         const text = format(context, childNode, newDepth);
 
-        // TODO THIS IS TOTALLY WRONG
-        if (shouldLineBreakAfterStartTag && !didLineBreakAfterStartTag) {
-            if (text.trim() !== '') {
-                // insert line break manually
-                if (!text.startsWith('\n')) {
-                    buff.push(breakLineAndIndent(newDepth));
-                }
-                didLineBreakAfterStartTag = true;
-            }
+        buff.push(lineBreaker.breakAfterStartTag(text));
+
+        if (i === childNodes.length - 1) {
+            buff.push(lineBreaker.unbreakBeforeEndTag(text));
+        } else {
+            buff.push(text);
         }
-
-        buff.push(text);
-    }
-    
-    // TODO THIS IS TOTALLY WRONG
-    if (node.nodeName === 'pre') {
-        // remove line break before </pre>
-        let lastText = buff.pop();
-        lastText = lastText.replace(/\r?\n$/, '');
-        buff.push(lastText);
     }
 
-    if (consts.ContextElements.has(node.nodeName)) {
-        context.parentStack.pop();
-    }
-
-    if (!consts.VoidElements.has(node.nodeName) && includeTag(context, node)) {
-        if (willBreakLineAndIndent(node, consts.BreakBeforeEndTag)) {
-            buff.push(breakLineAndIndent(newDepth));
-        }
-
+    if (!consts.voidElements.has(node.nodeName)) {
+        buff.push(lineBreaker.breakBeforeEndTag());
         buff.push(formatEndTag(context, node));
+    }
+
+    if (createContext) {
+        context.pop();
     }
 
     return buff.join('');
@@ -188,7 +154,7 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
 //
 // Tree
 //
-export function format(context: FormatContext, node: ASTNode, depth: number): string {
+function format(context: FormatContext, node: ASTNode, depth: number): string {
     if (node.nodeName === '#text') {
         return formatText(context, node);
     }
@@ -202,7 +168,7 @@ export function formatFragment(node: ASTNode): string {
     const context: FormatContext = new FormatContext();
 
     for (const childNode of node.childNodes) {
-        buff.push(format(context, childNode, 0));
+        buff.push(format(context, childNode, -1));
     }
 
     return buff.join('');
