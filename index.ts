@@ -2,8 +2,9 @@
 import { log } from './utils';
 import { diff } from './diff';
 import { fetch } from './fetcher';
-import { format }  from './formatter';
-import { split }  from './splitter';
+import { format } from './formatter';
+import { split } from './splitter';
+import { deploy } from './deploy';
 
 async function main() {
     log(['fetch', '', 'start']);
@@ -21,13 +22,19 @@ async function main() {
     log(['diff', '', 'start']);
     await diff();
     log(['diff', '', 'end']);
+
+    log(['deploy', '', 'start']);
+    await deploy();
+    log(['deploy', '', 'end']);
 }
 
 
 main().then(() => {
     console.log('done');
+    process.exit(0);
 }).catch((err) => {
     console.log('err');
     console.error(err);
     console.error(err.stack);
-})
+    process.exit(-1);
+});
