@@ -1,4 +1,5 @@
 'use strict';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirpModule from 'mkdirp';
@@ -58,4 +59,17 @@ export function mkdirp(dirname): Promise<any> {
 export function log(args): void {
     const message = [moment().utc().format()].concat(args).join('\t');
     console.log(message);
+}
+
+//
+// Hash
+//
+export function sha256(text: string): string {
+    const hash = crypto.createHash('sha256');
+    // https://nodejs.org/api/crypto.html#crypto_hash_digest_encoding
+    // > hash.update(data[, input_encoding])
+    // > If encoding is not provided, and the data is a string,
+    // > an encoding of 'binary' is enforced
+    hash.update(text);
+    return hash.digest('hex');
 }
