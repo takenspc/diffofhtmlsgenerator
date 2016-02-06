@@ -49,12 +49,14 @@ function readDiffEntriesFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
 // Entry point
 //
 export async function deploy(): Promise<void> {
-    const firebaseURL = process.env.FIREBASE_URL || null;
-    if (!firebaseURL) {
+    const URL = process.env.FIREBASE_URL || null;
+    const AUTH_TOKEN = process.env.FIREBASE_AUTH_TOKEN || null;
+    if (!URL || !AUTH_TOKEN) {
         return;
     }
 
-    const firebaseRef = new Firebase(firebaseURL);
+    const firebaseRef = new Firebase(URL);
+    await firebaseRef.authWithCustomToken(AUTH_TOKEN);
 
     log(['deploy', 'index', 'start']);
     const indexRef = firebaseRef.child('index');
