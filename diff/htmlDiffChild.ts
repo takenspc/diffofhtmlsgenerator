@@ -113,6 +113,10 @@ function splitLinesIntoChars(oldLines: LineDiff[]): LineDiff[] {
 }
 
 function computeDiff(a: string, b: string) {
+    // XXX strip trailing spaces
+    a = a.replace(/ +\n/g, '\n');
+    b = b.replace(/ +\n/g, '\n');
+    
     const rawDiffs = diff.diffLines(a, b, {
         newlineIsToken: true
     });
