@@ -84,6 +84,11 @@ function flattenElement(context: FilterContext, node: ASTNode): boolean {
         return true;
     }
     
+    // XXX Structure of this specification
+    if (node.nodeName === 'div' && node.attrs.length === 0) {
+        return true;
+    }
+    
     const parent = context.parent;
     if (parent) {
         const parentNodeName = parent.nodeName;
