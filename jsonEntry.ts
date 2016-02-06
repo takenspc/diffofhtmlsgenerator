@@ -8,6 +8,10 @@ export interface JSONEntry {
     headingText: string
     originalHeadingText: string
     sections: JSONEntry[]
+    hash: {
+        splitted: string
+        formatted: string
+    }
 }
 
 export function writeJSONEntry(root: string, json: JSONEntry[]): Promise<any> {

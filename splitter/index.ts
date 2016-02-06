@@ -1,7 +1,7 @@
 'use strict'; // XXX
 import * as fs from 'fs';
 import * as path from 'path';
-import { readFile, writeFile, mkdirp } from '../utils';
+import { readFile, writeFile, mkdirp, sha256 } from '../utils';
 import { JSONEntry, writeJSONEntry } from '../jsonEntry';
 import { parse, Document } from './htmlutils';
 import { Spec, Section } from './parserutils';
@@ -15,12 +15,18 @@ import * as w3c from './w3c';
 function toJSONEntry(section: Section): JSONEntry {
     const sections = section.sections.map(toJSONEntry);
 
+    const hash = section.text ? sha256(section.text) : null
+
     const jsonEntry: JSONEntry = {
         id: section.id,
         path: section.path,
         headingText: section.headingText,
         originalHeadingText: section.originalHeadingText,
         sections: sections,
+        hash: {
+            splitted: hash,
+            formatted: null,
+        }
     };
 
     return jsonEntry;
