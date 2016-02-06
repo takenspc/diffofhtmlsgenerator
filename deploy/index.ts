@@ -26,8 +26,9 @@ function readDiffEntriesFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
 //
 export async function deploy(): Promise<void> {
     const URL = process.env.FIREBASE_URL || null;
-    const AUTH_TOKEN = process.env.FIREBASE_AUTH_TOKEN || null;
+    const AUTH_TOKEN = process.env.FIREBASE_ADMIN_AUTH_TOKEN || null;
     if (!URL || !AUTH_TOKEN) {
+        log(['deploy', 'skip', 'deploy']);
         return;
     }
 
