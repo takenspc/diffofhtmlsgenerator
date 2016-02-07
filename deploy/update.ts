@@ -14,6 +14,7 @@ interface HashSubEntry {
 }
 
 interface HashEntry {
+    headingText: string
     whatwg: HashSubEntry
     w3c: HashSubEntry
 }
@@ -46,6 +47,7 @@ function createHashData(diffEntries: DiffEntry[]): HashData {
         paths.push(path);
 
         const hashEntry: HashEntry = {
+            headingText: diffEntry.headingText,
             whatwg: createHashSubEntry(diffEntry.whatwg),
             w3c: createHashSubEntry(diffEntry.w3c),
         };
@@ -71,6 +73,7 @@ interface UpdateSubEntry {
 
 interface UpdateEntry {
     path: string
+    headingText: string
     whatwg: UpdateSubEntry
     w3c: UpdateSubEntry
 }
@@ -125,7 +128,10 @@ function createUpdateEntry(path: string, oldHash: HashEntry, newHash: HashEntry)
         return null;
     }
 
+    const headingText = (newHash) ? newHash.headingText : oldHash.headingText;
+
     const entry: UpdateEntry = {
+        headingText: headingText,
         path: path,
         whatwg: whatwg,
         w3c: w3c,
