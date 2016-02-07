@@ -1,8 +1,8 @@
 'use strict'; // XXX
 import * as fs from 'fs';
 import * as path from 'path';
+import * as https from 'https';
 import * as mkdirp from 'mkdirp';
-import * as request from 'request';
 import { log, writeFile } from '../utils';
 
 function download(org: string, url: string): Promise<void> {
@@ -11,6 +11,7 @@ function download(org: string, url: string): Promise<void> {
         const dirPath = path.join(__dirname, 'data', org);
         mkdirp.sync(dirPath);
 
+        // write stream
         const htmlPath = path.join(dirPath, 'index.html');
         const writeStream = fs.createWriteStream(htmlPath);
 
@@ -25,7 +26,24 @@ function download(org: string, url: string): Promise<void> {
             resolve();
         });
 
-        request(url).pipe(writeStream);
+        // request
+        const request = https.get(url, (res) => {
+            log(['fetch', org, res.statusCode]);
+
+            res.on('data', (data) => {
+                writeStream.write(data);
+            });
+
+            res.on('end', () => {
+                writeStream.end();
+            });
+        });
+        
+        request.on('error', (err) => {
+            log(['error', org]);
+            console.error(org, err);
+            reject(err);
+        });
     });
 }
 
