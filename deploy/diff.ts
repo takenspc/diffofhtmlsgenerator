@@ -19,8 +19,6 @@ async function deployDiffSection(srcRoot: string, section: DiffEntry, diffRef: F
 }
 
 export async function deployDiff(srcRoot: string, diffEntries: DiffEntry[], diffRef: Firebase): Promise<void> {
-    const sections = [];
-    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
     for (const section of nextLeafDiffEntry(diffEntries)) {
         await deployDiffSection(srcRoot, section, diffRef);
     }
