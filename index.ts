@@ -9,22 +9,27 @@ import { deploy } from './deploy';
 async function main() {
     log(['fetch', '', 'start']);
     await fetch();
+    global.gc();
     log(['fetch', '', 'end']);
 
     log(['split', '', 'start']);
     await split();
+    global.gc();
     log(['split', '', 'end']);
 
     log(['format', '', 'start']);
     await format();
+    global.gc();
     log(['format', '', 'end']);
 
     log(['diff', '', 'start']);
     await diff();
+    global.gc();
     log(['diff', '', 'end']);
 
     log(['deploy', '', 'start']);
     await deploy();
+    global.gc();
     log(['deploy', '', 'end']);
 }
 
