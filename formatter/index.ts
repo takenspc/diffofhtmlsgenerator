@@ -44,12 +44,10 @@ async function formatOrg(org: string) {
 export async function format(): Promise<void> {
     log(['format', 'whatwg', 'start']);
     await formatOrg('whatwg');
-    global.gc();
     log(['format', 'whatwg', 'end']);
 
     log(['format', 'w3c', 'start']);
     await formatOrg('w3c');
-    global.gc();
     log(['format', 'w3c', 'end']);
 
 }

@@ -24,11 +24,9 @@ function runChildProcess(modulePath: string) {
 export async function split(): Promise<void> {
     log(['split', 'whatwg', 'start']);
     await runChildProcess(path.join(__dirname, 'whatwg'));
-    global.gc();
     log(['split', 'whatwg', 'end']);
 
     log(['split', 'w3c', 'start']);
     await runChildProcess(path.join(__dirname, 'w3c'));
-    global.gc();
     log(['split', 'w3c', 'end']);
 }
