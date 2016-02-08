@@ -148,3 +148,13 @@ export async function diffSection(section: DiffEntry): Promise<any> {
     await writeFile(jsonPath, JSON.stringify(diffs));
     log(['diff', heading, 'end']);
 }
+
+process.on('message', (section: DiffEntry) => {
+    diffSection(section).then(() => {
+        process.exit(0);
+    }).catch((err) => {
+        console.error(err);
+        console.error(err.stack);
+        process.exit(-1);
+    });
+});
