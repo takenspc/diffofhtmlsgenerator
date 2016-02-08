@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
 import { DiffEntry } from '../diffEntry';
-import { Message } from './htmlDiff';
 
 //
 // Diff
@@ -131,7 +130,7 @@ function computeDiff(a: string, b: string) {
 //
 // Handle objects
 //
-async function diffSection(section: DiffEntry): Promise<any> {
+export async function diffSection(section: DiffEntry): Promise<any> {
     const heading = section.headingText;
     log(['diff', heading, 'start']);
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
@@ -149,22 +148,3 @@ async function diffSection(section: DiffEntry): Promise<any> {
     await writeFile(jsonPath, JSON.stringify(diffs));
     log(['diff', heading, 'end']);
 }
-
-
-//
-// Entry point
-//
-
-
-process.on('message', (message: Message) => {
-    if (message.type === 'diff') {
-        diffSection(message.section).then(() => {
-            process.send({
-                type: 'finish',
-                section: null
-            });
-        })
-    } else if (message.type === 'exit') {
-        process.exit(0);
-    }
-});
