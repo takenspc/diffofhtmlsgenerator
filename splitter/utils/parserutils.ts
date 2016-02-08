@@ -14,7 +14,7 @@ export interface Section {
     originalHeadingText: string
 
     nodes: ASTNode[]
-    text: string
+    hash: string
 
     sections: Section[]
 }
@@ -22,39 +22,12 @@ export interface Section {
 export interface Header {
     id: string
     nodes: ASTNode[]
-    text: string
 }
 
 export interface Spec {
     header: Header
     section: Section
 }
-
-
-//
-// fill text
-//
-export function fillText(doc: Document, spec: Spec): void {
-    const header = spec.header;
-    // console.log(header.id);
-    header.text = getHTMLText(doc, header.nodes);
-
-    fillTextInternal(doc, spec.section);
-}
-
-function fillTextInternal(doc: Document, section: Section) {
-    // console.log(section.heading);
-
-    if (section.sections.length === 0) {
-        section.text = getHTMLText(doc, section.nodes);
-        return;
-    }
-
-    for (const subSection of section.sections) {
-        fillTextInternal(doc, subSection);
-    }
-}
-
 
 //
 //
@@ -141,7 +114,7 @@ export function addSection(parent: Section, id: string, headingText: string, ori
         originalHeadingText: originalHeadingText,
 
         nodes: [childNode],
-        text: null,
+        hash: null,
 
         sections: [],
     };

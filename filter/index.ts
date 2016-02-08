@@ -1,6 +1,6 @@
 'use strict'; // XXX
 import { Attr, ASTNode } from 'parse5';
-import { getAttribute, hasClassName } from '../splitter/htmlutils';
+import { getAttribute, hasClassName } from '../splitter/utils/htmlutils';
 import * as consts from './consts';
 import * as elementInfo from './elementInfo';
 
