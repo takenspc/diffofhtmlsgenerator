@@ -1,8 +1,10 @@
 'use strict'; // XXX
+import * as path from 'path';
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { Document, getBody, getAttribute, hasClassName, getText } from './htmlutils';
-import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
+import { Document, parse, getBody, getAttribute, hasClassName, getText } from './utils/htmlutils';
+import { Spec, Header, Section, addSection, addChildNode } from './utils/parserutils';
+import { saveSpec } from './utils/writeutils';
 
 //
 // Header
@@ -16,7 +18,6 @@ function parseHeader(divNode: ASTNode): Header {
             header = {
                 id: id,
                 nodes: [childNode],
-                text: null
             }
             break;
         }
@@ -191,17 +192,14 @@ function parseMainElement(root: Section, mainNode: ASTNode): void {
 }
 
 
-//
-// Entry point
-//
-export function parseSpec(doc: Document): Spec {
+function parseSpec(doc: Document): Spec {
     const root: Section = {
         id: '#root#',
         path: '',
         headingText: '#root#',
         originalHeadingText: '#roort#',
         nodes: [],
-        text: null,
+        hash: null,
         sections: [],
     };
 
@@ -234,10 +232,21 @@ export function parseSpec(doc: Document): Spec {
 
     const spec: Spec = {
         header: header,
-        section: root
+        section: root,
     };
-
-    fillText(doc, spec);
 
     return spec;
 }
+
+//
+// Entry point
+//
+(async function() {
+    const org = 'w3c';
+    const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
+    let doc = await parse(htmlPath);
+    let spec = parseSpec(doc);
+
+    const rootPath = path.join(__dirname, 'data', org);
+    await saveSpec(rootPath, doc, spec);
+})();

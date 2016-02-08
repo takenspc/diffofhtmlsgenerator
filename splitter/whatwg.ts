@@ -1,8 +1,10 @@
 'use strict'; // XXX
+import * as path from 'path';
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { Document, getBody, getAttribute, getText } from './htmlutils';
-import { Spec, Header, Section, addSection, addChildNode, fillText } from './parserutils';
+import { Document, parse, getBody, getAttribute, getText } from './utils/htmlutils';
+import { Spec, Header, Section, addSection, addChildNode } from './utils/parserutils';
+import { saveSpec } from './utils/writeutils';
 
 //
 // Config
@@ -76,7 +78,7 @@ export function parseSpec(doc: Document): Spec {
         headingText: '#root#',
         originalHeadingText: '#root#',
         nodes: [],
-        text: null,
+        hash: null,
         sections: [],
     };
 
@@ -109,7 +111,6 @@ export function parseSpec(doc: Document): Spec {
             header = {
                 id: id,
                 nodes: [childNode],
-                text: null
             }
             isHeader = false;
             continue;
@@ -171,11 +172,23 @@ export function parseSpec(doc: Document): Spec {
 
     const spec: Spec = {
         header: header,
-        section: root
+        section: root,
     };
-
-    fillText(doc, spec);
 
     return spec;
 }
+
+
+//
+// Entry point
+//
+(async function() {
+    const org = 'whatwg';
+    const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
+    let doc = await parse(htmlPath);
+    let spec = parseSpec(doc);
+
+    const rootPath = path.join(__dirname, 'data', org);
+    await saveSpec(rootPath, doc, spec);
+})();
 
