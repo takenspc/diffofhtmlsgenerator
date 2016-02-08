@@ -1,7 +1,7 @@
 'use strict'; // XXX
 import * as path from 'path';
 import * as parse5 from 'parse5';
-import { readFile, writeFile, mkdirp, sha256 } from '../utils';
+import { readFile, writeFile, mkdirp, sha256, log } from '../utils';
 import { readJSONEntry, writeJSONEntry, nextJSONEntry, JSONEntry } from '../jsonEntry';
 import { filter } from '../filter';
 import { formatFragment } from './formatter';
@@ -12,19 +12,19 @@ import { formatFragment } from './formatter';
 async function formatHTML(jsonEntry: JSONEntry, srcRoot: string, outRoot: string): Promise<any> {
     const srcPath = path.join(srcRoot, jsonEntry.path + '.html');
 
-    const srcHTML = await readFile(srcPath);
+    let html = await readFile(srcPath);
 
-    const fragmentNode = parse5.parseFragment(srcHTML);
-    const filtered = filter(fragmentNode);
-    const formatted = formatFragment(filtered);
+    let fragmentNode = parse5.parseFragment(html);
+    fragmentNode = filter(fragmentNode);
+    html = formatFragment(fragmentNode);
 
     const outPath = path.join(outRoot, jsonEntry.path + '.html');
     await mkdirp(path.dirname(outPath));
 
-    await writeFile(outPath, formatted);
+    await writeFile(outPath, html);
 
     // compute hash
-    jsonEntry.hash.formatted = sha256(formatted);
+    jsonEntry.hash.formatted = sha256(html);
 }
 
 
@@ -33,13 +33,8 @@ async function formatOrg(org: string) {
     const outRoot = path.join(__dirname, 'data', org);
 
     const jsonEntries = await readJSONEntry(srcRoot);
-    const leafJSONEntries: JSONEntry[] = [];
-    for (const jsonEntry of nextJSONEntry(jsonEntries)) {
-        leafJSONEntries.push(jsonEntry);
-    }
 
-    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
-    for (const jsonEntry of leafJSONEntries) {
+    for (const jsonEntry of nextJSONEntry(jsonEntries)) {
         await formatHTML(jsonEntry, srcRoot, outRoot);
     }
 
@@ -47,7 +42,14 @@ async function formatOrg(org: string) {
 }
 
 export async function format(): Promise<void> {
-    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
+    log(['format', 'whatwg', 'start']);
     await formatOrg('whatwg');
+    global.gc();
+    log(['format', 'whatwg', 'end']);
+
+    log(['format', 'w3c', 'start']);
     await formatOrg('w3c');
+    global.gc();
+    log(['format', 'w3c', 'end']);
+
 }
