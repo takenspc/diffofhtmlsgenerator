@@ -25,6 +25,7 @@ export function parse(htmlPath): Promise<Document> {
                 node: node,
                 text: text
             };
+
             resolve(doc);
         });
     });
@@ -46,7 +47,7 @@ export function getBody(doc: Document): parse5.ASTNode {
             }
         }
     }
-    
+
     return null;
 }
 
@@ -64,12 +65,12 @@ export function hasClassName(node: parse5.ASTNode, nodeName: string, className: 
     if (node.nodeName !== nodeName) {
         return false;
     }
-    
+
     let value = getAttribute(node, 'class');
     if (!value) {
         return false;
     }
-    
+
     value = ' ' + value.replace(/\s+/g, ' ').trim() + ' ';
     return value.indexOf(' ' + className + ' ') !== -1;
 }
