@@ -38,16 +38,16 @@ async function formatOrg(org: string) {
         leafJSONEntries.push(jsonEntry);
     }
 
-    await Promise.all(leafJSONEntries.map((jsonEntry) => {
-        return formatHTML(jsonEntry, srcRoot, outRoot);
-    }));
+    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
+    for (const jsonEntry of leafJSONEntries) {
+        await formatHTML(jsonEntry, srcRoot, outRoot);
+    }
 
     await writeJSONEntry(outRoot, jsonEntries);
 }
 
-export function format() {
-    return Promise.all([
-        formatOrg('whatwg'),
-        formatOrg('w3c'),
-    ]);
+export async function format(): Promise<void> {
+    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
+    await formatOrg('whatwg');
+    await formatOrg('w3c');
 }

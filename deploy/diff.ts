@@ -18,13 +18,10 @@ async function deployDiffSection(srcRoot: string, section: DiffEntry, diffRef: F
     await sectionRef.set(sectionDiff);
 }
 
-export async function deployDiff(srcRoot: string, diffEntries: DiffEntry[], diffRef: Firebase): Promise<void[]> {
+export async function deployDiff(srcRoot: string, diffEntries: DiffEntry[], diffRef: Firebase): Promise<void> {
     const sections = [];
+    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
     for (const section of nextLeafDiffEntry(diffEntries)) {
-        sections.push(section);
+        await deployDiffSection(srcRoot, section, diffRef);
     }
-
-    return Promise.all(sections.map((section) => {
-        return deployDiffSection(srcRoot, section, diffRef);
-    }));
 }

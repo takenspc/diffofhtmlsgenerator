@@ -41,23 +41,25 @@ async function saveHTML(root: string, section: Section): Promise<any> {
     await writeFile(htmlPath, text);
 }
 
-function saveSection(root: string, section: Section): Promise<any> {
+async function saveSection(rootPath: string, section: Section): Promise<void> {
     if (section.sections.length === 0) {
-        return saveHTML(root, section);
+        await saveHTML(rootPath, section);
+        return;
     }
 
-    return Promise.all(section.sections.map((subSection) => {
-        return saveSection(root, subSection);
-    }));
+    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
+    for (const subSection of section.sections) {
+        await saveSection(rootPath, subSection);
+    };
 }
 
 async function saveSpec(org: string, spec: Spec): Promise<any> {
-    const root = path.join(__dirname, 'data', org);
+    const rootPath = path.join(__dirname, 'data', org);
 
-    await saveSection(root, spec.section);
+    await saveSection(rootPath, spec.section);
 
     const json = toJSONEntry(spec.section);
-    await writeJSONEntry(root, json.sections);
+    await writeJSONEntry(rootPath, json.sections);
 }
 
 
@@ -82,9 +84,8 @@ function splitAndSaveSpec(org: string, parser: (Document) => Spec): Promise<any>
     });
 }
 
-export function split() {
-    return Promise.all([
-       splitAndSaveSpec('whatwg', whatwg.parseSpec),
-       splitAndSaveSpec('w3c', w3c.parseSpec),
-    ]);
+export async function split(): Promise<void> {
+    // TO MAKE HEROKU HAPPY, DO NOT USE Promise.all HERE
+    await splitAndSaveSpec('whatwg', whatwg.parseSpec);
+    await splitAndSaveSpec('w3c', w3c.parseSpec);
 }
