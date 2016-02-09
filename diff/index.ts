@@ -60,7 +60,8 @@ export async function diff() {
     const outDir = path.join(__dirname, 'data');
     await mkdirp(outDir);
 
-    await writeDiffEntry(outDir, diffEntries);
-    
+    // computeHTMLDiff mutates diffEntries
     await computeHTMLDiff(diffEntries);
+
+    await writeDiffEntry(outDir, diffEntries);
 }

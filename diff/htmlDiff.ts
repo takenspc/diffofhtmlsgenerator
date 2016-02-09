@@ -1,7 +1,10 @@
 'use strict';
 import * as path from 'path';
 import { fork } from 'child_process';
-import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
+import { IDiffResult } from 'diff';
+import { readFile } from '../utils';
+import { DiffEntry, DiffStat, nextLeafDiffEntry } from '../diffEntry';
+import { LineDiff } from './htmlDiffChild';
 
 function runChildProcess(modulePath: string, section: DiffEntry) {
     return new Promise((resolve, reject) => {
@@ -19,9 +22,32 @@ function runChildProcess(modulePath: string, section: DiffEntry) {
     });
 }
 
+function updateDiffCount(diffStat: DiffStat, diffs: IDiffResult[]): void {
+    for (const diff of diffs) {
+        const length = diff.value.length;
+        if (diff.removed || diff.added) {
+            diffStat.diffCount += length;
+        }
+        diffStat.total += length;
+    }
+}
+
+async function updateDiffStat(section: DiffEntry) {
+    const diffPath = path.join(__dirname, 'data', section.path + '.json');
+    const text = await readFile(diffPath);
+    const lineDiffs = JSON.parse(text) as LineDiff[];
+    
+    for (const lineDiff of lineDiffs) {
+        updateDiffCount(section.diffStats.whatwg, lineDiff.a);
+        updateDiffCount(section.diffStats.w3c, lineDiff.b);
+    }
+    
+}
+
 export async function computeHTMLDiff(sections: DiffEntry[]): Promise<void> {
     const modulePath = path.join(__dirname, 'htmlDiffChild');
     for (const section of nextLeafDiffEntry(sections)) {
         await runChildProcess(modulePath, section);
+        await updateDiffStat(section);
     }
 }

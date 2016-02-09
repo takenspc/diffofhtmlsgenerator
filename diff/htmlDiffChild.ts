@@ -7,7 +7,7 @@ import { DiffEntry } from '../diffEntry';
 //
 // Diff
 //
-interface LineDiff {
+export interface LineDiff {
     a: diff.IDiffResult[]
     b: diff.IDiffResult[]
 }
