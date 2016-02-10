@@ -1,6 +1,6 @@
 'use strict'; // XXX
 import * as assert from 'assert';
-import { getText } from '../splitter/utils/htmlutils';
+import { getText } from '../html';
 import { ASTNode } from 'parse5';
 
 const keys: string[] = [

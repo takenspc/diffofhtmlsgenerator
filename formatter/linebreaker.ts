@@ -1,6 +1,6 @@
 'use strict'; // XXX
 import { ASTNode } from 'parse5';
-import { hasClassName } from '../splitter/utils/htmlutils';
+import { hasClassName } from '../html';
 
 const breakBeforeStartTag = new Set([
     'address',
