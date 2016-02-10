@@ -4,13 +4,13 @@ import * as Firebase from 'firebase';
 import { readFile, log } from '../utils';
 import { DiffEntry, nextLeafDiffEntry, readDiffEntry } from '../diffEntry';
 import { deployDiff } from './diff';
-import { deployUpdate} from './update';
+import { update } from '../updater';
 
 
 //
 // Index
 //
-function readDiffEntriesFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
+function readDiffEntryFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
     return new Promise((resolve, reject) => {
         indexRef.once('value', (dataSnapshot) => {
             resolve(dataSnapshot.val());            
@@ -20,6 +20,11 @@ function readDiffEntriesFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
     });
 }
 
+
+async function computeUpdateFromFirebase(indexRef: Firebase, diffEntry: DiffEntry[]): Promise<void> {
+    const oldDiffEntries = await readDiffEntryFromFirebase(indexRef);
+    await update(oldDiffEntries, diffEntry);
+}
 
 //
 // Entry point
@@ -36,13 +41,10 @@ export async function deploy(): Promise<void> {
     await firebaseRef.authWithCustomToken(AUTH_TOKEN);
 
     log(['deploy', 'index', 'start']);
-    const indexRef = firebaseRef.child('index');
-    // const oldDiffRoot = path.join(__dirname, '..', 'diff', 'data-old');   
-    // const oldDiffEntries = await readDiffEntriesFromDisk(oldDiffRoot);
-    const oldDiffEntries = await readDiffEntriesFromFirebase(indexRef);
-    
     const diffRoot = path.join(__dirname, '..', 'diff', 'data');
     const diffEntries = await readDiffEntry(diffRoot);
+
+    const indexRef = firebaseRef.child('index');
     indexRef.set(diffEntries);
     log(['deploy', 'index', 'end']);
 
@@ -53,9 +55,25 @@ export async function deploy(): Promise<void> {
     
 
     log(['deploy', 'update', 'start']);
+    await computeUpdateFromFirebase(indexRef, diffEntries);
+    
+    const fetchPath = path.join(__dirname, '..', 'fetcher', 'data', 'fetch.json');
+    const fetchText = await readFile(fetchPath);
+    const fetchData = JSON.parse(fetchText);
+
+    const updatePath = path.join(__dirname, '..', 'updater', 'data', 'update.json');
+    const updateText = await readFile(updatePath);
+    const updateData = JSON.parse(updateText);
+
+    const data = {
+        datetime: fetchData.time,
+        updated: updateData,
+    };
+
     const updateRef = firebaseRef.child('update');
-    await deployUpdate(oldDiffEntries, diffEntries, updateRef);
+    await updateRef.push(data);
     log(['deploy', 'update', 'end']);
 
     Firebase.goOffline();
 }
+

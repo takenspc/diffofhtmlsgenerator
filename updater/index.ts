@@ -183,26 +183,13 @@ function createUpdateEntries(oldData: HashData, newData: HashData): UpdateEntry[
     return updateEntries;
 }
 
-export async function deployUpdate(oldDiffEntries: DiffEntry[], newDiffEntries: DiffEntry[], updateRef: Firebase): Promise<void> {
-    const fetchRoot = path.join(__dirname, '..', 'fetcher', 'data');
-    const fetchText = await readFile(path.join(fetchRoot, 'fetch.json'));
-    const fetchData = JSON.parse(fetchText);
-
-
-    const sectionToHash = {};
-
+export async function update(oldDiffEntries: DiffEntry[], newDiffEntries: DiffEntry[]): Promise<void> {
     const oldData = createHashData(oldDiffEntries);
     const newData = createHashData(newDiffEntries);
 
     const updatedEntries = createUpdateEntries(oldData, newData);
-    const data = {
-        datetime: fetchData.time,
-        updated: updatedEntries
-    };
-
-    await updateRef.push(data);
 
     const jsonPath = path.join(__dirname, 'data', 'update.json');
     await mkdirp(path.dirname(jsonPath));
-    await writeFile(jsonPath, JSON.stringify(data));
+    await writeFile(jsonPath, JSON.stringify(updatedEntries));
 }
