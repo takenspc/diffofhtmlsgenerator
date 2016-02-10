@@ -71,6 +71,7 @@ function createHashData(diffEntries: DiffEntry[]): HashData {
 interface UpdateSubEntry {
     splitted: string
     formatted: string
+    diffStat: string
 }
 
 interface UpdateEntry {
@@ -78,13 +79,13 @@ interface UpdateEntry {
     headingText: string
     whatwg: UpdateSubEntry
     w3c: UpdateSubEntry
-    diffStats: string
 }
 
-function createUpdateSubEntry(splitted: string, formatted: string): UpdateSubEntry {
+function createUpdateSubEntry(splitted: string, formatted: string, diffStat: string): UpdateSubEntry {
     return {
         splitted: splitted,
         formatted: formatted,
+        diffStat: diffStat,
     };
 }
 
@@ -96,23 +97,29 @@ function compareSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): 
     
     // added
     if (!oldSubEntry) {
-        return createUpdateSubEntry('added', 'added');
+        return createUpdateSubEntry('added', 'added', '');
     }
 
     // removed
     if (!newSubEntry) {
-        return createUpdateSubEntry('removed', 'removed');
+        return createUpdateSubEntry('removed', 'removed', '');
     }
 
     // in case, newSubEntry && oldSubEntry
-    const splittedModified = (oldSubEntry.splitted !== newSubEntry.splitted);
-    const formattedModified = (oldSubEntry.formatted !== newSubEntry.formatted);
+    const splitted = (oldSubEntry.splitted !== newSubEntry.splitted);
+    const formatted = (oldSubEntry.formatted !== newSubEntry.formatted);
 
-    if (splittedModified || formattedModified) {
-        return createUpdateSubEntry(
-            splittedModified ? 'modified' : '',
-            formattedModified ? 'modified' : ''
-        )
+    const oldDiffCount = oldSubEntry.diffStat.diffCount;
+    const newDiffCount = newSubEntry.diffStat.diffCount;
+    let diffStat = '';
+    if (oldDiffCount > newDiffCount) {
+        diffStat = 'decreased';
+    } else if (oldDiffCount < newDiffCount) {
+        diffStat = 'increased';
+    }
+
+    if (splitted || formatted) {
+        return createUpdateSubEntry(splitted ? 'modified' : '', formatted ? 'modified' : '', diffStat);
     }
 
     // not modified
@@ -122,9 +129,9 @@ function compareSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): 
 function createUpdateEntry(path: string, oldHash: HashEntry, newHash: HashEntry): UpdateEntry {
     // check modification
     const whatwg = compareSubEntry(oldHash ? oldHash.whatwg : null,
-                                   newHash ? newHash.whatwg : null);
+        newHash ? newHash.whatwg : null);
     const w3c = compareSubEntry(oldHash ? oldHash.w3c : null,
-                                newHash ? newHash.w3c : null);
+        newHash ? newHash.w3c : null);
 
     // not modified
     if (!whatwg && !w3c) {
@@ -138,7 +145,6 @@ function createUpdateEntry(path: string, oldHash: HashEntry, newHash: HashEntry)
         path: path,
         whatwg: whatwg,
         w3c: w3c,
-        diffStats: '',
     };
     return entry;
 }
@@ -195,4 +201,8 @@ export async function deployUpdate(oldDiffEntries: DiffEntry[], newDiffEntries: 
     };
 
     await updateRef.push(data);
+
+    const jsonPath = path.join(__dirname, 'data', 'update.json');
+    await mkdirp(path.dirname(jsonPath));
+    await writeFile(jsonPath, JSON.stringify(data));
 }
