@@ -2,6 +2,12 @@
 import * as path from 'path';
 import { readFile, writeFile} from './utils';
 
+
+export interface DiffStat {
+    total: number
+    diffCount: number
+}
+
 export interface JSONEntry {
     id: string
     path: string
@@ -12,6 +18,7 @@ export interface JSONEntry {
         splitted: string
         formatted: string
     }
+    diffStat: DiffStat
 }
 
 export function writeJSONEntry(root: string, json: JSONEntry[]): Promise<any> {

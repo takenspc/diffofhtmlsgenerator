@@ -3,7 +3,8 @@ import * as path from 'path';
 import { fork } from 'child_process';
 import { IDiffResult } from 'diff';
 import { readFile } from '../utils';
-import { DiffEntry, DiffStat, nextLeafDiffEntry } from '../diffEntry';
+import { DiffStat } from '../jsonEntry';
+import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 import { LineDiff } from './htmlDiffChild';
 
 function runChildProcess(modulePath: string, section: DiffEntry) {
@@ -38,8 +39,8 @@ async function updateDiffStat(section: DiffEntry) {
     const lineDiffs = JSON.parse(text) as LineDiff[];
     
     for (const lineDiff of lineDiffs) {
-        updateDiffCount(section.diffStats.whatwg, lineDiff.a);
-        updateDiffCount(section.diffStats.w3c, lineDiff.b);
+        updateDiffCount(section.whatwg.diffStat, lineDiff.a);
+        updateDiffCount(section.w3c.diffStat, lineDiff.b);
     }
     
 }

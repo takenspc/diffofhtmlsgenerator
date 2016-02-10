@@ -3,10 +3,6 @@ import * as path from 'path';
 import { readFile, writeFile } from './utils';
 import { JSONEntry } from './jsonEntry';
 
-export interface DiffStat {
-    total: number
-    diffCount: number
-}
 
 export interface DiffEntry {
     path: string
@@ -15,10 +11,6 @@ export interface DiffEntry {
     sections: DiffEntry[]
     whatwg: JSONEntry
     w3c: JSONEntry
-    diffStats: {
-        whatwg: DiffStat
-        w3c: DiffStat
-    }
 }
 
 export function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
@@ -29,16 +21,6 @@ export function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
         sections: [],
         whatwg: null,
         w3c: null,
-        diffStats: {
-            whatwg: {
-                total: 0,
-                diffCount: 0,
-            },
-            w3c: {
-                total: 0,
-                diffCount: 0,
-            }
-        }
     }
     return diffEntry;
 }

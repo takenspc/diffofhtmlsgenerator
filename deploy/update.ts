@@ -1,7 +1,7 @@
 'use strict'; // XXX
 import * as path from 'path';
-import { readFile } from '../utils';
-import { JSONEntry } from '../jsonEntry';
+import { readFile, writeFile, mkdirp } from '../utils';
+import { JSONEntry, DiffStat } from '../jsonEntry';
 import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 
 
@@ -11,6 +11,7 @@ import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 interface HashSubEntry {
     splitted: string
     formatted: string
+    diffStat: DiffStat
 }
 
 interface HashEntry {
@@ -32,6 +33,7 @@ function createHashSubEntry(jsonEntry: JSONEntry): HashSubEntry {
     const hashSubEntry: HashSubEntry = {
         splitted: jsonEntry.hash.splitted,
         formatted: jsonEntry.hash.formatted,
+        diffStat: jsonEntry.diffStat
     };
 
     return hashSubEntry;
@@ -76,6 +78,7 @@ interface UpdateEntry {
     headingText: string
     whatwg: UpdateSubEntry
     w3c: UpdateSubEntry
+    diffStats: string
 }
 
 function createUpdateSubEntry(splitted: string, formatted: string): UpdateSubEntry {
@@ -135,6 +138,7 @@ function createUpdateEntry(path: string, oldHash: HashEntry, newHash: HashEntry)
         path: path,
         whatwg: whatwg,
         w3c: w3c,
+        diffStats: '',
     };
     return entry;
 }

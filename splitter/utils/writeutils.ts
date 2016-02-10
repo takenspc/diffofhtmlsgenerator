@@ -20,6 +20,10 @@ function toJSONEntry(section: Section): JSONEntry {
         hash: {
             splitted: section.hash,
             formatted: null,
+        },
+        diffStat: {
+            total: 0,
+            diffCount: 0,
         }
     };
 
