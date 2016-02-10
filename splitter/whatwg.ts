@@ -2,9 +2,10 @@
 import * as path from 'path';
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { Document, parse, getBody, getAttribute, getText } from './utils/htmlutils';
-import { Spec, Header, Section, addSection, addChildNode } from './utils/parserutils';
-import { saveSpec } from './utils/writeutils';
+import { getText, getAttribute } from '../html';
+import { Spec } from './utils/spec';
+import { Document } from './utils/document';
+import { Section, Header, addSection, addChildNode } from './utils/section';
 
 //
 // Config
@@ -93,7 +94,7 @@ export function parseSpec(doc: Document): Spec {
     let subSection: Section = null;
     let processSubSections = false;
 
-    const body = getBody(doc);
+    const body = doc.getBody();
     for (const childNode of body.childNodes) {
         //
         // The structure of WHATWG HTML Standard
@@ -170,12 +171,7 @@ export function parseSpec(doc: Document): Spec {
         }
     }
 
-    const spec: Spec = {
-        header: header,
-        section: root,
-    };
-
-    return spec;
+    return new Spec(header, root, doc);
 }
 
 
@@ -184,11 +180,11 @@ export function parseSpec(doc: Document): Spec {
 //
 (async function() {
     const org = 'whatwg';
+
     const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
-    let doc = await parse(htmlPath);
+    let doc = await Document.parse(htmlPath);
+
     let spec = parseSpec(doc);
-
     const rootPath = path.join(__dirname, 'data', org);
-    await saveSpec(rootPath, doc, spec);
+    await spec.save(rootPath);
 })();
-

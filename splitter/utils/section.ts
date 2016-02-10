@@ -1,11 +1,10 @@
-'use strict';
+'use strict'; // XXX
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { Document, getAttribute, hasClassName, getText, getHTMLText } from './htmlutils';
+import { hasClassName } from '../../html';
+import { JSONEntry } from '../../jsonEntry';
 
-//
-// Interfaces
-//
+
 export interface Section {
     id: string
 
@@ -24,20 +23,17 @@ export interface Header {
     nodes: ASTNode[]
 }
 
-export interface Spec {
-    header: Header
-    section: Section
-}
 
-//
-//
-//
+// for debug
 function formatStartTag(node: ASTNode) {
     return `<${node.tagName} ${node.attrs.map((attr) => {
         return `${attr.name}="${attr.value}"`;
     }).join(' ')}>`
 }
 
+//
+//
+// 
 export function addChildNode(parent: Section, current: Section, childNode: ASTNode): Section {
     // adding preface contents
     if (!current) {
@@ -59,9 +55,6 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
 }
 
 
-//
-//
-//
 function normalizeHeadingText(original: string): string {
     let headingText = original;
 
@@ -123,4 +116,44 @@ export function addSection(parent: Section, id: string, headingText: string, ori
         parent.sections.push(section);
     }
     return section;
+}
+
+
+//
+// iterable
+//
+export function* nextLeafSection(parent: Section): Iterable<Section> {
+    for (const section of parent.sections) {
+        if (section.sections.length === 0) {
+            yield section;
+        } else {
+            yield* nextLeafSection(section);
+        }
+    }
+}
+
+
+//
+// JSONEntry
+//
+export function toJSONEntry(section: Section): JSONEntry {
+    const sections = section.sections.map(toJSONEntry);
+
+    const jsonEntry: JSONEntry = {
+        id: section.id,
+        path: section.path,
+        headingText: section.headingText,
+        originalHeadingText: section.originalHeadingText,
+        sections: sections,
+        hash: {
+            splitted: section.hash,
+            formatted: null,
+        },
+        diffStat: {
+            total: 0,
+            diffCount: 0,
+        }
+    };
+
+    return jsonEntry;
 }
