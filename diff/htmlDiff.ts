@@ -18,7 +18,7 @@ function runChildProcess(modulePath: string, section: DiffEntry) {
             console.error(err);
             reject(err);
         });
-        
+
         child.send(section);
     });
 }
@@ -37,12 +37,17 @@ async function updateDiffStat(section: DiffEntry) {
     const diffPath = path.join(__dirname, 'data', section.path + '.json');
     const text = await readFile(diffPath);
     const lineDiffs = JSON.parse(text) as LineDiff[];
-    
+
     for (const lineDiff of lineDiffs) {
-        updateDiffCount(section.whatwg.diffStat, lineDiff.a);
-        updateDiffCount(section.w3c.diffStat, lineDiff.b);
+        if (section.whatwg) {
+            updateDiffCount(section.whatwg.diffStat, lineDiff.a);
+        }
+
+        if (section.w3c) {
+            updateDiffCount(section.w3c.diffStat, lineDiff.b);
+        }
     }
-    
+
 }
 
 export async function computeHTMLDiff(sections: DiffEntry[]): Promise<void> {
