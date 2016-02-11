@@ -1,6 +1,7 @@
 'use strict'; // XXX
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
+import { getText, hasClassName } from '../html';
 import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
 import { BufferList } from './';
@@ -129,10 +130,18 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): vo
     context.bufferList.write(lineBreaker.breakBeforeStartTag());
     context.bufferList.write(formatStartTag(context, node));
 
+    const isElementInfo = hasClassName(node, 'dl', 'element');
+
     const newDepth = lineBreaker.depth;
-    const childNodes = node.childNodes;
+    const childNodes = node.childNodes;    
     for (let i = 0; i < childNodes.length; i++) {
         const childNode = childNodes[i];
+
+        // create new buffer after 'DOM interface:'
+        if (isElementInfo && childNode.nodeName === 'dt' && getText(childNode).trim() === 'DOM interface:') {
+            context.bufferList.createNextBuffer();
+        }
+
         // insert line break after start tag
         context.bufferList.write(lineBreaker.breakAfterStartTag(childNode));
         format(context, childNode, newDepth);

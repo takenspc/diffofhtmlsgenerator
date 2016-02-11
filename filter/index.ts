@@ -174,11 +174,6 @@ function filterNode(context: FilterContext, node: ASTNode): void {
             newChildNodes.push(childNode);
             filterNode(context, childNode);
         }
-        
-        // XXX Reorder dl.element
-        // if (hasClassName(node, 'dl', 'element')) {
-        //    newChildNodes = elementInfo.reorder(newChildNodes);
-        // }
 
         node.childNodes = newChildNodes;
     }
