@@ -1,6 +1,7 @@
 'use strict'; // XXX
 import { ASTNode } from 'parse5';
 import { hasClassName } from '../html';
+import { BufferList } from './';
 
 const breakBeforeStartTag = new Set([
     'address',
@@ -84,11 +85,11 @@ export class LineBreaker {
     constructor(node: ASTNode, depth: number) {
         this.node = node;
         this.nodeName = node.nodeName;
-        this.depth = (this.willBreakBeforeStartTag()) ? ++depth : depth;
+        this.depth = (this.willBreakBeforeStartTag(node)) ? ++depth : depth;
         this.didBreakAfterStartTag = !this.willBreakAfterStartTag();
     }
     
-    private breakAndIndent() {
+    private breakAndIndent(): string {
         const buff: string[] = [];
 
         buff.push('\n');
@@ -100,16 +101,16 @@ export class LineBreaker {
     }
 
 
-    private willBreakBeforeStartTag() {
-        if (hasClassName(this.node, 'div', 'impl')) {
+    private willBreakBeforeStartTag(node: ASTNode): boolean {
+        if (hasClassName(node, 'div', 'impl')) {
             return false;
         }
 
-        return breakBeforeStartTag.has(this.nodeName);
+        return breakBeforeStartTag.has(node.nodeName);
     }    
     
-    breakBeforeStartTag() {
-        if (this.willBreakBeforeStartTag()) {
+    breakBeforeStartTag(): string {
+        if (this.willBreakBeforeStartTag(this.node)) {
             return this.breakAndIndent();
         }
 
@@ -127,19 +128,20 @@ export class LineBreaker {
         return breakAfterStartTag.has(this.nodeName);
     }
 
-    breakAfterStartTag(text: string) {
+    breakAfterStartTag(node: ASTNode): string {
         // we did, do nothing
         if (this.didBreakAfterStartTag) {
             return '';
         }
 
-        // skip white space
-        if (text === ' ') {
+        // skip white space text nodes
+        if (node.nodeName === '#text' && node.value.trim() === '') {
             return '';
         }
 
         this.didBreakAfterStartTag = true;
-        if (text.match(/^ *\n/)) {
+        // if the start tag of a node inserts a line break, do nothing
+        if (this.willBreakBeforeStartTag(node)) {
             return '';
         }
 
@@ -147,7 +149,7 @@ export class LineBreaker {
     }
 
 
-    private willBreakBeforeEndTag() {
+    private willBreakBeforeEndTag(): boolean {
         if (hasClassName(this.node, 'div', 'impl')) {
             return false;
         }
@@ -155,7 +157,7 @@ export class LineBreaker {
         return breakBeforeEndTag.has(this.nodeName);
     }
 
-    breakBeforeEndTag() {
+    breakBeforeEndTag(): string {
         if (this.willBreakBeforeEndTag()) {
             return this.breakAndIndent();
         }
@@ -163,11 +165,10 @@ export class LineBreaker {
         return '';
     }
     
-    unbreakBeforeEndTag(text) {
+    unbreakBeforeEndTag(buffer: string[]): void {
         if (this.nodeName === 'pre') {
-            return text.replace(/\n *$/, '');
+            const index = buffer.length - 1;
+            buffer[index] = buffer[index].replace(/\n *$/, '');
         }
-
-        return text;
     }
 }

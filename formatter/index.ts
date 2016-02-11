@@ -45,7 +45,6 @@ async function formatHTML(jsonEntry: JSONEntry, srcRoot: string, outRoot: string
 
     const bufferList = new BufferList();
     formatFragment(bufferList, fragmentNode);
-    bufferList.flush();
 
     html = '';
     const bufferListLength = bufferList.bufferList.length;

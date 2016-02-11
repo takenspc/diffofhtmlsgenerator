@@ -10,6 +10,11 @@ import { BufferList } from './';
 //
 class FormatContext {
     parentStack: ASTNode[] = []
+    bufferList: BufferList
+    
+    constructor(bufferList: BufferList) {
+        this.bufferList = bufferList;
+    }
     
     get parent(): ASTNode {
         const length = this.parentStack.length;
@@ -100,19 +105,19 @@ function formatEndTag(context: FormatContext, node: ASTNode): string {
 //
 // Node
 //
-function formatText(context: FormatContext, node: ASTNode): string {
+function formatText(context: FormatContext, node: ASTNode): void {
     let value = node.value;
 
     if (!context.parent || context.parent.nodeName !== 'pre') {
         value = value.replace(/\s+/g, ' ');
     }
 
-    return escapeHTML(value)
+    return context.bufferList.write(escapeHTML(value));
 }
 
 
-function formatElement(context: FormatContext, node: ASTNode, depth: number): string {
-    const buff: string[] = [];
+function formatElement(context: FormatContext, node: ASTNode, depth: number): void {
+    // const buff: string[] = [];
 
     const createContext = consts.contextElements.has(node.nodeName);
     if (createContext) {
@@ -121,52 +126,51 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): st
 
     const lineBreaker = new LineBreaker(node, depth);
 
-    buff.push(lineBreaker.breakBeforeStartTag());
-    buff.push(formatStartTag(context, node));
+    context.bufferList.write(lineBreaker.breakBeforeStartTag());
+    context.bufferList.write(formatStartTag(context, node));
 
     const newDepth = lineBreaker.depth;
     const childNodes = node.childNodes;
     for (let i = 0; i < childNodes.length; i++) {
         const childNode = childNodes[i];
-        const text = format(context, childNode, newDepth);
-
-        buff.push(lineBreaker.breakAfterStartTag(text));
+        // insert line break after start tag
+        context.bufferList.write(lineBreaker.breakAfterStartTag(childNode));
+        format(context, childNode, newDepth);
 
         if (i === childNodes.length - 1) {
-            buff.push(lineBreaker.unbreakBeforeEndTag(text));
-        } else {
-            buff.push(text);
+            const buffer = context.bufferList.buffer;
+            lineBreaker.unbreakBeforeEndTag(buffer);
         }
     }
 
     if (!consts.voidElements.has(node.nodeName)) {
-        buff.push(lineBreaker.breakBeforeEndTag());
-        buff.push(formatEndTag(context, node));
+        context.bufferList.write(lineBreaker.breakBeforeEndTag());
+        context.bufferList.write(formatEndTag(context, node));
     }
 
     if (createContext) {
         context.pop();
     }
-
-    return buff.join('');
 }
 
 
 //
 // Tree
 //
-function format(context: FormatContext, node: ASTNode, depth: number): string {
+function format(context: FormatContext, node: ASTNode, depth: number): void {
     if (node.nodeName === '#text') {
-        return formatText(context, node);
+        formatText(context, node);
+    } else {
+        formatElement(context, node, depth);
     }
-
-    return formatElement(context, node, depth);
 }
 
 export function formatFragment(bufferList: BufferList, node: ASTNode): void {
-    const context: FormatContext = new FormatContext();
+    const context: FormatContext = new FormatContext(bufferList);
 
     for (const childNode of node.childNodes) {
-        bufferList.write(format(context, childNode, -1));
+        format(context, childNode, -1);
     }
+    
+    bufferList.flush();
 }
