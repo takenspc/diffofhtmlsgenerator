@@ -31,7 +31,7 @@ function parseHeader(divNode: ASTNode): Header {
 //
 // Config
 //
-const chapterHavingSubSections = new Set([
+const h2HavingH4 = new Set([
     // 'introduction',
     'infrastructure',
     'dom',
@@ -46,7 +46,7 @@ const chapterHavingSubSections = new Set([
     // 'iana',
 
 ]);
-const sectionNotHavingSubSections = new Set([
+const h3NotHavingH4 = new Set([
     // 'introduction',
     // 'infrastructure',
     'case-sensitivity-and-string-comparison',
@@ -81,6 +81,10 @@ const sectionNotHavingSubSections = new Set([
     // 'iana',
 ]);
 
+const h4HavingH6 = new Set([
+    'the-img-element',
+    'the-input-element',
+]);
 
 //
 // Heading text
@@ -115,10 +119,10 @@ function* nextElement(sectionElement: ASTNode): Iterable<ASTNode> {
 // parse section element
 //
 function parseSectionElement(sectionNode: ASTNode): Section {
-    let chapter: Section = null;
-    let section: Section = null;
-    let subSection: Section = null;
-    let processSubSections = false;
+    let h2Section: Section = null;
+    let h3Section: Section = null;
+    let h4Section: Section = null;
+    let processH4Sections = false;
 
     //
     // section
@@ -134,7 +138,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
         if (nodeName === 'h2') {
             const id = getAttribute(childNode, 'id');
 
-            assert(chapter === null, 'Chapter must be null before h2');
+            assert(h2Section === null, 'Chapter must be null before h2');
 
             // end of the main contents
             if (id === 'index') {
@@ -142,10 +146,10 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             }
 
             const headingText = getHeadingText(childNode);
-            chapter = addSection(null, id, headingText, getText(childNode), childNode);
-            section = null;
-            subSection = null;
-            processSubSections = chapterHavingSubSections.has(id);
+            h2Section = addSection(null, id, headingText, getText(childNode), childNode);
+            h3Section = null;
+            h4Section = null;
+            processH4Sections = h2HavingH4.has(id);
             continue;
         }
 
@@ -153,29 +157,29 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             const id = getAttribute(childNode, 'id');
             let headingText = getHeadingText(childNode);
 
-            assert(chapter, `chapter must be initialized before adding a section: ${headingText}`)
-            section = addSection(chapter, id, headingText, getText(childNode), childNode);
-            subSection = null;
+            assert(h2Section, `chapter must be initialized before adding a section: ${headingText}`)
+            h3Section = addSection(h2Section, id, headingText, getText(childNode), childNode);
+            h4Section = null;
             continue;
         }
 
-        if (processSubSections && (section && !sectionNotHavingSubSections.has(section.id))) {
+        if (processH4Sections && (h3Section && !h3NotHavingH4.has(h3Section.id))) {
             if (nodeName === 'h4') {
                 const id = getAttribute(childNode, 'id');
                 const headingText = getHeadingText(childNode);
 
-                assert(section, `section must be initialized before adding a sub section: ${headingText}`)
-                subSection = addSection(section, id, headingText, getText(childNode), childNode);
+                assert(h3Section, `section must be initialized before adding a sub section: ${headingText}`)
+                h4Section = addSection(h3Section, id, headingText, getText(childNode), childNode);
                 continue;
             }
 
-            subSection = addChildNode(section, subSection, childNode);
+            h4Section = addChildNode(h3Section, h4Section, childNode);
         } else {
-            section = addChildNode(chapter, section, childNode);
+            h3Section = addChildNode(h2Section, h3Section, childNode);
         }
     }
 
-    return chapter;
+    return h2Section;
 }
 
 
