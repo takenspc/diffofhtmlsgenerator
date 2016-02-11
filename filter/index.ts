@@ -2,7 +2,7 @@
 import { Attr, ASTNode } from 'parse5';
 import { getAttribute, hasClassName } from '../html';
 import * as consts from './consts';
-import * as elementInfo from './elementInfo';
+
 
 //
 // Context
@@ -95,13 +95,6 @@ function includeElement(context: FilterContext, node: ASTNode): boolean {
             }
         }
         return false;
-    }
-
-    // XXX Remove ARIA Info for now
-    if (hasClassName(node, 'div', 'note')) {
-        if (elementInfo.containsOnlyARIAInfo(node)) {
-            return false;
-        }
     }
 
     return true;
