@@ -2,6 +2,7 @@
 import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
+import { JSONEntry } from '../jsonEntry';
 import { DiffEntry } from '../diffEntry';
 
 //
@@ -126,6 +127,15 @@ function computeDiff(a: string, b: string) {
     return lines;
 }
 
+function readFileIfExists(section: DiffEntry, org: string, srcDir: string, index: number): Promise<string> {
+    const jsonEntry = (org === 'whatwg') ? section.whatwg : section.w3c;
+    if (!jsonEntry || jsonEntry.bufferListLength <= index) {
+        return Promise.resolve('');
+    }
+
+    const htmlPath = path.join(srcDir, org, section.path + '.' + index + '.html');
+    return readFile(htmlPath);
+}
 
 //
 // Handle objects
@@ -137,17 +147,17 @@ export async function diffSection(section: DiffEntry): Promise<any> {
     const outDir = path.join(__dirname, 'data');
 
     let diffs: LineDiff[] = [];
-    const htmlPath = section.path;
     const length = Math.max(section.w3c ? section.w3c.bufferListLength : 0, section.whatwg ? section.whatwg.bufferListLength : 0);
+
     for (var i = 0; i < length; i++) {
         const htmls = await Promise.all([
-            readFile(path.join(srcDir, 'whatwg', htmlPath + '.' + i + '.html')),
-            readFile(path.join(srcDir, 'w3c', htmlPath + '.' + i + '.html')),
+            readFileIfExists(section, 'whatwg', srcDir, i),
+            readFileIfExists(section, 'w3c', srcDir, i),
         ]);
         diffs = diffs.concat(computeDiff(htmls[0].trim(), htmls[1].trim()));
     }
 
-    const jsonPath = path.join(outDir, htmlPath + '.json');
+    const jsonPath = path.join(outDir, section.path + '.json');
     await mkdirp(path.dirname(jsonPath));
     await writeFile(jsonPath, JSON.stringify(diffs));
     log(['diff', heading, 'end']);
