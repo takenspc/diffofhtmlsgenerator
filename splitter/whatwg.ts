@@ -5,12 +5,12 @@ import { ASTNode } from 'parse5';
 import { getText, getAttribute } from '../html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, Header, addSection, addChildNode } from './utils/section';
+import { Section, Header, addSection, addChildNode, mergeNestedPrefaces } from './utils/section';
 
 //
 // Config
 //
-const chapterHavingSubSections = new Set([
+const h2HavingH4 = new Set([
     // 'introduction',
     'infrastructure',
     'dom',
@@ -23,42 +23,13 @@ const chapterHavingSubSections = new Set([
     // 'rendering',
     // 'obsolete',
     // 'iana',
-
 ]);
-const sectionNotHavingSubSections = new Set([
-    // 'introduction',
-    // 'infrastructure',
-    'case-sensitivity-and-string-comparison',
-    'namespaces',
-    // 'dom',
 
-    // 'semantics',
-    'disabled-elements',
-
-    // 'editing',
-    'the-hidden-attribute',
-    'inert-subtrees',
-    'activation',
-
-    // 'browsers'
-    'sandboxing',
-
-    // 'webappapis',
-    'atob',
-    'timers',
-    'images',
-    'animation-frames',
-
-    // 'syntax'
-    'serialising-html-fragments',
-    'parsing-html-fragments',
-    'named-character-references',
-
-    // 'the-xhtml-syntax',
-    // 'rendering',
-    // 'obsolete',
-    // 'iana',
+const h4HavingH6 = new Set([
+    'the-img-element',
+    'the-input-element',
 ]);
+
 
 
 //
@@ -89,10 +60,13 @@ export function parseSpec(doc: Document): Spec {
     let isHeader = true;
     let inMain = false;
 
-    let chapter: Section = null;
-    let section: Section = null;
-    let subSection: Section = null;
-    let processSubSections = false;
+    let h2Section: Section = null;
+    let h3Section: Section = null;
+    let h4Section: Section = null;
+    let processH4Sections = false;
+    let h5Section: Section = null;
+    let h6Section: Section = null;
+    let processH6Sections = false;
 
     const body = doc.getBody();
     for (const childNode of body.childNodes) {
@@ -134,12 +108,16 @@ export function parseSpec(doc: Document): Spec {
             }
 
             const headingText = getHeadingText(childNode);
-            chapter = addSection(null, id, headingText, getText(childNode), childNode);
-            section = null;
-            subSection = null;
-            processSubSections = chapterHavingSubSections.has(id);
+            h2Section = addSection(null, id, headingText, getText(childNode), childNode);
+
+            h3Section = null;
+            h4Section = null;
+            processH4Sections = h2HavingH4.has(id);
+            h5Section = null;
+            h6Section = null;
+            processH6Sections = false;
             // XXX split parseSpec into functions
-            root.sections.push(chapter);
+            root.sections.push(h2Section);
             continue;
         }
 
@@ -150,26 +128,81 @@ export function parseSpec(doc: Document): Spec {
         if (nodeName === 'h3') {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
-            section = addSection(chapter, id, headingText, getText(childNode), childNode);
-            subSection = null;
+
+            assert(h2Section, `h2 section must be initialized before adding an h3 section: ${headingText}`)
+            h3Section = addSection(h2Section, id, headingText, getText(childNode), childNode);
+
+            h4Section = null;
+            h5Section = null;
+            h6Section = null;
+            processH6Sections = false;
             continue;
         }
 
-        // in #semantics, process h4
-        if (processSubSections && (section && !sectionNotHavingSubSections.has(section.id))) {
-            if (nodeName === 'h4') {
-                const id = getAttribute(childNode, 'id');
-                const headingText = getHeadingText(childNode);
+        // add child Node
+        if (!processH4Sections) {
+            h3Section = addChildNode(h2Section, h3Section, childNode);
+            continue;
+        }
 
-                subSection = addSection(section, id, headingText, getText(childNode), childNode);
+
+        if (nodeName === 'h4') {
+            const id = getAttribute(childNode, 'id');
+            const headingText = getHeadingText(childNode);
+
+            assert(h3Section, `h3 section must be initialized before adding an h4 section: ${headingText}`)
+            h4Section = addSection(h3Section, id, headingText, getText(childNode), childNode);
+
+            h5Section = null;
+            h6Section = null;
+            processH6Sections = h4HavingH6.has(id);
+            continue;
+        }
+
+        // add child Node
+        if (!processH6Sections) {
+            if (!h3Section) {
+                h3Section = addChildNode(h2Section, h3Section, childNode);
                 continue;
             }
 
-            subSection = addChildNode(section, subSection, childNode);
-        } else {
-            section = addChildNode(chapter, section, childNode);
+            h4Section = addChildNode(h3Section, h4Section, childNode);
+            continue;
         }
+
+
+        if (nodeName === 'h5') {
+            const id = getAttribute(childNode, 'id');
+            let headingText = getHeadingText(childNode);
+
+            assert(h4Section, `h4 section must be initialized before adding an h5 section: ${headingText}`)
+            h5Section = addSection(h4Section, id, headingText, getText(childNode), childNode);
+
+            h6Section = null;
+            continue;
+        }
+
+        if (nodeName === 'h6') {
+            const id = getAttribute(childNode, 'id');
+            let headingText = getHeadingText(childNode);
+
+            assert(h5Section, `h5 section must be initialized before adding an h6 section: ${headingText}`)
+            h6Section = addSection(h5Section, id, headingText, getText(childNode), childNode);
+            continue;
+        }
+
+
+        // add child Node
+        if (!h5Section) {
+            h5Section = addChildNode(h4Section, h5Section, childNode);
+            continue;
+        }
+
+        h6Section = addChildNode(h5Section, h6Section, childNode);
+
     }
+
+    mergeNestedPrefaces(root);
 
     return new Spec(header, root, doc);
 }
@@ -187,4 +220,8 @@ export function parseSpec(doc: Document): Spec {
     let spec = parseSpec(doc);
     const rootPath = path.join(__dirname, 'data', org);
     await spec.save(rootPath);
-})();
+})().catch((err) => {
+    console.error(err);
+    console.error(err.stack);
+    process.exit(-1);
+});
