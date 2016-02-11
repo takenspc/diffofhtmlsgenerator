@@ -152,7 +152,8 @@ export function toJSONEntry(section: Section): JSONEntry {
         diffStat: {
             total: 0,
             diffCount: 0,
-        }
+        },
+        bufferListLength: 0,
     };
 
     return jsonEntry;

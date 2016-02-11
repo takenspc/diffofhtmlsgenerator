@@ -19,6 +19,7 @@ export interface JSONEntry {
         formatted: string
     }
     diffStat: DiffStat
+    bufferListLength: number
 }
 
 export function writeJSONEntry(root: string, json: JSONEntry[]): Promise<any> {

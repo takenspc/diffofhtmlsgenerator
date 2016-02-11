@@ -3,6 +3,7 @@ import * as assert from 'assert';
 import { ASTNode } from 'parse5';
 import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
+import { BufferList } from './';
 
 //
 // Context
@@ -162,14 +163,10 @@ function format(context: FormatContext, node: ASTNode, depth: number): string {
     return formatElement(context, node, depth);
 }
 
-export function formatFragment(node: ASTNode): string {
-    const buff: string[] = []
-
+export function formatFragment(bufferList: BufferList, node: ASTNode): void {
     const context: FormatContext = new FormatContext();
 
     for (const childNode of node.childNodes) {
-        buff.push(format(context, childNode, -1));
+        bufferList.write(format(context, childNode, -1));
     }
-
-    return buff.join('');
 }

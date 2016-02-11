@@ -136,12 +136,16 @@ export async function diffSection(section: DiffEntry): Promise<any> {
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
     const outDir = path.join(__dirname, 'data');
 
+    let diffs: LineDiff[] = [];
     const htmlPath = section.path;
-    const htmls = await Promise.all([
-        readFile(path.join(srcDir, 'whatwg', htmlPath + '.html')),
-        readFile(path.join(srcDir, 'w3c', htmlPath + '.html')),
-    ]);
-    const diffs = computeDiff(htmls[0].trim(), htmls[1].trim());
+    const length = Math.max(section.w3c ? section.w3c.bufferListLength : 0, section.whatwg ? section.whatwg.bufferListLength : 0);
+    for (var i = 0; i < length; i++) {
+        const htmls = await Promise.all([
+            readFile(path.join(srcDir, 'whatwg', htmlPath + '.' + i + '.html')),
+            readFile(path.join(srcDir, 'w3c', htmlPath + '.' + i + '.html')),
+        ]);
+        diffs = diffs.concat(computeDiff(htmls[0].trim(), htmls[1].trim()));
+    }
 
     const jsonPath = path.join(outDir, htmlPath + '.json');
     await mkdirp(path.dirname(jsonPath));

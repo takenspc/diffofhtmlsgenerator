@@ -9,22 +9,59 @@ import { formatFragment } from './formatter';
 //
 // Formatter
 //
-async function formatHTML(jsonEntry: JSONEntry, srcRoot: string, outRoot: string): Promise<any> {
+export class BufferList {
+    bufferList: string[]
+    buffer: string[];
+
+    constructor() {
+        this.bufferList = [];
+        this.createNextBuffer();
+    }
+    
+    
+    createNextBuffer(): void {
+        this.flush();
+        this.buffer = [];
+    }
+    
+    flush(): void {
+        if (this.buffer) {
+            this.bufferList.push(this.buffer.join(''));
+        }
+    }
+    
+    write(text: string): void {
+        this.buffer.push(text);
+    }
+}
+
+async function formatHTML(jsonEntry: JSONEntry, srcRoot: string, outRoot: string): Promise<void> {
     const srcPath = path.join(srcRoot, jsonEntry.path + '.html');
 
     let html = await readFile(srcPath);
 
     let fragmentNode = parse5.parseFragment(html);
     fragmentNode = filter(fragmentNode);
-    html = formatFragment(fragmentNode);
 
-    const outPath = path.join(outRoot, jsonEntry.path + '.html');
-    await mkdirp(path.dirname(outPath));
+    const bufferList = new BufferList();
+    formatFragment(bufferList, fragmentNode);
+    bufferList.flush();
 
-    await writeFile(outPath, html);
+    html = '';
+    const bufferListLength = bufferList.bufferList.length;
+    for (let i = 0; i < bufferListLength; i++) {
+        const outPath = path.join(outRoot, jsonEntry.path + '.' + i + '.html');
+        await mkdirp(path.dirname(outPath));
+
+        const text = bufferList.bufferList[i];
+        await writeFile(outPath, text);
+
+        html += text;
+    }
 
     // compute hash
     jsonEntry.hash.formatted = sha256(html);
+    jsonEntry.bufferListLength = bufferListLength;
 }
 
 
@@ -34,6 +71,7 @@ async function formatOrg(org: string) {
 
     const jsonEntries = await readJSONEntry(srcRoot);
 
+    // formatHTML mutates jsonEntries
     for (const jsonEntry of nextJSONEntry(jsonEntries)) {
         await formatHTML(jsonEntry, srcRoot, outRoot);
     }
