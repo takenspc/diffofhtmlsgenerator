@@ -176,9 +176,9 @@ function filterNode(context: FilterContext, node: ASTNode): void {
         }
         
         // XXX Reorder dl.element
-        if (hasClassName(node, 'dl', 'element')) {
-            newChildNodes = elementInfo.reorder(newChildNodes);
-        }
+        // if (hasClassName(node, 'dl', 'element')) {
+        //    newChildNodes = elementInfo.reorder(newChildNodes);
+        // }
 
         node.childNodes = newChildNodes;
     }
