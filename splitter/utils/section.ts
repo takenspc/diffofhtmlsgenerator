@@ -120,6 +120,27 @@ export function addSection(parent: Section, id: string, headingText: string, ori
 
 
 //
+// move __pre__/__pre__ into parent
+//
+export function mergeNestedPrefaces(parent: Section): void {
+    for (const section of parent.sections) {
+        mergeNestedPrefaces(section);
+    }
+
+    // if parent has only __pre__, merge __pre__ into parent
+    if (parent.sections.length === 1) {
+        const section = parent.sections[0];
+        if (section.id === parent.id) {
+            // merge __pre__ into root
+            parent.nodes = section.nodes;
+            // remove __pre__
+            parent.sections = [];
+        }
+    }
+}
+
+
+//
 // iterable
 //
 export function* nextLeafSection(parent: Section): Iterable<Section> {

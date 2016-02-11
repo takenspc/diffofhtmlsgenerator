@@ -5,7 +5,7 @@ import { ASTNode } from 'parse5';
 import { getAttribute, hasClassName, getText } from '../html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, Header, addSection, addChildNode } from './utils/section';
+import { Section, Header, addSection, addChildNode, mergeNestedPrefaces } from './utils/section';
 
 //
 // Header
@@ -45,40 +45,6 @@ const h2HavingH4 = new Set([
     // 'obsolete',
     // 'iana',
 
-]);
-const h3NotHavingH4 = new Set([
-    // 'introduction',
-    // 'infrastructure',
-    'case-sensitivity-and-string-comparison',
-    'namespaces',
-
-    // 'dom',
-
-    // 'semantics',
-    'disabled-elements',
-
-    // 'editing',
-    'the-hidden-attribute',
-    'inert-subtrees',
-    'activation',
-
-    // 'browsers'
-    'sandboxing',
-
-    // 'webappapis',
-    'base64-utility-methods',
-    'timers',
-    'webappapis-images',
-
-    // 'syntax'
-    'serializing-html-fragments',
-    'parsing-html-fragments',
-    'named-character-references',
-
-    // 'the-xhtml-syntax',
-    // 'rendering',
-    // 'obsolete',
-    // 'iana',
 ]);
 
 const h4HavingH6 = new Set([
@@ -123,6 +89,9 @@ function parseSectionElement(sectionNode: ASTNode): Section {
     let h3Section: Section = null;
     let h4Section: Section = null;
     let processH4Sections = false;
+    let h5Section: Section = null;
+    let h6Section: Section = null;
+    let processH6Sections = false;
 
     //
     // section
@@ -138,7 +107,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
         if (nodeName === 'h2') {
             const id = getAttribute(childNode, 'id');
 
-            assert(h2Section === null, 'Chapter must be null before h2');
+            assert(h2Section === null, 'h2 section must be null before h2');
 
             // end of the main contents
             if (id === 'index') {
@@ -147,36 +116,90 @@ function parseSectionElement(sectionNode: ASTNode): Section {
 
             const headingText = getHeadingText(childNode);
             h2Section = addSection(null, id, headingText, getText(childNode), childNode);
+
             h3Section = null;
             h4Section = null;
             processH4Sections = h2HavingH4.has(id);
+            h5Section = null;
+            h6Section = null;
+            processH6Sections = false;
             continue;
         }
 
         if (nodeName === 'h3') {
             const id = getAttribute(childNode, 'id');
-            let headingText = getHeadingText(childNode);
+            const headingText = getHeadingText(childNode);
 
-            assert(h2Section, `chapter must be initialized before adding a section: ${headingText}`)
+            assert(h2Section, `h2 section must be initialized before adding an h3 section: ${headingText}`)
             h3Section = addSection(h2Section, id, headingText, getText(childNode), childNode);
+
             h4Section = null;
+            h5Section = null;
+            h6Section = null;
+            processH6Sections = false;
             continue;
         }
 
-        if (processH4Sections && (h3Section && !h3NotHavingH4.has(h3Section.id))) {
-            if (nodeName === 'h4') {
-                const id = getAttribute(childNode, 'id');
-                const headingText = getHeadingText(childNode);
+        // add child Node
+        if (!processH4Sections) {
+            h3Section = addChildNode(h2Section, h3Section, childNode);
+            continue;
+        }
 
-                assert(h3Section, `section must be initialized before adding a sub section: ${headingText}`)
-                h4Section = addSection(h3Section, id, headingText, getText(childNode), childNode);
+
+        if (nodeName === 'h4') {
+            const id = getAttribute(childNode, 'id');
+            const headingText = getHeadingText(childNode);
+
+            assert(h3Section, `h3 section must be initialized before adding an h4 section: ${headingText}`)
+            h4Section = addSection(h3Section, id, headingText, getText(childNode), childNode);
+
+            h5Section = null;
+            h6Section = null;
+            processH6Sections = h4HavingH6.has(id);
+            continue;
+        }
+
+        // add child Node
+        if (!processH6Sections) {
+            if (!h3Section) {
+                h3Section = addChildNode(h2Section, h3Section, childNode);
                 continue;
             }
 
             h4Section = addChildNode(h3Section, h4Section, childNode);
-        } else {
-            h3Section = addChildNode(h2Section, h3Section, childNode);
+            continue;
         }
+
+
+        if (nodeName === 'h5') {
+            const id = getAttribute(childNode, 'id');
+            const headingText = getHeadingText(childNode);
+
+            assert(h4Section, `h4 section must be initialized before adding an h5 section: ${headingText}`)
+            h5Section = addSection(h4Section, id, headingText, getText(childNode), childNode);
+
+            h6Section = null;
+            continue;
+        }
+
+        if (nodeName === 'h6') {
+            const id = getAttribute(childNode, 'id');
+            const headingText = getHeadingText(childNode);
+
+            assert(h5Section, `h5 section must be initialized before adding an h6 section: ${headingText}`)
+            h6Section = addSection(h5Section, id, headingText, getText(childNode), childNode);
+            continue;
+        }
+
+
+        // add child Node
+        if (!h5Section) {
+            h5Section = addChildNode(h4Section, h5Section, childNode);
+            continue;
+        }
+
+        h6Section = addChildNode(h5Section, h6Section, childNode);
     }
 
     return h2Section;
@@ -195,6 +218,7 @@ function parseMainElement(root: Section, mainNode: ASTNode): void {
         }
     }
 }
+
 
 
 function parseSpec(doc: Document): Spec {
@@ -235,6 +259,8 @@ function parseSpec(doc: Document): Spec {
         }
     }
 
+    mergeNestedPrefaces(root);
+
     return new Spec(header, root, doc);
 }
 
@@ -250,4 +276,8 @@ function parseSpec(doc: Document): Spec {
     let spec = parseSpec(doc);
     const rootPath = path.join(__dirname, 'data', org);
     await spec.save(rootPath);
-})();
+})().catch((err) => {
+    console.error(err);
+    console.error(err.stack);
+    process.exit(-1);
+});
