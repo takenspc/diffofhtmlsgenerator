@@ -49,7 +49,9 @@ const h2HavingH4 = new Set([
 
 const h4HavingH6 = new Set([
     'the-img-element',
+    'media-elements',
     'the-input-element',
+    'the-canvas-element',
 ]);
 
 //

@@ -66,12 +66,16 @@ function normalizeHeadingText(original: string): string {
 
     // Common infrastructure → Common microsyntaxes → Colours
     //  The elements of HTML → Forms → The input element → States of the type attribute → Colour state (type=color)
+    // The elements of HTML → Scripting → The canvas element → Colour spaces and colour correction
     headingText = headingText.replace('Colors', 'Colours');
-    headingText = headingText.replace('Color state', 'Colour state');
+    headingText = headingText.replace('Color ', 'Colour ');
+    headingText = headingText.replace('color ', 'colour ');
 
     // The elements of HTML → Forms → The input element → Common event behaviours
     headingText = headingText.replace('behaviors', 'behaviours');
 
+    // The elements of HTML → Embedded content → Media elements → Synchronising multiple media elements
+    headingText = headingText.replace('Synchronizing', 'Synchronising');
 
     // The HTML syntax
     // The XHTML syntax
