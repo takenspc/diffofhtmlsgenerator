@@ -175,7 +175,7 @@ export function parseSpec(doc: Document): Spec {
 
         if (nodeName === 'h5') {
             const id = getAttribute(childNode, 'id');
-            let headingText = getHeadingText(childNode);
+            const headingText = getHeadingText(childNode);
 
             assert(h4Section, `h4 section must be initialized before adding an h5 section: ${headingText}`)
             h5Section = addSection(h4Section, id, headingText, getText(childNode), childNode);
@@ -186,7 +186,7 @@ export function parseSpec(doc: Document): Spec {
 
         if (nodeName === 'h6') {
             const id = getAttribute(childNode, 'id');
-            let headingText = getHeadingText(childNode);
+            const headingText = getHeadingText(childNode);
 
             assert(h5Section, `h5 section must be initialized before adding an h6 section: ${headingText}`)
             h6Section = addSection(h5Section, id, headingText, getText(childNode), childNode);
