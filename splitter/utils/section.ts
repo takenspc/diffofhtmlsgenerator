@@ -65,7 +65,13 @@ function normalizeHeadingText(original: string): string {
     headingText = headingText.replace('Plugin Content Handlers', 'Plugins');
 
     // Common infrastructure → Common microsyntaxes → Colours
+    //  The elements of HTML → Forms → The input element → States of the type attribute → Colour state (type=color)
     headingText = headingText.replace('Colors', 'Colours');
+    headingText = headingText.replace('Color state', 'Colour state');
+
+    // The elements of HTML → Forms → The input element → Common event behaviours
+    headingText = headingText.replace('behaviors', 'behaviours');
+
 
     // The HTML syntax
     // The XHTML syntax
