@@ -46,13 +46,7 @@ export async function deploy(): Promise<void> {
 
     const indexRef = firebaseRef.child('index');
     indexRef.set(diffEntries);
-    log(['deploy', 'index', 'end']);
-
-    log(['deploy', 'diff', 'start']);
-    const diffRef = firebaseRef.child('diff');
-    await deployDiff(diffRoot, diffEntries, diffRef);
-    log(['deploy', 'diff', 'end']);
-    
+    log(['deploy', 'index', 'end']);  
 
     log(['deploy', 'update', 'start']);
     await computeUpdateFromFirebase(indexRef, diffEntries);
@@ -73,6 +67,12 @@ export async function deploy(): Promise<void> {
     const updateRef = firebaseRef.child('update');
     await updateRef.push(data);
     log(['deploy', 'update', 'end']);
+
+    log(['deploy', 'diff', 'start']);
+    const diffRef = firebaseRef.child('diff');
+    await deployDiff(diffRoot, diffEntries, diffRef);
+    log(['deploy', 'diff', 'end']);
+
 
     Firebase.goOffline();
 }
