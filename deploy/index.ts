@@ -21,11 +21,6 @@ function readDiffEntryFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
 }
 
 
-async function computeUpdateFromFirebase(indexRef: Firebase, diffEntry: DiffEntry[]): Promise<void> {
-    const oldDiffEntries = await readDiffEntryFromFirebase(indexRef);
-    await update(oldDiffEntries, diffEntry);
-}
-
 //
 // Entry point
 //
@@ -40,24 +35,25 @@ export async function deploy(): Promise<void> {
     const firebaseRef = new Firebase(URL);
     await firebaseRef.authWithCustomToken(AUTH_TOKEN);
 
-    log(['deploy', 'index', 'start']);
-    const diffRoot = path.join(__dirname, '..', 'diff', 'data');
-    const diffEntries = await readDiffEntry(diffRoot);
-
-    const indexRef = firebaseRef.child('index');
-    indexRef.set(diffEntries);
-    log(['deploy', 'index', 'end']);  
-
     log(['deploy', 'update', 'start']);
-    await computeUpdateFromFirebase(indexRef, diffEntries);
-    
-    const fetchPath = path.join(__dirname, '..', 'fetcher', 'data', 'fetch.json');
-    const fetchText = await readFile(fetchPath);
-    const fetchData = JSON.parse(fetchText);
+    const indexRef = firebaseRef.child('index');
+    const oldDiffEntries = await readDiffEntryFromFirebase(indexRef);
 
+    const diffRoot = path.join(__dirname, '..', 'diff', 'data');
+    const newDiffEntries = await readDiffEntry(diffRoot);
+
+    // update() writes updateData into disk
+    await update(oldDiffEntries, newDiffEntries);
+
+    // read updateData previously written
+    // I know this is redundant...
     const updatePath = path.join(__dirname, '..', 'updater', 'data', 'update.json');
     const updateText = await readFile(updatePath);
     const updateData = JSON.parse(updateText);
+
+    const fetchPath = path.join(__dirname, '..', 'fetcher', 'data', 'fetch.json');
+    const fetchText = await readFile(fetchPath);
+    const fetchData = JSON.parse(fetchText);
 
     const data = {
         datetime: fetchData.time,
@@ -68,9 +64,13 @@ export async function deploy(): Promise<void> {
     await updateRef.push(data);
     log(['deploy', 'update', 'end']);
 
+    log(['deploy', 'index', 'start']);
+    indexRef.set(newDiffEntries);
+    log(['deploy', 'index', 'end']);  
+
     log(['deploy', 'diff', 'start']);
     const diffRef = firebaseRef.child('diff');
-    await deployDiff(diffRoot, diffEntries, diffRef);
+    await deployDiff(diffRoot, newDiffEntries, diffRef);
     log(['deploy', 'diff', 'end']);
 
 
