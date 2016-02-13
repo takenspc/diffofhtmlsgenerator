@@ -56,30 +56,46 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
 
 
 function normalizeHeadingText(original: string): string {
+    const replaceMap = new Map<string, string>([
+        // Format:
+        // [w3c text, whatwg text],
+        //
+        ['’', '\''],
+
+        // Common infrastructure
+        ['Plugin Content Handlers', 'Plugins'],
+        ['Colors', 'Colours'],
+
+        // Requirements for providing text to act as an alternative for images
+        ['A link or button containing nothing but an image', 'A link or button containing nothing but the image'],
+        ['Images of text', 'Text that has been rendered to a graphic for typographical effect'],
+
+        // Media elements
+        // Synchronising multiple media elements
+        ['Synchronizing', 'Synchronising'],
+
+        // The input element
+        // Colour state (type=color)
+        ['Color ', 'Colour '],
+        // Implementation notes regarding localization of form controls
+        ['implementation notes', 'Implementation notes'],
+        // Common event behaviours
+        ['behaviors', 'behaviours'],
+
+        // The canvas element
+        // Colour spaces and colour correction
+        ['color ', 'colour '],
+
+        // Serialising HTML fragments
+        // Serialising XHTML fragments
+        ['Serializing', 'Serialising'],
+    ]);
+
     let headingText = original;
+    for (const pair of replaceMap) {
+        headingText = headingText.replace(pair[0], pair[1]);
+    }
 
-    // ’ → '
-    headingText = headingText.replace('’', '\'');
-
-    // Common infrastructure → Terminology → Plugins
-    headingText = headingText.replace('Plugin Content Handlers', 'Plugins');
-
-    // Common infrastructure → Common microsyntaxes → Colours
-    //  The elements of HTML → Forms → The input element → States of the type attribute → Colour state (type=color)
-    // The elements of HTML → Scripting → The canvas element → Colour spaces and colour correction
-    headingText = headingText.replace('Colors', 'Colours');
-    headingText = headingText.replace('Color ', 'Colour ');
-    headingText = headingText.replace('color ', 'colour ');
-
-    // The elements of HTML → Forms → The input element → Common event behaviours
-    headingText = headingText.replace('behaviors', 'behaviours');
-
-    // The elements of HTML → Embedded content → Media elements → Synchronising multiple media elements
-    headingText = headingText.replace('Synchronizing', 'Synchronising');
-
-    // The HTML syntax
-    // The XHTML syntax
-    headingText = headingText.replace('Serializing', 'Serialising');
     return headingText;
 }
 
