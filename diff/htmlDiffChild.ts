@@ -1,4 +1,5 @@
 'use strict';
+import * as assert from 'assert';
 import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
@@ -13,45 +14,69 @@ export interface LineDiff {
     b: diff.IDiffResult[]
 }
 
-function convertDiffResultsToLineDiffs(rawDiffs: diff.IDiffResult[]): LineDiff[] {
-    const lines: LineDiff[] = [];
+function insertEmptyLinesIfNeeded(lineDiff: LineDiff) {
+    const a = lineDiff.a;
+    const b = lineDiff.b;
 
-    let line: LineDiff = { a: [], b: [] };
-    lines.push(line);
-
-    for (const rawDiff of rawDiffs) {
-        const values = rawDiff.value.split('\n');
-
-        // NEED COMMENT
-        for (let j = 0; j < values.length; j++) {
-            // NEED COMMENT
-            if (j > 0) {
-                line = { a: [], b: [] };
-                lines.push(line);
-            }
-
-            const hunk = {
-                value: values[j],
-                added: rawDiff.added,
-                removed: rawDiff.removed,
-            };
-
-            if (hunk.removed || (!hunk.added && !hunk.removed)) {
-                line.a.push(hunk);
-            }
-
-            if (hunk.added || (!hunk.added && !hunk.removed)) {
-                line.b.push(hunk);
-            }
-        }
-
+    while (a.length < b.length) {
+        a.push({ value: '', removed: true });
     }
 
-    return lines;
+    while (b.length < a.length) {
+        b.push({ value: '', added: true });
+    }
 }
 
-function splitLineHunkIntoCharHunks(line: LineDiff, hunkA: diff.IDiffResult, hunkB: diff.IDiffResult): void {
-    const rawDiffs = diff.diffWords(hunkA.value, hunkB.value);
+function convertDiffResultsToLineDiff(rawDiffs: diff.IDiffResult[]): LineDiff {
+    const lineDiff: LineDiff = {
+        a: [],
+        b: [],
+    };
+
+    for (const rawDiff of rawDiffs) {
+        const lines = rawDiff.value.split('\n');
+
+        // remove empty line
+        if (rawDiff.value.startsWith('\n')) {
+            lines.shift();
+        }
+        if (rawDiff.value.endsWith('\n')) {
+            lines.pop();
+        }
+
+        const added = rawDiff.added;
+        const removed = rawDiff.removed;
+        const isLineSame = !added && !removed;
+
+        if (isLineSame) {
+            insertEmptyLinesIfNeeded(lineDiff);
+        }
+
+        for (const line of lines) {
+            const hunk = {
+                value: line,
+                added: added,
+                removed: removed,
+            };
+
+            if (hunk.removed || isLineSame) {
+                lineDiff.a.push(hunk);
+            }
+
+            if (hunk.added || isLineSame) {
+                lineDiff.b.push(hunk);
+            }
+        }
+    }
+
+    insertEmptyLinesIfNeeded(lineDiff);
+    assert.strictEqual(lineDiff.a.length, lineDiff.b.length, 'lineDiff must have same number of lines');
+
+    return lineDiff;
+}
+
+function splitLineIntoWordDiffs(wordDiff: LineDiff, lineA: string, lineB: string): void {
+    const rawDiffs = diff.diffWords(lineA, lineB);
     for (const rawDiff of rawDiffs) {
         const hunk = {
             value: rawDiff.value,
@@ -60,57 +85,43 @@ function splitLineHunkIntoCharHunks(line: LineDiff, hunkA: diff.IDiffResult, hun
         };
 
         if (hunk.removed || (!hunk.added && !hunk.removed)) {
-            line.a.push(hunk);
+            wordDiff.a.push(hunk);
         }
 
         if (hunk.added || (!hunk.added && !hunk.removed)) {
-            line.b.push(hunk);
+            wordDiff.b.push(hunk);
         }
     }
 }
 
-function splitLinesIntoChars(oldLines: LineDiff[]): LineDiff[] {
-    const newLines: LineDiff[] = [];
+function splitLinesIntoWordDiffs(lineDiff: LineDiff): LineDiff[] {
+    const wordDiffs: LineDiff[] = [];
+    
+    const a = lineDiff.a;
+    const b = lineDiff.b;
 
-    for (const oldLine of oldLines) {
-        const newLine: LineDiff = { a: [], b: [] };
-        newLines.push(newLine);
+    for (let i = 0; i < a.length; i++) {
+        const wordDiff: LineDiff = { a: [], b: [] };
+        wordDiffs.push(wordDiff);
 
-        const a = oldLine.a;
-        const b = oldLine.b;
-        const len = (a.length < b.length) ? b.length : a.length;
-
-        // for each hunk of linediff
-        for (let i = 0; i < len; i++) {
-            // in case there are only b
-            if (a.length <= i) {
-                newLine.b.push(b[i]);
-                continue;
-            }
-
-            // in case there are only a
-            if (b.length <= i) {
-                newLine.a.push(a[i]);
-                continue;
-            }
-
-            // modified skip
-            const hunkA = a[i];
-            const hunkB = b[i];
-            if (!hunkA.added && !hunkA.removed) {
-                newLine.a.push(hunkA);
-                newLine.b.push(hunkB);
-                continue;
-            }
-
-            splitLineHunkIntoCharHunks(newLine, hunkA, hunkB);
+        const lineHunkA = a[i];
+        const lineHunkB = b[i];
+        
+        // in case, the line is same
+        if (!lineHunkA.removed && !lineHunkB.added) {
+            wordDiff.a.push(lineHunkA);
+            wordDiff.b.push(lineHunkB);
+            continue;
         }
+
+        // the line is not same
+        splitLineIntoWordDiffs(wordDiff, lineHunkA.value, lineHunkB.value);
     }
 
-    return newLines;
+    return wordDiffs;
 }
 
-function computeDiff(a: string, b: string) {
+function computeDiff(a: string, b: string): LineDiff[] {
     // XXX strip trailing spaces
     a = a.replace(/ +\n/g, '\n');
     b = b.replace(/ +\n/g, '\n');
@@ -119,10 +130,10 @@ function computeDiff(a: string, b: string) {
         newlineIsToken: true
     });
 
-    let lines = convertDiffResultsToLineDiffs(rawDiffs);
-    lines = splitLinesIntoChars(lines);
+    const lineDiff = convertDiffResultsToLineDiff(rawDiffs);
+    const wordDiff = splitLinesIntoWordDiffs(lineDiff);
 
-    return lines;
+    return wordDiff;
 }
 
 function readFileIfExists(section: DiffEntry, org: string, srcDir: string, index: number): Promise<string> {
