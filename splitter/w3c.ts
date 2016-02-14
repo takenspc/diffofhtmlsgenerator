@@ -39,10 +39,10 @@ const h2HavingH4 = new Set([
     'editing',
     'browsers',
     'webappapis',
-    'syntax'
+    'syntax',
     // 'the-xhtml-syntax',
     // 'rendering',
-    // 'obsolete',
+    'obsolete',
     // 'iana',
 
 ]);
@@ -51,7 +51,11 @@ const h4HavingH6 = new Set([
     'the-img-element',
     'media-elements',
     'the-input-element',
+    'the-script-element',
     'the-canvas-element',
+    'scripting-processing-model',
+    'the-navigator-object',
+    'requirements-for-implementations',
 ]);
 
 //
