@@ -22,18 +22,10 @@ export const textLevelElements: Set<string> = new Set([
     'a',
     'em',
     'strong',
-    'small',
-    'cite',
-    'q',
     'dfn',
-    'abbr',
     'code',
     'var',
-    'samp',   
-    'kbd',
     'i',
-    'b',
-    'mark',
 ]);
 
 //
