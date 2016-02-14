@@ -123,8 +123,8 @@ export function addSection(parent: Section, id: string, headingText: string, ori
     // preface
     if (id === '__pre__') {
         id = parent.id;
-        normalizedHeadingText = '(preface)';
-        originalHeadingText = `(preface of ${parent.originalHeadingText})`;
+        normalizedHeadingText = `(preface of “${parent.headingText}”)`;
+        originalHeadingText = `(preface of “${parent.originalHeadingText}”)`;
         // move parent.nodes which containing one h1-h6 element to __pre__
         nodes = parent.nodes.concat(nodes);
         parent.nodes = [];
