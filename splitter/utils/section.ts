@@ -118,11 +118,16 @@ export function addSection(parent: Section, id: string, headingText: string, ori
     let path = getSafePath(normalizedHeadingText);
     path = (parent) ? parent.path + '/' + path : path;
 
+    let nodes = [childNode];
+
     // preface
     if (id === '__pre__') {
         id = parent.id;
         normalizedHeadingText = '(preface)';
         originalHeadingText = `(preface of ${parent.originalHeadingText})`;
+        // move parent.nodes which containing one h1-h6 element to __pre__
+        nodes = parent.nodes.concat(nodes);
+        parent.nodes = [];
     }
 
     const section: Section = {
@@ -132,7 +137,7 @@ export function addSection(parent: Section, id: string, headingText: string, ori
         headingText: normalizedHeadingText,
         originalHeadingText: originalHeadingText,
 
-        nodes: [childNode],
+        nodes: nodes,
         hash: null,
 
         sections: [],
@@ -158,6 +163,7 @@ export function mergeNestedPrefaces(parent: Section): void {
         const section = parent.sections[0];
         if (section.id === parent.id) {
             // merge __pre__ into root
+            assert(parent.nodes.length === 0, `section which have __pre__ must not have nodes: ${parent.path}`);
             parent.nodes = section.nodes;
             // remove __pre__
             parent.sections = [];
