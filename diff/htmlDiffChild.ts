@@ -51,9 +51,7 @@ function convertDiffResultsToLineDiffs(rawDiffs: diff.IDiffResult[]): LineDiff[]
 }
 
 function splitLineHunkIntoCharHunks(line: LineDiff, hunkA: diff.IDiffResult, hunkB: diff.IDiffResult): void {
-    const rawDiffs = diff.diffChars(hunkA.value, hunkB.value, {
-        ignoreWhitespace: true,
-    });
+    const rawDiffs = diff.diffWords(hunkA.value, hunkB.value);
     for (const rawDiff of rawDiffs) {
         const hunk = {
             value: rawDiff.value,
