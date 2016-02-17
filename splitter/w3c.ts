@@ -77,8 +77,7 @@ function getHeadingText(node: ASTNode): string {
 //
 function* nextElement(sectionElement: ASTNode): Iterable<ASTNode> {
     for (const childNode of sectionElement.childNodes) {
-        if (hasClassName(childNode, 'div', 'impl') ||
-            (childNode.nodeName === 'div' && getAttribute(childNode, 'data-fill-with'))) {
+        if (childNode.nodeName === 'div' || childNode.nodeName === 'section') {
             yield* nextElement(childNode);
         } else {
             yield childNode;
