@@ -151,13 +151,16 @@ export function addSection(parent: Section, id: string, headingText: string, ori
 
 
 //
-// move __pre__/__pre__ into parent
+// fixup sections 
 //
-export function mergeNestedPrefaces(parent: Section): void {
+export function fixupSection(parent: Section): void {
     for (const section of parent.sections) {
-        mergeNestedPrefaces(section);
+        fixupSection(section);
     }
 
+    //
+    // move __pre__/__pre__ into parent
+    //
     // if parent has only __pre__, merge __pre__ into parent
     if (parent.sections.length === 1) {
         const section = parent.sections[0];
@@ -170,7 +173,9 @@ export function mergeNestedPrefaces(parent: Section): void {
         }
     }
 
+    //
     // remove trailing whitespace text nodes
+    //
     for (let i = parent.nodes.length - 1; 0 <= i; --i) {
         const node = parent.nodes[i];
         if (node.nodeName !== '#text' || node.value.trim() !== '') {

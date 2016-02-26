@@ -5,7 +5,7 @@ import { ASTNode } from 'parse5';
 import { getText, getAttribute } from '../html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, Header, addSection, addChildNode, mergeNestedPrefaces } from './utils/section';
+import { Section, Header, addSection, addChildNode, fixupSection } from './utils/section';
 
 //
 // Config
@@ -207,7 +207,7 @@ export function parseSpec(doc: Document): Spec {
 
     }
 
-    mergeNestedPrefaces(root);
+    fixupSection(root);
 
     return new Spec(header, root, doc);
 }
