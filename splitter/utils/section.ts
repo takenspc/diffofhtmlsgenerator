@@ -169,6 +169,15 @@ export function mergeNestedPrefaces(parent: Section): void {
             parent.sections = [];
         }
     }
+
+    // remove trailing whitespace text nodes
+    for (let i = parent.nodes.length - 1; 0 <= i; --i) {
+        const node = parent.nodes[i];
+        if (node.nodeName !== '#text' || node.value.trim() !== '') {
+            break;
+        }
+        parent.nodes.pop();
+    }
 }
 
 

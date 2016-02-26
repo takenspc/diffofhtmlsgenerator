@@ -86,15 +86,12 @@ function includeElement(context: FilterContext, node: ASTNode): boolean {
         hasClassName(node, 'div', 'status')) {
         return false;
     }
-    
-    // XXX splitter should not include <div class='impl'>
-    if (hasClassName(node, 'div', 'impl')) {
-        for (const childNode of node.childNodes) {
-            if (!childNode.nodeName.startsWith('#')) {
-                return true;
-            }
+
+    // XXX <span>
+    if (node.nodeName === 'span') {
+        if (node.childNodes.length === 0) {
+            return false;
         }
-        return false;
     }
 
     return true;
