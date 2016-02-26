@@ -125,9 +125,14 @@ export function addSection(parent: Section, id: string, headingText: string, ori
         id = parent.id;
         normalizedHeadingText = `(preface of “${parent.headingText}”)`;
         originalHeadingText = `(preface of “${parent.originalHeadingText}”)`;
-        // move parent.nodes which containing one h1-h6 element to __pre__
-        nodes = parent.nodes.concat(nodes);
-        parent.nodes = [];
+    }
+
+    if (parent) {
+        // move parent.nodes (h1-h6 elements) to its first section
+        if (parent.sections.length === 0) {
+            nodes = parent.nodes.concat(nodes);
+            parent.nodes = [];
+        }
     }
 
     const section: Section = {
@@ -146,6 +151,7 @@ export function addSection(parent: Section, id: string, headingText: string, ori
     if (parent) {
         parent.sections.push(section);
     }
+
     return section;
 }
 
