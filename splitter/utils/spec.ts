@@ -7,6 +7,25 @@ import { Document } from './document';
 import { Section, Header, toJSONEntry, nextLeafSection } from './section';
 
 
+function formatNode(node: ASTNode): string {
+    if (node.nodeName === '#text') {
+        return node.value;
+    }
+
+    let str = `<${node.tagName}${node.attrs.map((attr) => {
+        return ` ${attr.name}="${attr.value}"`;
+    }).join('')}>`
+    
+    for (const child of node.childNodes) {
+        str += formatNode(child);
+    }
+
+    str += `</${node.tagName}>`;
+
+    return str;
+}
+
+
 export class Spec {
     header: Header
     section: Section
@@ -19,6 +38,13 @@ export class Spec {
     }
 
     async saveHTML(rootPath: string, section: Section): Promise<any> {
+        const debugJSONPath = path.join(rootPath, section.path + '.json');
+        await mkdirp(path.dirname(debugJSONPath));
+        await writeFile(debugJSONPath, JSON.stringify(section.nodes.map((node) => {
+            return formatNode(node);
+        })));
+
+
         const text = this.document.getHTMLText(section.nodes);
         section.hash = sha256(text);
 
