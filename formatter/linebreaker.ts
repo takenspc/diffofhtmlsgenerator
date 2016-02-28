@@ -38,7 +38,7 @@ const breakBeforeStartTag = new Set([
     'ol',
     'p',
     'pre',
-    'section',
+    // 'section',
     'table',
     'tbody',
     'td',
