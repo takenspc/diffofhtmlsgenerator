@@ -86,6 +86,9 @@ function normalizeHeadingText(original: string): string {
         // Colour spaces and colour correction
         ['color ', 'colour '],
 
+        // Navigating to a fragment
+        ['fragment identifier', 'fragment'],
+
         // Serialising HTML fragments
         // Serialising XHTML fragments
         ['Serializing', 'Serialising'],
