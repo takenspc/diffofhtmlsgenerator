@@ -83,6 +83,7 @@ function filterAttrs(context: FilterContext, node: ASTNode): void {
 //
 function includeElement(context: FilterContext, node: ASTNode): boolean {
     if (hasClassName(node, 'a', 'self-link') ||
+        hasClassName(node, 'span', 'dfn-panel') ||
         hasClassName(node, 'div', 'status')) {
         return false;
     }

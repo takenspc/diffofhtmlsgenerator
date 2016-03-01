@@ -61,14 +61,28 @@ const h4HavingH6 = new Set([
 //
 // Heading text
 //
-function getHeadingText(node: ASTNode): string {
+function* nextText(node: ASTNode): Iterable<ASTNode> {
     for (const childNode of node.childNodes) {
-        if (hasClassName(childNode, 'span', 'content')) {
-            return getText(childNode).replace(/\s+/g, ' ').trim();
+        if (childNode.nodeName === '#text') {
+            yield childNode;
+        } else {
+            if (!hasClassName(childNode, 'span', 'secno') &&
+                !hasClassName(childNode, 'span', 'dfn-panel') &&
+                !hasClassName(childNode, 'a', 'self-link')) {
+                yield* nextText(childNode);
+            }
         }
     }
+}
 
-    throw new Error('Unexpected heading format');
+function getHeadingText(node: ASTNode): string {
+    const buff: string[] = [];
+
+    for (const textNode of nextText(node)) {
+        buff.push(textNode.value);
+    }
+
+    return buff.join('').trim().replace(/\s+/, ' ');
 }
 
 
