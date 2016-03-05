@@ -45,8 +45,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
         assert(parent, '__pre__ must have a parent:' + formatStartTag(childNode));
         const id = '__pre__';
         const headingText = '__pre__';
-        const originalHeadingText = '__pre__';
-        return addSection(parent, id, headingText, originalHeadingText, childNode);
+        return addSection(parent, id, headingText, childNode);
     }
 
     // normal
@@ -114,7 +113,8 @@ function getSafePath(value: string): string {
     return safePath;
 }
 
-export function addSection(parent: Section, id: string, headingText: string, originalHeadingText: string, childNode: ASTNode): Section {
+export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
+    let originalHeadingText = headingText;
     let normalizedHeadingText = normalizeHeadingText(headingText);
 
     // path is not for human, for system

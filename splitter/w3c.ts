@@ -134,7 +134,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             }
 
             const headingText = getHeadingText(childNode);
-            h2Section = addSection(null, id, headingText, getText(childNode), childNode);
+            h2Section = addSection(null, id, headingText, childNode);
 
             h3Section = null;
             h4Section = null;
@@ -150,7 +150,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             const headingText = getHeadingText(childNode);
 
             assert(h2Section, `h2 section must be initialized before adding an h3 section: ${headingText}`)
-            h3Section = addSection(h2Section, id, headingText, getText(childNode), childNode);
+            h3Section = addSection(h2Section, id, headingText, childNode);
 
             h4Section = null;
             h5Section = null;
@@ -171,7 +171,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             const headingText = getHeadingText(childNode);
 
             assert(h3Section, `h3 section must be initialized before adding an h4 section: ${headingText}`)
-            h4Section = addSection(h3Section, id, headingText, getText(childNode), childNode);
+            h4Section = addSection(h3Section, id, headingText, childNode);
 
             h5Section = null;
             h6Section = null;
@@ -196,7 +196,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             const headingText = getHeadingText(childNode);
 
             assert(h4Section, `h4 section must be initialized before adding an h5 section: ${headingText}`)
-            h5Section = addSection(h4Section, id, headingText, getText(childNode), childNode);
+            h5Section = addSection(h4Section, id, headingText, childNode);
 
             h6Section = null;
             continue;
@@ -207,7 +207,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             const headingText = getHeadingText(childNode);
 
             assert(h5Section, `h5 section must be initialized before adding an h6 section: ${headingText}`)
-            h6Section = addSection(h5Section, id, headingText, getText(childNode), childNode);
+            h6Section = addSection(h5Section, id, headingText, childNode);
             continue;
         }
 
