@@ -76,8 +76,6 @@ function normalizeHeadingText(original: string): string {
         // The input element
         // Colour state (type=color)
         ['Color ', 'Colour '],
-        // Implementation notes regarding localization of form controls
-        ['implementation notes', 'Implementation notes'],
         // Common event behaviours
         ['behaviors', 'behaviours'],
 
