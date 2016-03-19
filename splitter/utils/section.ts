@@ -65,6 +65,9 @@ function normalizeHeadingText(original: string): string {
         ['Plugin Content Handlers', 'Plugins'],
         ['Colors', 'Colours'],
 
+        // The elements of HTML
+        ['The root element', 'The document element'],
+
         // Requirements for providing text to act as an alternative for images
         ['A link or button containing nothing but an image', 'A link or button containing nothing but the image'],
         ['Images of text', 'Text that has been rendered to a graphic for typographical effect'],
