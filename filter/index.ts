@@ -88,13 +88,6 @@ function includeElement(context: FilterContext, node: ASTNode): boolean {
         return false;
     }
 
-    // XXX <span>
-    if (node.nodeName === 'span') {
-        if (node.childNodes.length === 0) {
-            return false;
-        }
-    }
-
     return true;
 }
 
