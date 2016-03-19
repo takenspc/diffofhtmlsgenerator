@@ -74,7 +74,7 @@ interface UpdateSubEntry {
     diffStat: string
 }
 
-interface UpdateEntry {
+export interface UpdateEntry {
     path: string
     headingText: string
     whatwg: UpdateSubEntry

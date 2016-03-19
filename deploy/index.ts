@@ -3,8 +3,9 @@ import * as path from 'path';
 import * as Firebase from 'firebase';
 import { readFile, log } from '../utils';
 import { DiffEntry, nextLeafDiffEntry, readDiffEntry } from '../diffEntry';
-import { deployDiff } from './diff';
 import { update } from '../updater';
+import { deployDiff } from './diff';
+import { tweet } from './tweet';
 
 
 //
@@ -62,6 +63,7 @@ export async function deploy(): Promise<void> {
 
     const updateRef = firebaseRef.child('update');
     await updateRef.push(data);
+    await tweet(fetchData.time, updateData);
     log(['deploy', 'update', 'end']);
 
     log(['deploy', 'index', 'start']);
