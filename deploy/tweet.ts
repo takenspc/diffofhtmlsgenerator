@@ -1,10 +1,11 @@
 'use strict'; // XXX
 import * as path from 'path';
+import * as moment from 'moment';
 import * as Twitter from 'twitter';
 import { UpdateEntry } from '../updater';
 
 
-function isUpdated(updateEntries: UpdateEntry[], org: string, orgTitle: string): string {
+function createMessage(updateEntries: UpdateEntry[], org: string, orgTitle: string): string {
     var updated = updateEntries.filter(function(updateEntry) {
         return !!updateEntry[org];
     });
@@ -21,13 +22,16 @@ function createTweet(updatedTime: number, updateEntries: UpdateEntry[]) {
 
     const updated = moment(updatedTime).utc()
     const momentFormat = 'YYYY-M-D (UTC)';
-
     messages.push(updated.format(momentFormat));
-    messages.push(updateEntries, 'whatwg', 'WHATWG HTML Standard');
-    messages.push(updateEntries, 'w3c', 'W3C HTML 5.1');
+
+    messages.push(createMessage(updateEntries, 'whatwg', 'WHATWG HTML Standard'));
+    messages.push(createMessage(updateEntries, 'w3c', 'W3C HTML 5.1'));
+    messages.push('https://diffofhtmls.herokuapp.com/log/#' + updatedTime);
+
+    const message = messages.join(' ');
 
     const tweet = {
-        status: messages.join(' '),
+        status: message,
     }
     return tweet;
 }
