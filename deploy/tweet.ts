@@ -11,24 +11,24 @@ function createMessage(updateEntries: UpdateEntry[], org: string, orgTitle: stri
     });
 
     if (updated.length > 0) {
-        return orgTitle + ' is updated';
+        return orgTitle + ' is updated. ';
     }
 
-    return orgTitle + ' is not updated';
+    return orgTitle + ' is not updated. ';
 }
 
 function createTweet(updatedTime: number, updateEntries: UpdateEntry[]) {
     const messages = [];
 
     const updated = moment(updatedTime).utc()
-    const momentFormat = 'YYYY-M-D (UTC)';
+    const momentFormat = 'YYYY-M-D (UTC): ';
     messages.push(updated.format(momentFormat));
 
     messages.push(createMessage(updateEntries, 'whatwg', 'WHATWG HTML Standard'));
     messages.push(createMessage(updateEntries, 'w3c', 'W3C HTML 5.1'));
     messages.push('https://diffofhtmls.herokuapp.com/log/#' + updatedTime);
 
-    const message = messages.join(' ');
+    const message = messages.join('');
 
     const tweet = {
         status: message,
