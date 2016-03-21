@@ -89,6 +89,10 @@ function normalizeHeadingText(original: string): string {
         // Navigating to a fragment
         ['fragment identifier', 'fragment'],
 
+        // Scripting
+        // HostPromiseRejectionTracker(promise, operation)
+        ['The HostPromiseRejectionTracker implementation', 'HostPromiseRejectionTracker(promise, operation)'],
+
         // Serialising HTML fragments
         // Serialising XHTML fragments
         ['Serializing', 'Serialising'],
