@@ -81,6 +81,8 @@ function normalizeHeadingText(original: string): string {
         ['Color ', 'Colour '],
         // Common event behaviours
         ['behaviors', 'behaviours'],
+        // APIs for text field selections
+        ['APIs for text field selections', 'APIs for the text field selections'],
 
         // The canvas element
         // Colour spaces and colour correction
