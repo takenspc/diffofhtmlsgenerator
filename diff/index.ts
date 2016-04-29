@@ -28,15 +28,21 @@ function moveEntryBefore(entries: JSONEntry[], targetId: string, referenceId: st
         tmp.push(entry);
     }
     assert(target, `There must be #${targetId} section`);
-    assert(reference, `There must be #${referenceId} section`);
+    if (referenceId) {
+        assert(reference, `There must be #${referenceId} section`);
+    }
 
-    const reorderd: JSONEntry[]= [];    
-    for (const entry of tmp) {
-        if (entry === reference) {
-            reorderd.push(target);
+    let reorderd: JSONEntry[]= [];
+    if (referenceId) {
+        for (const entry of tmp) {
+            if (entry === reference) {
+                reorderd.push(target);
+            }
+
+            reorderd.push(entry);
         }
-
-        reorderd.push(entry);
+    } else {
+        reorderd = tmp.concat(target);
     }
 
     return reorderd;
@@ -78,6 +84,12 @@ function reoderW3C(entries: JSONEntry[]): void {
     assert(processingModel, 'w3c entries must have #scripting-processing-model section');
     // Move 'Calling scripts' before 'Killing scripts'
     processingModel.sections = moveEntryBefore(processingModel.sections, 'calling-scripts', 'killing-scripts');
+    
+    // Session history and navigation
+    const history = getEntryById(entries, 'session-history-and-navigation');
+    assert(history, 'w3c entries must have #session-history-and-navigation section');
+    // Move 'Calling scripts' before 'Killing scripts'
+    history.sections = moveEntryBefore(history.sections, 'the-location-interface', null);
 }
 
 
