@@ -55,7 +55,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
 
 
 function normalizeHeadingText(original: string): string {
-    const replaceMap = new Map<string, string>([
+    const replaceMap = new Map<any, string>([
         // Format:
         // [w3c text, whatwg text],
         //
@@ -94,6 +94,9 @@ function normalizeHeadingText(original: string): string {
         // Scripting
         // HostPromiseRejectionTracker(promise, operation)
         ['The HostPromiseRejectionTracker implementation', 'HostPromiseRejectionTracker(promise, operation)'],
+
+        // Matching HTML elements using selectors and CSS
+        [/^Matching HTML elements using selectors$/, 'Matching HTML elements using selectors and CSS'], 
 
         // Serialising HTML fragments
         // Serialising XHTML fragments
