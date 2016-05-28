@@ -48,14 +48,13 @@ const h2HavingH4 = new Set([
 ]);
 
 const h4HavingH6 = new Set([
-    'the-img-element',
-    'the-media-elements',
-    'the-input-element',
-    'the-script-element',
-    'the-canvas-element',
-    'scripting-processing-model',
-    'the-navigator-object',
-    'requirements-for-implementations',
+    'The elements of HTML/Embedded content/The img element',
+    'The elements of HTML/Embedded content/Media elements',
+    'The elements of HTML/Forms/The input element',
+    'The elements of HTML/Scripting/The script element',
+    'The elements of HTML/Scripting/The canvas element',
+    'Web application APIs/Scripting/Processing model',
+    'Web application APIs/System state and capabilities/The Navigator object',
 ]);
 
 //
@@ -175,7 +174,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
 
             h5Section = null;
             h6Section = null;
-            processH6Sections = h4HavingH6.has(id);
+            processH6Sections = h4HavingH6.has(h4Section.path);
             continue;
         }
 
