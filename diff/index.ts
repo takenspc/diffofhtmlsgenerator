@@ -78,18 +78,6 @@ function reoderW3C(entries: JSONEntry[]): void {
     assert(embedded, 'w3c entries must have #semantics-embedded-content section');
     // Move 'The source element' before 'The source element when used with the picture element'
     embedded.sections = moveEntryBefore(embedded.sections, 'the-source-element', 'the-source-element-when-used-with-the-picture-element');
-    
-    // 7 Web application APIs
-    const processingModel = getEntryById(entries, 'scripting-processing-model');
-    assert(processingModel, 'w3c entries must have #scripting-processing-model section');
-    // Move 'Calling scripts' before 'Killing scripts'
-    processingModel.sections = moveEntryBefore(processingModel.sections, 'calling-scripts', 'killing-scripts');
-    
-    // Session history and navigation
-    const history = getEntryById(entries, 'session-history-and-navigation');
-    assert(history, 'w3c entries must have #session-history-and-navigation section');
-    // Move 'Calling scripts' before 'Killing scripts'
-    history.sections = moveEntryBefore(history.sections, 'the-location-interface', null);
 }
 
 
