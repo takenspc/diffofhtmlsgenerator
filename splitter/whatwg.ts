@@ -31,7 +31,7 @@ const h4HavingH6 = new Set([
     'the-input-element',
     'the-script-element',
     'the-canvas-element',
-    'processing-model-7',
+    'scripting-processing-model',
     'the-navigator-object',
 ]);
 
