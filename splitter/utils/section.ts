@@ -97,6 +97,9 @@ function normalizeHeadingText(original: string): string {
 
         // Matching HTML elements using selectors and CSS
         [/^Matching HTML elements using selectors$/, 'Matching HTML elements using selectors and CSS'], 
+        
+        // Drag-and-drop processing model
+        ['Drag-and-drop processing model', 'Processing model'],
 
         // Serialising HTML fragments
         // Serialising XHTML fragments
