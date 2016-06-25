@@ -26,9 +26,9 @@ function formatNode(node: ASTNode): string {
 
 
 export class Spec {
-    header: Header
-    section: Section
-    document: Document
+    private header: Header
+    private section: Section
+    private document: Document
 
     constructor(header: Header, section: Section, document: Document) {
         this.header = header;

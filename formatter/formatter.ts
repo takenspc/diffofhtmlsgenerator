@@ -9,7 +9,7 @@ import { BufferList } from './';
 // Context
 //
 class FormatContext {
-    parentStack: ASTNode[] = []
+    private parentStack: ASTNode[] = []
     bufferList: BufferList
     
     constructor(bufferList: BufferList) {

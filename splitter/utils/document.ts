@@ -5,8 +5,8 @@ import { ASTNode, parse } from 'parse5';
 // Document
 //
 export class Document {
-    node: ASTNode
-    text: string
+    private node: ASTNode
+    private text: string
 
     constructor(text: string, node: ASTNode) {
         this.text = text;

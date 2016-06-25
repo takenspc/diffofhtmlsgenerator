@@ -76,10 +76,10 @@ const breakBeforeEndTag: Set<string> = new Set([
 
 
 export class LineBreaker {
-    node: ASTNode
-    nodeName: string
+    private node: ASTNode
+    private nodeName: string
     depth: number
-    didBreakAfterStartTag: boolean
+    private didBreakAfterStartTag: boolean
     
     constructor(node: ASTNode, depth: number) {
         this.node = node;

@@ -7,7 +7,7 @@ import * as consts from './consts';
 // Context
 //
 class FilterContext {
-    parentStack: ASTNode[] = []
+    private parentStack: ASTNode[] = []
     
     get parent(): ASTNode {
         const length = this.parentStack.length;
