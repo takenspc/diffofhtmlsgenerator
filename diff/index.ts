@@ -20,11 +20,11 @@ function moveEntryBefore(entries: JSONEntry[], targetId: string, referenceId: st
             continue;
         }
 
+        tmp.push(entry);
+
         if (entry.id === referenceId) {
             reference = entry;
         }
-
-        tmp.push(entry);
     }
     assert(target, `There must be #${targetId} section`);
     if (referenceId) {
@@ -41,7 +41,7 @@ function moveEntryBefore(entries: JSONEntry[], targetId: string, referenceId: st
             reorderd.push(entry);
         }
     } else {
-        reorderd = tmp.concat(target);
+        reorderd = tmp.concat([target]);
     }
 
     return reorderd;
