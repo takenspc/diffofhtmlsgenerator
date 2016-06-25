@@ -1,4 +1,3 @@
-'use strict';
 import * as path from 'path';
 import { fork } from 'child_process';
 import { IDiffResult } from 'diff';

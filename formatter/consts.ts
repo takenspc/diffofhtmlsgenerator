@@ -1,5 +1,3 @@
-'use strict';
-
 //
 // Void elements
 // https://html.spec.whatwg.org/multipage/syntax.html#void-elements

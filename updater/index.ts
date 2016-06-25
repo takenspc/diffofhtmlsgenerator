@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as path from 'path';
 import { readFile, writeFile, mkdirp } from '../utils';
 import { JSONEntry, DiffStat } from '../jsonEntry';

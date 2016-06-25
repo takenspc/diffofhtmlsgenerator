@@ -1,4 +1,3 @@
-'use strict';
 import { JSONEntry } from '../jsonEntry';
 import { DiffEntry, createStubDiffEntry } from '../diffEntry'
 

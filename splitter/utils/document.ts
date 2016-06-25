@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as fs from 'fs';
 import { ASTNode, parse } from 'parse5';
 

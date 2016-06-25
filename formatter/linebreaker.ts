@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import { ASTNode } from 'parse5';
 import { hasClassName } from '../html';
 import { BufferList } from './';

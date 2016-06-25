@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as path from 'path';
 import { fork } from 'child_process';
 import { log } from '../utils';

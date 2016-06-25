@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as path from 'path';
 import * as parse5 from 'parse5';
 import { readFile, writeFile, mkdirp, sha256, log } from '../utils';

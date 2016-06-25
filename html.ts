@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import { ASTNode } from 'parse5';
 
 export function getAttribute(node: ASTNode, attrName: string): string {

@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as path from 'path';
 import * as moment from 'moment';
 import * as Twitter from 'twitter';

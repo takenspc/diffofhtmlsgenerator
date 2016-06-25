@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as path from 'path';
 import * as Firebase from 'firebase';
 import { readFile, log } from '../utils';
@@ -78,4 +77,3 @@ export async function deploy(): Promise<void> {
 
     Firebase.goOffline();
 }
-

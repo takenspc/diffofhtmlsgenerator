@@ -1,10 +1,10 @@
-'use strict';
 import * as assert from 'assert';
 import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
 import { JSONEntry } from '../jsonEntry';
 import { DiffEntry } from '../diffEntry';
+
 
 //
 // Diff

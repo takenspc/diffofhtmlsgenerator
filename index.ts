@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import { log } from './utils';
 import { diff } from './diff';
 import { fetch } from './fetcher';

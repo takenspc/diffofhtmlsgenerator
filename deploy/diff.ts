@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as path from 'path';
 import { readFile } from '../utils';
 import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';

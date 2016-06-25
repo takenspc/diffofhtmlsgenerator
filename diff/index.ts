@@ -1,4 +1,3 @@
-'use strict';
 import * as assert from 'assert';
 import * as path from 'path';
 import { writeFile, readFile, mkdirp } from '../utils';

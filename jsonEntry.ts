@@ -1,4 +1,3 @@
-'use strict'; // TODO
 import * as path from 'path';
 import { readFile, writeFile} from './utils';
 

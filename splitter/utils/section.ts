@@ -1,4 +1,3 @@
-'use strict'; // XXX
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
 import { hasClassName } from '../../html';

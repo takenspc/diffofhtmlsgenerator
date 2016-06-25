@@ -1,4 +1,3 @@
-'use strict';
 import * as path from 'path';
 import { ASTNode } from 'parse5';
 import { writeFile, mkdirp, sha256 } from '../../utils';
