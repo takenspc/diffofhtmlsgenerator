@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFile } from '../../utils';
 import { ASTNode, parse } from 'parse5';
 
 //
@@ -14,20 +14,13 @@ export class Document {
     }
 
     static parse(htmlPath): Promise<Document> {
-        return new Promise((resolve, reject) => {
-            fs.readFile(htmlPath, 'utf-8', (err, text) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-
-                const node = parse(text, {
-                    locationInfo: true,
-                });
-                const doc = new Document(text, node);
-
-                resolve(doc);
+        return readFile(htmlPath).then((text) => {
+            const node = parse(text, {
+                locationInfo: true,
             });
+            const doc = new Document(text, node);
+
+            return doc;
         });
     }
 
