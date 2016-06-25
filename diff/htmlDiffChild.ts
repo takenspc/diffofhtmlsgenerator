@@ -14,7 +14,7 @@ export interface LineDiff {
     b: diff.IDiffResult[]
 }
 
-function insertEmptyLinesIfNeeded(lineDiff: LineDiff) {
+function insertEmptyLinesIfNeeded(lineDiff: LineDiff): void {
     const a = lineDiff.a;
     const b = lineDiff.b;
 
@@ -171,6 +171,7 @@ export async function diffSection(section: DiffEntry): Promise<any> {
     await writeFile(jsonPath, JSON.stringify(diffs));
     log(['diff', heading, 'end']);
 }
+
 
 process.on('message', (section: DiffEntry) => {
     diffSection(section).then(() => {

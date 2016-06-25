@@ -83,7 +83,7 @@ function reoderW3C(entries: JSONEntry[]): void {
 //
 // Entry point
 //
-export async function diff() {
+export async function diff(): Promise<void> {
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
     const jsonEntries = await Promise.all([
         readJSONEntry(path.join(srcDir, 'whatwg')),

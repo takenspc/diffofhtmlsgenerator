@@ -31,7 +31,7 @@ export function readDiffEntry(root: string): Promise<DiffEntry[]> {
     });
 }
 
-export function writeDiffEntry(root: string, json: DiffEntry[]): Promise<any> {
+export function writeDiffEntry(root: string, json: DiffEntry[]): Promise<void> {
     const jsonPath = path.join(root, 'index.json');
     const text = JSON.stringify(json);
 

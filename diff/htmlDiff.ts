@@ -6,8 +6,8 @@ import { DiffStat } from '../jsonEntry';
 import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
 import { LineDiff } from './htmlDiffChild';
 
-function runChildProcess(modulePath: string, section: DiffEntry) {
-    return new Promise((resolve, reject) => {
+function runChildProcess(modulePath: string, section: DiffEntry): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
         const child = fork(modulePath);
         child.on('exit', () => {
             resolve();
@@ -32,7 +32,7 @@ function updateDiffCount(diffStat: DiffStat, diffs: IDiffResult[]): void {
     }
 }
 
-async function updateDiffStat(section: DiffEntry) {
+async function updateDiffStat(section: DiffEntry): Promise<void> {
     const diffPath = path.join(__dirname, 'data', section.path + '.json');
     const text = await readFile(diffPath);
     const lineDiffs = JSON.parse(text) as LineDiff[];

@@ -63,7 +63,7 @@ async function formatHTML(jsonEntry: JSONEntry, srcRoot: string, outRoot: string
 }
 
 
-async function formatOrg(org: string) {
+async function formatOrg(org: string): Promise<void> {
     const srcRoot = path.join(__dirname, '..', 'splitter', 'data', org);
     const outRoot = path.join(__dirname, 'data', org);
 

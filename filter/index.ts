@@ -17,11 +17,11 @@ class FilterContext {
         return this.parentStack[length - 1];
     }
     
-    push(parent: ASTNode) {
+    push(parent: ASTNode): void {
         this.parentStack.push(parent);
     }
     
-    pop() {
+    pop(): void {
         this.parentStack.pop();
     }
 }

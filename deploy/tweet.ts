@@ -16,7 +16,7 @@ function createMessage(updateEntries: UpdateEntry[], org: string, orgTitle: stri
     return orgTitle + ' is not updated. ';
 }
 
-function createTweet(updatedTime: number, updateEntries: UpdateEntry[]) {
+function createTweet(updatedTime: number, updateEntries: UpdateEntry[]): any {
     const messages = [];
 
     const updated = moment(updatedTime).utc()
@@ -35,7 +35,7 @@ function createTweet(updatedTime: number, updateEntries: UpdateEntry[]) {
     return tweet;
 }
 
-export function tweet(updatedTime: number, updateEntries: UpdateEntry[]): Promise<any> {
+export function tweet(updatedTime: number, updateEntries: UpdateEntry[]): Promise<void> {
     const client = new Twitter({
         consumer_key: process.env.TWITTER_CONSUMER_KEY,
         consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
@@ -46,7 +46,7 @@ export function tweet(updatedTime: number, updateEntries: UpdateEntry[]): Promis
     const url = 'statuses/update';
     const tweet = createTweet(updatedTime, updateEntries);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         client.post(url, tweet, (err) => {
             if (err) {
                 reject(err);

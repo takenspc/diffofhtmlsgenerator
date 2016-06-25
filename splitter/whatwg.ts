@@ -9,7 +9,7 @@ import { Section, Header, addSection, addChildNode, fixupSection } from './utils
 //
 // Config
 //
-const h2HavingH4 = new Set([
+const h2HavingH4: Set<string> = new Set([
     // 'introduction',
     'infrastructure',
     'dom',
@@ -24,7 +24,7 @@ const h2HavingH4 = new Set([
     // 'iana',
 ]);
 
-const h4HavingH6 = new Set([
+const h4HavingH6: Set<string> = new Set([
     'The elements of HTML/Embedded content/The img element',
     'The elements of HTML/Embedded content/Media elements',
     'The elements of HTML/Forms/The input element',
@@ -39,7 +39,7 @@ const h4HavingH6 = new Set([
 //
 // Header text
 //
-function getHeadingText(node: ASTNode) {
+function getHeadingText(node: ASTNode): string {
     const text = getText(node);
     return text.replace(/\s+/g, ' ').replace(/^\d+(?:\.\d+)* /, '').trim();
 }

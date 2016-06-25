@@ -30,7 +30,7 @@ function parseHeader(divNode: ASTNode): Header {
 //
 // Config
 //
-const h2HavingH4 = new Set([
+const h2HavingH4: Set<string> = new Set([
     // 'introduction',
     'infrastructure',
     'dom',
@@ -46,7 +46,7 @@ const h2HavingH4 = new Set([
 
 ]);
 
-const h4HavingH6 = new Set([
+const h4HavingH6: Set<string> = new Set([
     'The elements of HTML/Embedded content/The img element',
     'The elements of HTML/Embedded content/Media elements',
     'The elements of HTML/Forms/The input element',

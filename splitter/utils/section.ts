@@ -24,7 +24,7 @@ export interface Header {
 
 
 // for debug
-function formatStartTag(node: ASTNode) {
+function formatStartTag(node: ASTNode): string {
     return `<${node.tagName} ${node.attrs.map((attr) => {
         return `${attr.name}="${attr.value}"`;
     }).join(' ')}>`

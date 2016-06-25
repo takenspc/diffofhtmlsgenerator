@@ -2,7 +2,7 @@ import { ASTNode } from 'parse5';
 import { hasClassName } from '../html';
 import { BufferList } from './';
 
-const breakBeforeStartTag = new Set([
+const breakBeforeStartTag: Set<string> = new Set([
     'address',
     'article',
     'aside',
@@ -58,7 +58,7 @@ const breakAfterStartTag: Set<string> = new Set([
     'li',
 ]);
 
-const breakBeforeEndTag = new Set([
+const breakBeforeEndTag: Set<string> = new Set([
     'blockquote',
     'dd',
     'div',

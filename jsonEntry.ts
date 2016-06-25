@@ -21,7 +21,7 @@ export interface JSONEntry {
     bufferListLength: number
 }
 
-export function writeJSONEntry(root: string, json: JSONEntry[]): Promise<any> {
+export function writeJSONEntry(root: string, json: JSONEntry[]): Promise<void> {
     const jsonPath = path.join(root, 'index.json');
     const text = JSON.stringify(json);
 

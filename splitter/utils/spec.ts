@@ -36,7 +36,7 @@ export class Spec {
         this.document = document;
     }
 
-    async saveHTML(rootPath: string, section: Section): Promise<any> {
+    private async saveHTML(rootPath: string, section: Section): Promise<void> {
         const debugJSONPath = path.join(rootPath, section.path + '.json');
         await mkdirp(path.dirname(debugJSONPath));
         await writeFile(debugJSONPath, JSON.stringify(section.nodes.map((node) => {
@@ -53,7 +53,7 @@ export class Spec {
     }
 
     async save(rootPath: string): Promise<void> {
-        // saveHTML mutates section
+        // NOTE: saveHTML mutates section
         for (const section of nextLeafSection(this.section)) {
             await this.saveHTML(rootPath, section);
         };

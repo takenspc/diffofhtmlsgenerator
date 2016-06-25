@@ -20,8 +20,8 @@ export function readFile(srcPath: string): Promise<string> {
     });    
 }
 
-export function writeFile(outPath: string, str: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+export function writeFile(outPath: string, str: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
         fs.writeFile(outPath, str, (err) => {
             if (err) {
                 reject(err);
@@ -33,8 +33,8 @@ export function writeFile(outPath: string, str: string): Promise<any> {
     });
 }
 
-export function mkdirp(dirname): Promise<any> {
-    return new Promise((resolve, reject) => {
+export function mkdirp(dirname): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
         mkdirpModule(dirname, (err) => {
             if (err) {
                 reject(err);

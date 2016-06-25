@@ -1,12 +1,12 @@
 //
 // Attrs
 //
-export const excludeAttrs = new Set([
+export const excludeAttrs: Set<string> = new Set([
     'id',
     'role',
 ]);
 
-export const excludeClassNames = new Set([
+export const excludeClassNames: Set<string> = new Set([
     'heading',
     'settled',
     'highlight',

@@ -2,7 +2,7 @@
 // Void elements
 // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
 //
-export const voidElements = new Set([
+export const voidElements: Set<string> = new Set([
     'area',
     'base',
     'br',
@@ -22,6 +22,6 @@ export const voidElements = new Set([
 ]);
 
 
-export const contextElements = new Set([
+export const contextElements: Set<string> = new Set([
     'pre',
 ]);
