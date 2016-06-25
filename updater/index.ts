@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { readFile, writeFile, mkdirp } from '../utils';
 import { JSONEntry, DiffStat } from '../jsonEntry';
-import { DiffEntry, nextLeafDiffEntry } from '../diffEntry';
+import { UnifiedSection, nextLeafUnifiedSection } from '../diffEntry';
 
 
 //
@@ -39,18 +39,18 @@ function createHashSubEntry(jsonEntry: JSONEntry): HashSubEntry {
 }
 
 
-function createHashData(diffEntries: DiffEntry[]): HashData {
+function createHashData(unifiedSections: UnifiedSection[]): HashData {
     const paths: string[] = [];
     const path2HashEntry = new Map<string, HashEntry>();
 
-    for (const diffEntry of nextLeafDiffEntry(diffEntries)) {
-        const path = diffEntry.path;
+    for (const unifiedSection of nextLeafUnifiedSection(unifiedSections)) {
+        const path = unifiedSection.path;
         paths.push(path);
 
         const hashEntry: HashEntry = {
-            headingText: diffEntry.headingText,
-            whatwg: createHashSubEntry(diffEntry.whatwg),
-            w3c: createHashSubEntry(diffEntry.w3c),
+            headingText: unifiedSection.headingText,
+            whatwg: createHashSubEntry(unifiedSection.whatwg),
+            w3c: createHashSubEntry(unifiedSection.w3c),
         };
         path2HashEntry.set(path, hashEntry);
     }
@@ -182,7 +182,7 @@ function createUpdateEntries(oldData: HashData, newData: HashData): UpdateEntry[
     return updateEntries;
 }
 
-export async function update(oldDiffEntries: DiffEntry[], newDiffEntries: DiffEntry[]): Promise<void> {
+export async function update(oldDiffEntries: UnifiedSection[], newDiffEntries: UnifiedSection[]): Promise<void> {
     const oldData = createHashData(oldDiffEntries);
     const newData = createHashData(newDiffEntries);
 

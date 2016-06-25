@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as diff from 'diff';
 import { writeFile, readFile, mkdirp, log } from '../utils';
 import { JSONEntry } from '../jsonEntry';
-import { DiffEntry } from '../diffEntry';
+import { UnifiedSection } from '../diffEntry';
 
 
 //
@@ -136,7 +136,7 @@ function computeDiff(a: string, b: string): LineDiff[] {
     return wordDiff;
 }
 
-function readFileIfExists(section: DiffEntry, org: string, srcDir: string, index: number): Promise<string> {
+function readFileIfExists(section: UnifiedSection, org: string, srcDir: string, index: number): Promise<string> {
     const jsonEntry = (org === 'whatwg') ? section.whatwg : section.w3c;
     if (!jsonEntry || jsonEntry.bufferListLength <= index) {
         return Promise.resolve('');
@@ -149,7 +149,7 @@ function readFileIfExists(section: DiffEntry, org: string, srcDir: string, index
 //
 // Handle objects
 //
-export async function diffSection(section: DiffEntry): Promise<any> {
+export async function diffSection(section: UnifiedSection): Promise<any> {
     const heading = section.headingText;
     log(['diff', heading, 'start']);
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
@@ -173,7 +173,7 @@ export async function diffSection(section: DiffEntry): Promise<any> {
 }
 
 
-process.on('message', (section: DiffEntry) => {
+process.on('message', (section: UnifiedSection) => {
     diffSection(section).then(() => {
         process.exit(0);
     }).catch((err) => {

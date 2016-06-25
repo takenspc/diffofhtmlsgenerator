@@ -1,19 +1,9 @@
 import { JSONEntry } from '../jsonEntry';
-import { DiffEntry, createStubDiffEntry } from '../diffEntry'
+import { UnifiedSection, createUnifiedSection } from '../diffEntry'
 
 //
 // Utils.
 //
-
-function createDiffEntry(whatwg: JSONEntry, w3c: JSONEntry): DiffEntry {
-    const diffEntry: DiffEntry = createStubDiffEntry(whatwg ? whatwg : w3c);
-
-    diffEntry.whatwg = whatwg;
-    diffEntry.w3c = w3c;
-
-    return diffEntry;
-}
-
 function compare(whatwg: JSONEntry, w3c: JSONEntry): boolean {
     const whatwgHeading = whatwg.headingText;
     const w3cHeading = w3c.headingText;
@@ -25,10 +15,10 @@ function compare(whatwg: JSONEntry, w3c: JSONEntry): boolean {
     return false;
 }
 
-//
-// check whether `base` contains `target`
-// if so return `index` which satisfies `base[index] === target`
-//
+/**
+ * check whether `base` contains `target`
+ * if so return `index` which satisfies `base[index] === target`
+ */
 function findIndexOfTargetEntry(target: JSONEntry, base: JSONEntry[], limit: number): number {
     const len = (limit < base.length) ? limit : base.length;
 
@@ -45,8 +35,8 @@ function findIndexOfTargetEntry(target: JSONEntry, base: JSONEntry[], limit: num
 //
 // Entry point
 //
-export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntry[] {
-    const diffEntries: DiffEntry[] = [];
+export function createUnifiedSectionIndex(whatwg: JSONEntry[], w3c: JSONEntry[]): UnifiedSection[] {
+    const unifiedSections: UnifiedSection[] = [];
 
     const whatwgRemains: JSONEntry[] = [].concat(whatwg);
     const w3cRemains: JSONEntry[] = [].concat(w3c);
@@ -57,7 +47,7 @@ export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntr
         // if `whatwgEntry === w3cEntry`,
         // insert both `whatwgEntry` and ``w3cEntry`
         if (w3cEntry && compare(whatwgEntry, w3cEntry)) {
-            diffEntries.push(createDiffEntry(whatwgEntry, w3cEntry));
+            unifiedSections.push(toUnifiedSection(whatwgEntry, w3cEntry));
             continue
         }
 
@@ -70,7 +60,7 @@ export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntr
             // NOTE: `w3cRemains[-1]` means current `w3cEntry`
             //
             for (let i = -1; i < index; i++) {
-                diffEntries.push(createDiffEntry(null, w3cEntry));
+                unifiedSections.push(toUnifiedSection(null, w3cEntry));
                 w3cEntry = w3cRemains.shift();
             }
 
@@ -80,12 +70,12 @@ export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntr
             // NOTE: w3cRemains has been muted by calling shift,
             // `w3cEntry === w3cRemains[index]` returns false
             //
-            diffEntries.push(createDiffEntry(whatwgEntry, w3cEntry));
+            unifiedSections.push(toUnifiedSection(whatwgEntry, w3cEntry));
             continue;
         }
 
         // insert whatwg only Entry
-        diffEntries.push(createDiffEntry(whatwgEntry, null));
+        unifiedSections.push(toUnifiedSection(whatwgEntry, null));
 
         // push back w3cEntry
         if (w3cEntry) {
@@ -95,19 +85,19 @@ export function computeJSONDiff(whatwg: JSONEntry[], w3c: JSONEntry[]): DiffEntr
 
     // insert w3cEntry
     for (const w3cEntry of w3cRemains) {
-        diffEntries.push(createDiffEntry(null, w3cEntry));
+        unifiedSections.push(toUnifiedSection(null, w3cEntry));
     }
 
     // process recursively
-    for (const diffEntry of diffEntries) {
-        const whatwg = (diffEntry.whatwg) ? diffEntry.whatwg.sections : [];
-        const w3c = (diffEntry.w3c) ? diffEntry.w3c.sections : [];
+    for (const unifiedSectionEntry of unifiedSections) {
+        const whatwg = (unifiedSectionEntry.whatwg) ? unifiedSectionEntry.whatwg.sections : [];
+        const w3c = (unifiedSectionEntry.w3c) ? unifiedSectionEntry.w3c.sections : [];
 
         if (whatwg.length > 0 || w3c.length > 0) {
-            diffEntry.sections = computeJSONDiff(whatwg, w3c);
+            unifiedSectionEntry.sections = createUnifiedSectionIndex(whatwg, w3c);
         }
     }
 
 
-    return diffEntries;
+    return unifiedSections;
 }

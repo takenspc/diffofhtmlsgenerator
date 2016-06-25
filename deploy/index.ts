@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as Firebase from 'firebase';
 import { readFile, log } from '../utils';
-import { DiffEntry, nextLeafDiffEntry, readDiffEntry } from '../diffEntry';
+import { UnifiedSection, nextLeafUnifiedSection } from '../diffEntry';
 import { update } from '../updater';
 import { deployDiff } from './diff';
 import { tweet } from './tweet';
@@ -10,13 +10,16 @@ import { tweet } from './tweet';
 //
 // Index
 //
-function readDiffEntryFromFirebase(indexRef: Firebase): Promise<DiffEntry[]> {
-    return new Promise((resolve, reject) => {
-        indexRef.once('value', (dataSnapshot) => {
-            resolve(dataSnapshot.val());            
-        }, (err) => {
-            reject(err);
-        });
+function readUnifiedSectionsFromFirebase(indexRef: Firebase): Promise<UnifiedSection[]> {
+    return indexRef.once('value').then((dataSnapshot) => {
+        return dataSnapshot.val();
+    });
+}
+
+function readUnifiedSectionsFromJson(rootPath: string): Promise<UnifiedSection[]> {
+    const jsonPath = path.join(rootPath, 'index.json');
+    return readFile(jsonPath).then((text) => {
+        return JSON.parse(text);
     });
 }
 
@@ -37,13 +40,13 @@ export async function deploy(): Promise<void> {
 
     log(['deploy', 'update', 'start']);
     const indexRef = firebaseRef.child('index');
-    const oldDiffEntries = await readDiffEntryFromFirebase(indexRef);
+    const oldUnifiedSections = await readUnifiedSectionsFromFirebase(indexRef);
 
-    const diffRoot = path.join(__dirname, '..', 'diff', 'data');
-    const newDiffEntries = await readDiffEntry(diffRoot);
+    const rootPath = path.join(__dirname, '..', 'diff', 'data');
+    const newUnifiedSections = await readUnifiedSectionsFromJson(rootPath);
 
     // update() writes updateData into disk
-    await update(oldDiffEntries, newDiffEntries);
+    await update(oldUnifiedSections, newUnifiedSections);
 
     // read updateData previously written
     // I know this is redundant...
@@ -66,12 +69,12 @@ export async function deploy(): Promise<void> {
     log(['deploy', 'update', 'end']);
 
     log(['deploy', 'index', 'start']);
-    indexRef.set(newDiffEntries);
+    indexRef.set(newUnifiedSections);
     log(['deploy', 'index', 'end']);  
 
     log(['deploy', 'diff', 'start']);
     const diffRef = firebaseRef.child('diff');
-    await deployDiff(diffRoot, newDiffEntries, diffRef);
+    await deployDiff(rootPath, newUnifiedSections, diffRef);
     log(['deploy', 'diff', 'end']);
 
 

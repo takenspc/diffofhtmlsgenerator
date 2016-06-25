@@ -2,8 +2,8 @@ import * as assert from 'assert';
 import * as path from 'path';
 import { writeFile, readFile, mkdirp } from '../utils';
 import { JSONEntry, readJSONEntry } from '../jsonEntry';
-import { DiffEntry, writeDiffEntry } from '../diffEntry';
-import { computeJSONDiff } from './jsonDiff';
+import { UnifiedSection } from '../diffEntry';
+import { createUnifiedSectionIndex } from './jsonDiff';
 import { computeHTMLDiff } from './htmlDiff';
 
 /**
@@ -93,7 +93,7 @@ export async function diff(): Promise<void> {
     // reorder 
     reoderW3C(w3c);
 
-    const diffEntries = computeJSONDiff(whatwg, w3c);
+    const diffEntries = createUnifiedSectionIndex(whatwg, w3c);
 
     const outDir = path.join(__dirname, 'data');
     await mkdirp(outDir);
@@ -101,5 +101,6 @@ export async function diff(): Promise<void> {
     // computeHTMLDiff mutates diffEntries
     await computeHTMLDiff(diffEntries);
 
-    await writeDiffEntry(outDir, diffEntries);
+    const jsonPath = path.join(outDir, 'index.json');
+    await writeFile(jsonPath, JSON.stringify(diffEntries));
 }

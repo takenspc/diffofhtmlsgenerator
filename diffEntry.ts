@@ -3,42 +3,29 @@ import { readFile, writeFile } from './utils';
 import { JSONEntry } from './jsonEntry';
 
 
-export interface DiffEntry {
+export interface UnifiedSection {
     path: string
     headingText: string
     originalHeadingText: string
-    sections: DiffEntry[]
+    sections: UnifiedSection[]
     whatwg: JSONEntry
     w3c: JSONEntry
 }
 
-export function createStubDiffEntry(jsonEntry: JSONEntry): DiffEntry {
-    const diffEntry: DiffEntry = {
-        path: jsonEntry.path,
-        headingText: jsonEntry.headingText,
-        originalHeadingText: jsonEntry.originalHeadingText,
+export function toUnifiedSection(whatwgEntry: SpecSection, w3cEntry: SpecSection): UnifiedSection {
+    const baseEntry = whatwgEntry ? whatwgEntry : w3cEntry;
+    const unifiedSectionEntry: UnifiedSection = {
+        path: baseEntry.path,
+        headingText: baseEntry.headingText,
+        originalHeadingText: baseEntry.originalHeadingText,
         sections: [],
-        whatwg: null,
-        w3c: null,
+        whatwg: whatwgEntry,
+        w3c: w3cEntry,
     }
-    return diffEntry;
+    return unifiedSectionEntry;
 }
 
-export function readDiffEntry(root: string): Promise<DiffEntry[]> {
-    const jsonPath = path.join(root, 'index.json');
-    return readFile(jsonPath).then((text) => {
-        return JSON.parse(text);
-    });
-}
-
-export function writeDiffEntry(root: string, json: DiffEntry[]): Promise<void> {
-    const jsonPath = path.join(root, 'index.json');
-    const text = JSON.stringify(json);
-
-    return writeFile(jsonPath, text);
-}
-
-export function* nextLeafDiffEntry(entries: DiffEntry[]): Iterable<DiffEntry> {
+export function* nextLeafUnifiedSection(entries: UnifiedSection[]): Iterable<UnifiedSection> {
     for (const entry of entries) {
         // XXX Firebase makes empty array be undefined
         // XXX section.sections must be always an array
@@ -49,7 +36,7 @@ export function* nextLeafDiffEntry(entries: DiffEntry[]): Iterable<DiffEntry> {
         if (entry.sections.length === 0) {
             yield entry;
         } else {
-            yield* nextLeafDiffEntry(entry.sections);
+            yield* nextLeafUnifiedSection(entry.sections);
         }
     }
 }
