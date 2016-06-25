@@ -1,11 +1,12 @@
 // Type definitions for diff
 // Project: https://github.com/kpdecker/jsdiff
 // Definitions by: vvakame <https://github.com/vvakame/>
-// Definitions: https://github.com/borisyankov/DefinitelyTyped
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-declare module JsDiff {
+declare namespace JsDiff {
     interface IDiffResult {
         value: string;
+        count?: number;
         added?: boolean;
         removed?: boolean;
     }
@@ -38,17 +39,17 @@ declare module JsDiff {
         tokenize(value:string):any; // return types are string or string[]
     }
 
-    function diffChars(oldStr:string, newStr:string, options?: Options):IDiffResult[];
+    function diffChars(oldStr:string, newStr:string):IDiffResult[];
 
-    function diffWords(oldStr:string, newStr:string, options?: Options):IDiffResult[];
+    function diffWords(oldStr:string, newStr:string):IDiffResult[];
 
-    function diffWordsWithSpace(oldStr:string, newStr:string, options?: Options):IDiffResult[];
+    function diffWordsWithSpace(oldStr:string, newStr:string):IDiffResult[];
 
-    function diffJson(oldObj: Object, newObj: Object, options?: Options): IDiffResult[];
+    function diffJson(oldObj: Object, newObj: Object): IDiffResult[];
 
     function diffLines(oldStr:string, newStr:string, options?: Options):IDiffResult[];
 
-    function diffCss(oldStr:string, newStr:string, options?: Options):IDiffResult[];
+    function diffCss(oldStr:string, newStr:string):IDiffResult[];
 
     function createPatch(fileName:string, oldStr:string, newStr:string, oldHeader:string, newHeader:string):string;
 
