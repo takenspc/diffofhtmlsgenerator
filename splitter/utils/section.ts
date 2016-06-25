@@ -106,8 +106,8 @@ function normalizeHeadingText(original: string): string {
     ]);
 
     let headingText = original;
-    for (const pair of replaceMap) {
-        headingText = headingText.replace(pair[0], pair[1]);
+    for (const [target, replacement] of replaceMap) {
+        headingText = headingText.replace(target, replacement);
     }
 
     return headingText;

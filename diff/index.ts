@@ -85,13 +85,10 @@ function reoderW3C(entries: JSONEntry[]): void {
 //
 export async function diff(): Promise<void> {
     const srcDir = path.join(__dirname, '..', 'formatter', 'data');
-    const jsonEntries = await Promise.all([
+    const [whatwg, w3c] = await Promise.all([
         readJSONEntry(path.join(srcDir, 'whatwg')),
         readJSONEntry(path.join(srcDir, 'w3c')),
     ]);
-
-    const whatwg = jsonEntries[0];
-    const w3c = jsonEntries[1];
 
     // reorder 
     reoderW3C(w3c);

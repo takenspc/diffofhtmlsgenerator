@@ -159,11 +159,11 @@ export async function diffSection(section: DiffEntry): Promise<any> {
     const length = Math.max(section.w3c ? section.w3c.bufferListLength : 0, section.whatwg ? section.whatwg.bufferListLength : 0);
 
     for (var i = 0; i < length; i++) {
-        const htmls = await Promise.all([
+        const [whatwg, w3c] = await Promise.all([
             readFileIfExists(section, 'whatwg', srcDir, i),
             readFileIfExists(section, 'w3c', srcDir, i),
         ]);
-        diffs = diffs.concat(computeDiff(htmls[0].trim(), htmls[1].trim()));
+        diffs = diffs.concat(computeDiff(whatwg.trim(), w3c.trim()));
     }
 
     const jsonPath = path.join(outDir, section.path + '.json');
