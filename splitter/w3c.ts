@@ -4,7 +4,7 @@ import { ASTNode } from 'parse5';
 import { getAttribute, hasClassName, getText } from '../shared/html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, addSection, addChildNode, fixupSection } from './section';
+import { Section, addSection, addChildNode } from './section';
 
 
 //
@@ -240,7 +240,7 @@ function parseSpec(spec: Spec): void {
         }
     }
 
-    fixupSection(spec.rootSection);
+    spec.rootSection.fixup();
 }
 
 //

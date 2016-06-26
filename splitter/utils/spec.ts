@@ -22,7 +22,7 @@ export class Spec {
     async save(): Promise<void> {
         const sections = this.rootSection.sections;
         for (const section of nextLeafSection(sections)) {
-            await section.writeAstJson();
+            await section.writeDebugJson();
 
             const html = this.document.getHTMLText(section.nodes);
             await section.writeHTML(html);
