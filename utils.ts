@@ -21,14 +21,16 @@ export function readFile(srcPath: string): Promise<string> {
 }
 
 export function writeFile(outPath: string, str: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.writeFile(outPath, str, (err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
+    return mkdirp(path.dirname(outPath)).then(() => {
+        return new Promise<void>((resolve, reject) => {
+            fs.writeFile(outPath, str, (err) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
 
-            resolve();
+                resolve();
+            });
         });
     });
 }
@@ -54,6 +56,7 @@ export function log(args): void {
     const message = [moment().utc().format()].concat(args).join('\t');
     console.log(message);
 }
+
 
 //
 // Hash

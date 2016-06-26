@@ -3,19 +3,36 @@ import { ASTNode } from 'parse5';
 import { getText, hasClassName } from '../html';
 import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
-import { BufferList } from './';
 
 //
 // Context
 //
 class FormatContext {
     private parentStack: ASTNode[] = []
-    bufferList: BufferList
+    private buffers: string[][] = []
     
-    constructor(bufferList: BufferList) {
-        this.bufferList = bufferList;
+    constructor() {
+        this.createNextBuffer();
     }
-    
+
+    get buffer(): string[] {
+        return this.buffers[this.buffers.length - 1];
+    }
+
+    getHTMLs(): string[] {
+        return this.buffers.map((texts) => {
+            return texts.join('');
+        });
+    }
+
+    createNextBuffer(): void {
+        this.buffers.push([]);
+    }
+
+    write(text: string): void {
+        this.buffer.push(text);
+    }
+
     get parent(): ASTNode {
         const length = this.parentStack.length;
         if (length === 0) {
@@ -112,7 +129,7 @@ function formatText(context: FormatContext, node: ASTNode): void {
         value = value.replace(/\s+/g, ' ');
     }
 
-    return context.bufferList.write(escapeHTML(value));
+    return context.write(escapeHTML(value));
 }
 
 
@@ -126,8 +143,8 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): vo
 
     const lineBreaker = new LineBreaker(node, depth);
 
-    context.bufferList.write(lineBreaker.breakBeforeStartTag());
-    context.bufferList.write(formatStartTag(context, node));
+    context.write(lineBreaker.breakBeforeStartTag());
+    context.write(formatStartTag(context, node));
 
     const isElementInfo = hasClassName(node, 'dl', 'element');
 
@@ -138,22 +155,22 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): vo
 
         // create new buffer after 'DOM interface:'
         if (isElementInfo && childNode.nodeName === 'dt' && getText(childNode).trim() === 'DOM interface:') {
-            context.bufferList.createNextBuffer();
+            context.createNextBuffer();
         }
 
         // insert line break after start tag
-        context.bufferList.write(lineBreaker.breakAfterStartTag(childNode));
+        context.write(lineBreaker.breakAfterStartTag(childNode));
         format(context, childNode, newDepth);
 
         if (i === childNodes.length - 1) {
-            const buffer = context.bufferList.buffer;
+            const buffer = context.buffer;
             lineBreaker.unbreakBeforeEndTag(buffer);
         }
     }
 
     if (!consts.voidElements.has(node.nodeName)) {
-        context.bufferList.write(lineBreaker.breakBeforeEndTag());
-        context.bufferList.write(formatEndTag(context, node));
+        context.write(lineBreaker.breakBeforeEndTag());
+        context.write(formatEndTag(context, node));
     }
 
     if (createContext) {
@@ -173,12 +190,12 @@ function format(context: FormatContext, node: ASTNode, depth: number): void {
     }
 }
 
-export function formatFragment(bufferList: BufferList, node: ASTNode): void {
-    const context: FormatContext = new FormatContext(bufferList);
+export function formatFragment(node: ASTNode): string[] {
+    const context: FormatContext = new FormatContext();
 
     for (const childNode of node.childNodes) {
         format(context, childNode, -1);
     }
     
-    bufferList.flush();
+    return context.getHTMLs();
 }

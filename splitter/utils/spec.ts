@@ -1,64 +1,33 @@
 import * as path from 'path';
-import { ASTNode } from 'parse5';
-import { writeFile, mkdirp, sha256 } from '../../utils';
-import { writeJSONEntry } from '../../jsonEntry';
+import { SpecSection } from '../../jsonEntry';
 import { Document } from './document';
-import { Section, Header, toJSONEntry, nextLeafSection } from './section';
-
-
-function formatNode(node: ASTNode): string {
-    if (node.nodeName === '#text') {
-        return node.value;
-    }
-
-    let str = `<${node.tagName}${node.attrs.map((attr) => {
-        return ` ${attr.name}="${attr.value}"`;
-    }).join('')}>`
-    
-    for (const child of node.childNodes) {
-        str += formatNode(child);
-    }
-
-    str += `</${node.tagName}>`;
-
-    return str;
-}
-
+import { Section, nextLeafSection } from './section';
 
 export class Spec {
-    private header: Header
-    private section: Section
-    private document: Document
+    private org: string
+    rootSection: Section
+    document: Document
 
-    constructor(header: Header, section: Section, document: Document) {
-        this.header = header;
-        this.section = section;
-        this.document = document;
+    constructor(org: string) {
+        this.org = org;
+        this.rootSection = Section.createRootSection(org);
+        this.document = new Document();
     }
 
-    private async saveHTML(rootPath: string, section: Section): Promise<void> {
-        const debugJSONPath = path.join(rootPath, section.path + '.json');
-        await mkdirp(path.dirname(debugJSONPath));
-        await writeFile(debugJSONPath, JSON.stringify(section.nodes.map((node) => {
-            return formatNode(node);
-        })));
-
-
-        const text = this.document.getHTMLText(section.nodes);
-        section.hash = sha256(text);
-
-        const htmlPath = path.join(rootPath, section.path + '.html');
-        await mkdirp(path.dirname(htmlPath));
-        await writeFile(htmlPath, text);
+    init(): Promise<void> {
+        const htmlPath = path.join(__dirname, '..', '..', 'fetcher', 'data', this.org, 'index.html');
+        return this.document.init(htmlPath);
     }
 
-    async save(rootPath: string): Promise<void> {
-        // NOTE: saveHTML mutates section
-        for (const section of nextLeafSection(this.section)) {
-            await this.saveHTML(rootPath, section);
+    async save(): Promise<void> {
+        for (const section of nextLeafSection(this.rootSection)) {
+            await section.writeJson();
+
+            const html = this.document.getHTMLText(section.nodes);
+            await section.writeHTML(html);
         };
 
-        const json = toJSONEntry(this.section);
-        await writeJSONEntry(rootPath, json.sections);
+        const rootSpecSection = new SpecSection(this.rootSection);
+        await SpecSection.write(this.org, rootSpecSection.sections);
     }
 }

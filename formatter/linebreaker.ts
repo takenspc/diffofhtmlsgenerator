@@ -1,6 +1,5 @@
 import { ASTNode } from 'parse5';
 import { hasClassName } from '../html';
-import { BufferList } from './';
 
 const breakBeforeStartTag: Set<string> = new Set([
     'address',

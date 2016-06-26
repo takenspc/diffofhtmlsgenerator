@@ -4,7 +4,7 @@ import { ASTNode } from 'parse5';
 import { getText, getAttribute } from '../html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, Header, addSection, addChildNode, fixupSection } from './utils/section';
+import { Section, addSection, addChildNode, fixupSection } from './utils/section';
 
 //
 // Config
@@ -47,21 +47,7 @@ function getHeadingText(node: ASTNode): string {
 //
 // Entry Point
 //
-export function parseSpec(doc: Document): Spec {
-    const root: Section = {
-        id: '#root#',
-        path: '',
-        headingText: '#root#',
-        originalHeadingText: '#root#',
-        nodes: [],
-        hash: null,
-        sections: [],
-    };
-
-    let header: Header;
-
-
-    let isHeader = true;
+export function parseSpec(spec: Spec): void {
     let inMain = false;
 
     let h2Section: Section = null;
@@ -72,7 +58,9 @@ export function parseSpec(doc: Document): Spec {
     let h6Section: Section = null;
     let processH6Sections = false;
 
-    const body = doc.getBody();
+    const body = spec.document.getBody();
+    const root = spec.rootSection;
+
     for (const childNode of body.childNodes) {
         //
         // The structure of WHATWG HTML Standard
@@ -85,15 +73,6 @@ export function parseSpec(doc: Document): Spec {
         //   ...
         //
         const nodeName = childNode.nodeName;
-        if (isHeader && nodeName === 'header') {
-            const id = getAttribute(childNode, 'id');
-            header = {
-                id: id,
-                nodes: [childNode],
-            }
-            isHeader = false;
-            continue;
-        }
 
         if (nodeName === 'h2') {
             const id = getAttribute(childNode, 'id');
@@ -112,7 +91,7 @@ export function parseSpec(doc: Document): Spec {
             }
 
             const headingText = getHeadingText(childNode);
-            h2Section = addSection(null, id, headingText, childNode);
+            h2Section = addSection(root, id, headingText, childNode);
 
             h3Section = null;
             h4Section = null;
@@ -121,7 +100,6 @@ export function parseSpec(doc: Document): Spec {
             h6Section = null;
             processH6Sections = false;
             // XXX split parseSpec into functions
-            root.sections.push(h2Section);
             continue;
         }
 
@@ -207,8 +185,6 @@ export function parseSpec(doc: Document): Spec {
     }
 
     fixupSection(root);
-
-    return new Spec(header, root, doc);
 }
 
 
@@ -218,12 +194,10 @@ export function parseSpec(doc: Document): Spec {
 (async function() {
     const org = 'whatwg';
 
-    const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
-    let doc = await Document.parse(htmlPath);
-
-    let spec = parseSpec(doc);
-    const rootPath = path.join(__dirname, 'data', org);
-    await spec.save(rootPath);
+    const spec = new Spec(org);
+    await spec.init();
+    parseSpec(spec);
+    await spec.save();
 })().catch((err) => {
     console.error(err);
     console.error(err.stack);

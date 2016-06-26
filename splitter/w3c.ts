@@ -4,27 +4,7 @@ import { ASTNode } from 'parse5';
 import { getAttribute, hasClassName, getText } from '../html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, Header, addSection, addChildNode, fixupSection } from './utils/section';
-
-//
-// Header
-//
-function parseHeader(divNode: ASTNode): Header {
-    let header: Header = null;
-
-    for (const childNode of divNode.childNodes) {
-        if (childNode.nodeName === 'header') {
-            const id = getAttribute(childNode, 'id');
-            header = {
-                id: id,
-                nodes: [childNode],
-            }
-            break;
-        }
-    }
-
-    return header;
-}
+import { Section, addSection, addChildNode, fixupSection } from './utils/section';
 
 
 //
@@ -101,7 +81,7 @@ function* nextElement(sectionElement: ASTNode): Iterable<ASTNode> {
 //
 // parse section element
 //
-function parseSectionElement(sectionNode: ASTNode): Section {
+function parseSectionElement(sectionNode: ASTNode, root: Section): Section {
     let h2Section: Section = null;
     let h3Section: Section = null;
     let h4Section: Section = null;
@@ -132,7 +112,7 @@ function parseSectionElement(sectionNode: ASTNode): Section {
             }
 
             const headingText = getHeadingText(childNode);
-            h2Section = addSection(null, id, headingText, childNode);
+            h2Section = addSection(root, id, headingText, childNode);
 
             h3Section = null;
             h4Section = null;
@@ -226,10 +206,8 @@ function parseSectionElement(sectionNode: ASTNode): Section {
 function parseMainElement(root: Section, mainNode: ASTNode): void {
     for (const sectionNode of mainNode.childNodes) {
         if (sectionNode.nodeName === 'section') {
-            const section = parseSectionElement(sectionNode);
-            if (section) {
-                root.sections.push(section);
-            } else {
+            const section = parseSectionElement(sectionNode, root);
+            if (!section) {
                 return;
             }
         }
@@ -238,24 +216,12 @@ function parseMainElement(root: Section, mainNode: ASTNode): void {
 
 
 
-function parseSpec(doc: Document): Spec {
-    const root: Section = {
-        id: '#root#',
-        path: '',
-        headingText: '#root#',
-        originalHeadingText: '#roort#',
-        nodes: [],
-        hash: null,
-        sections: [],
-    };
-
-    let header: Header;
-
-    const bodyNode = doc.getBody();
+function parseSpec(spec: Spec): void {
+    const bodyNode = spec.document.getBody();
 
     for (const childNode of bodyNode.childNodes) {
         //
-        // The structure of W3C HTML 5.1
+        // The structure of W3C HTML
         //
         // body
         //   div.head
@@ -269,16 +235,12 @@ function parseSpec(doc: Document): Spec {
         //     section
         //     ...
         //
-        if (hasClassName(childNode, 'div', 'head')) {
-            header = parseHeader(childNode);
-        } else if (childNode.nodeName === 'main') {
-            parseMainElement(root, childNode);
+       if (childNode.nodeName === 'main') {
+            parseMainElement(spec.rootSection, childNode);
         }
     }
 
-    fixupSection(root);
-
-    return new Spec(header, root, doc);
+    fixupSection(spec.rootSection);
 }
 
 //
@@ -287,12 +249,10 @@ function parseSpec(doc: Document): Spec {
 (async function() {
     const org = 'w3c';
 
-    const htmlPath = path.join(__dirname, '..', 'fetcher', 'data', org, 'index.html');
-    let doc = await Document.parse(htmlPath);
-
-    let spec = parseSpec(doc);
-    const rootPath = path.join(__dirname, 'data', org);
-    await spec.save(rootPath);
+    const spec = new Spec(org);
+    await spec.init();
+    parseSpec(spec);
+    await spec.save();
 })().catch((err) => {
     console.error(err);
     console.error(err.stack);

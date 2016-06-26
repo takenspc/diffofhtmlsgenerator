@@ -1,10 +1,10 @@
-import { JSONEntry } from '../jsonEntry';
-import { UnifiedSection, createUnifiedSection } from '../diffEntry'
+import { SpecSection } from '../jsonEntry';
+import { UnifiedSection } from '../diffEntry'
 
 //
 // Utils.
 //
-function compare(whatwg: JSONEntry, w3c: JSONEntry): boolean {
+function compare(whatwg: SpecSection, w3c: SpecSection): boolean {
     const whatwgHeading = whatwg.headingText;
     const w3cHeading = w3c.headingText;
     
@@ -19,7 +19,7 @@ function compare(whatwg: JSONEntry, w3c: JSONEntry): boolean {
  * check whether `base` contains `target`
  * if so return `index` which satisfies `base[index] === target`
  */
-function findIndexOfTargetEntry(target: JSONEntry, base: JSONEntry[], limit: number): number {
+function findIndexOfTargetEntry(target: SpecSection, base: SpecSection[], limit: number): number {
     const len = (limit < base.length) ? limit : base.length;
 
     for (let i = 0; i < len; i++) {
@@ -35,33 +35,33 @@ function findIndexOfTargetEntry(target: JSONEntry, base: JSONEntry[], limit: num
 //
 // Entry point
 //
-export function createUnifiedSectionIndex(whatwg: JSONEntry[], w3c: JSONEntry[]): UnifiedSection[] {
-    const unifiedSections: UnifiedSection[] = [];
+export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[]): UnifiedSection[] {
+    const sectionPairs: SpecSection[][] = [];
 
-    const whatwgRemains: JSONEntry[] = [].concat(whatwg);
-    const w3cRemains: JSONEntry[] = [].concat(w3c);
+    const whatwgRemains: SpecSection[] = [].concat(whatwg);
+    const w3cRemains: SpecSection[] = [].concat(w3c);
 
-    for (const whatwgEntry of whatwgRemains) {
-        let w3cEntry = w3cRemains.shift();
+    for (const whatwgSection of whatwgRemains) {
+        let w3cSection = w3cRemains.shift();
 
         // if `whatwgEntry === w3cEntry`,
         // insert both `whatwgEntry` and ``w3cEntry`
-        if (w3cEntry && compare(whatwgEntry, w3cEntry)) {
-            unifiedSections.push(toUnifiedSection(whatwgEntry, w3cEntry));
+        if (w3cSection && compare(whatwgSection, w3cSection)) {
+            sectionPairs.push([whatwgSection, w3cSection]);
             continue
         }
 
         // check whether `w3cRemains` contains `whatwgEntry`
         // in such caess, `index` satisfies `w3cRemains[index] === whatwgEntry`
-        const index = findIndexOfTargetEntry(whatwgEntry, w3cRemains, 8);
+        const index = findIndexOfTargetEntry(whatwgSection, w3cRemains, 8);
         if (index > -1) {
             // insert w3c only entries (`w3cRemains[-1]` ... `w3cRemains[index - 1]`)
             //
             // NOTE: `w3cRemains[-1]` means current `w3cEntry`
             //
             for (let i = -1; i < index; i++) {
-                unifiedSections.push(toUnifiedSection(null, w3cEntry));
-                w3cEntry = w3cRemains.shift();
+                sectionPairs.push([null, w3cSection]);
+                w3cSection = w3cRemains.shift();
             }
 
             // Now, `w3cEntry` is `w3cRemains[index]` (=== `whatwgEntry`)
@@ -70,31 +70,34 @@ export function createUnifiedSectionIndex(whatwg: JSONEntry[], w3c: JSONEntry[])
             // NOTE: w3cRemains has been muted by calling shift,
             // `w3cEntry === w3cRemains[index]` returns false
             //
-            unifiedSections.push(toUnifiedSection(whatwgEntry, w3cEntry));
+            sectionPairs.push([whatwgSection, w3cSection]);
             continue;
         }
 
         // insert whatwg only Entry
-        unifiedSections.push(toUnifiedSection(whatwgEntry, null));
+        sectionPairs.push([whatwgSection, null]);
 
         // push back w3cEntry
-        if (w3cEntry) {
-            w3cRemains.unshift(w3cEntry);
+        if (w3cSection) {
+            w3cRemains.unshift(w3cSection);
         }
     }
 
     // insert w3cEntry
     for (const w3cEntry of w3cRemains) {
-        unifiedSections.push(toUnifiedSection(null, w3cEntry));
+        sectionPairs.push([null, w3cEntry]);
     }
 
     // process recursively
-    for (const unifiedSectionEntry of unifiedSections) {
-        const whatwg = (unifiedSectionEntry.whatwg) ? unifiedSectionEntry.whatwg.sections : [];
-        const w3c = (unifiedSectionEntry.w3c) ? unifiedSectionEntry.w3c.sections : [];
+    const unifiedSections: UnifiedSection[] = [];
+    for (const [whatwg, w3c] of sectionPairs) {
+        const unifiedSection = new UnifiedSection(whatwg, w3c);
+        unifiedSections.push(unifiedSection);
 
-        if (whatwg.length > 0 || w3c.length > 0) {
-            unifiedSectionEntry.sections = createUnifiedSectionIndex(whatwg, w3c);
+        const whatwgChildren = whatwg ? whatwg.sections : [];
+        const w3cChildren = w3c ? w3c.sections : [];
+        if (whatwgChildren.length > 0 || w3cChildren.length > 0) {
+            unifiedSection.sections = createUnifiedSections(whatwgChildren, w3cChildren);
         }
     }
 

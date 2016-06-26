@@ -1,10 +1,12 @@
 import * as assert from 'assert';
+import * as path from 'path';
 import { ASTNode } from 'parse5';
 import { hasClassName } from '../../html';
-import { JSONEntry } from '../../jsonEntry';
+import { writeFile } from '../../utils';
 
 
-export interface Section {
+export class Section {
+    org: string
     id: string
 
     path: string
@@ -12,18 +14,87 @@ export interface Section {
     originalHeadingText: string
 
     nodes: ASTNode[]
-    hash: string
 
-    sections: Section[]
-}
+    sections: Section[] = []
 
-export interface Header {
-    id: string
-    nodes: ASTNode[]
+    constructor({ org, id, path, headingText, originalHeadingText, nodes}) {
+        this.org = org;
+        this.id = id;
+        this.path = path;
+        this.headingText = headingText;
+        this.originalHeadingText = originalHeadingText;
+        this.nodes = nodes;
+    }
+
+
+    //
+    // JSON
+    //
+    private DATA_PATH(extension): string {
+        return path.join(__dirname, '..', 'data', this.org, `${this.path}.${extension}`);
+    }
+
+    writeJson(): Promise<void> {
+        const jsonPath = this.DATA_PATH('json');
+        const text = JSON.stringify(this.nodes.map((node) => {
+            return formatNode(node);
+        }));
+
+        return writeFile(jsonPath, text);
+    }
+
+
+    //
+    // HTML
+    //
+    writeHTML(html): Promise<void> {
+        const htmlPath = this.DATA_PATH('html');
+
+        return writeFile(htmlPath, html);
+    }
+
+
+    //
+    // Root
+    //
+    get isRoot() {
+        return this.id === '#root#';
+    }
+
+    static createRootSection(org: string): Section {
+        const root: Section = new Section({
+            org: org,
+            id: '#root#',
+            path: '',
+            headingText: '#root#',
+            originalHeadingText: '#roort#',
+            nodes: []
+        });
+
+        return root;
+    }
 }
 
 
 // for debug
+function formatNode(node: ASTNode): string {
+    if (node.nodeName === '#text') {
+        return node.value;
+    }
+
+    let str = `<${node.tagName}${node.attrs.map((attr) => {
+        return ` ${attr.name}="${attr.value}"`;
+    }).join('')}>`
+
+    for (const child of node.childNodes) {
+        str += formatNode(child);
+    }
+
+    str += `</${node.tagName}>`;
+
+    return str;
+}
+
 function formatStartTag(node: ASTNode): string {
     return `<${node.tagName} ${node.attrs.map((attr) => {
         return `${attr.name}="${attr.value}"`;
@@ -95,8 +166,8 @@ function normalizeHeadingText(original: string): string {
         ['The HostPromiseRejectionTracker implementation', 'HostPromiseRejectionTracker(promise, operation)'],
 
         // Matching HTML elements using selectors and CSS
-        [/^Matching HTML elements using selectors$/, 'Matching HTML elements using selectors and CSS'], 
-        
+        [/^Matching HTML elements using selectors$/, 'Matching HTML elements using selectors and CSS'],
+
         // Drag-and-drop processing model
         ['Drag-and-drop processing model', 'Processing model'],
 
@@ -125,13 +196,21 @@ function getSafePath(value: string): string {
     return safePath;
 }
 
+function computePath(parent: Section, normalizedHeadingText: string): string {
+    // path is not for human, for system
+    const currentPath = getSafePath(normalizedHeadingText);
+    if (parent.isRoot) {
+        return currentPath;
+    }
+
+    return `${parent.path}/${currentPath}`;
+
+}
+
 export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
     let originalHeadingText = headingText;
     let normalizedHeadingText = normalizeHeadingText(headingText);
-
-    // path is not for human, for system
-    let path = getSafePath(normalizedHeadingText);
-    path = (parent) ? parent.path + '/' + path : path;
+    const path = computePath(parent, normalizedHeadingText);
 
     let nodes = [childNode];
 
@@ -142,30 +221,24 @@ export function addSection(parent: Section, id: string, headingText: string, chi
         originalHeadingText = `(preface of “${parent.originalHeadingText}”)`;
     }
 
-    if (parent) {
-        // move parent.nodes (h1-h6 elements) to its first section
-        if (parent.sections.length === 0) {
-            nodes = parent.nodes.concat(nodes);
-            parent.nodes = [];
-        }
+    // move parent.nodes (h1-h6 elements) to its first section
+    if (parent.sections.length === 0) {
+        nodes = parent.nodes.concat(nodes);
+        parent.nodes = [];
     }
 
-    const section: Section = {
+    const section: Section = new Section({
+        org: parent.org,
         id: id,
 
         path: path,
         headingText: normalizedHeadingText,
         originalHeadingText: originalHeadingText,
 
-        nodes: nodes,
-        hash: null,
+        nodes: nodes
+    });
 
-        sections: [],
-    };
-
-    if (parent) {
-        parent.sections.push(section);
-    }
+    parent.sections.push(section);
 
     return section;
 }
@@ -218,31 +291,4 @@ export function* nextLeafSection(parent: Section): Iterable<Section> {
             yield* nextLeafSection(section);
         }
     }
-}
-
-
-//
-// JSONEntry
-//
-export function toJSONEntry(section: Section): JSONEntry {
-    const sections = section.sections.map(toJSONEntry);
-
-    const jsonEntry: JSONEntry = {
-        id: section.id,
-        path: section.path,
-        headingText: section.headingText,
-        originalHeadingText: section.originalHeadingText,
-        sections: sections,
-        hash: {
-            splitted: section.hash,
-            formatted: null,
-        },
-        diffStat: {
-            total: 0,
-            diffCount: 0,
-        },
-        bufferListLength: 0,
-    };
-
-    return jsonEntry;
 }

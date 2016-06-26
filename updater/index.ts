@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { readFile, writeFile, mkdirp } from '../utils';
-import { JSONEntry, DiffStat } from '../jsonEntry';
-import { UnifiedSection, nextLeafUnifiedSection } from '../diffEntry';
+import { UnifiedSection, nextLeafUnifiedSection, DiffStat, FlattedSpecSection } from '../diffEntry';
 
 
 //
@@ -24,15 +23,15 @@ interface HashData {
     path2HashEntry: Map<string, HashEntry>
 }
 
-function createHashSubEntry(jsonEntry: JSONEntry): HashSubEntry {
-    if (!jsonEntry) {
+function createHashSubEntry(specSection: FlattedSpecSection): HashSubEntry {
+    if (!specSection) {
         return null;
     }
 
     const hashSubEntry: HashSubEntry = {
-        splitted: jsonEntry.hash.splitted,
-        formatted: jsonEntry.hash.formatted,
-        diffStat: jsonEntry.diffStat
+        splitted: specSection.hash.splitted,
+        formatted: specSection.hash.formatted,
+        diffStat: specSection.diffStat
     };
 
     return hashSubEntry;

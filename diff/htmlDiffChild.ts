@@ -1,8 +1,7 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as diff from 'diff';
-import { writeFile, readFile, mkdirp, log } from '../utils';
-import { JSONEntry } from '../jsonEntry';
+import { log } from '../utils';
 import { UnifiedSection } from '../diffEntry';
 
 
@@ -136,39 +135,21 @@ function computeDiff(a: string, b: string): LineDiff[] {
     return wordDiff;
 }
 
-function readFileIfExists(section: UnifiedSection, org: string, srcDir: string, index: number): Promise<string> {
-    const jsonEntry = (org === 'whatwg') ? section.whatwg : section.w3c;
-    if (!jsonEntry || jsonEntry.bufferListLength <= index) {
-        return Promise.resolve('');
-    }
-
-    const htmlPath = path.join(srcDir, org, section.path + '.' + index + '.html');
-    return readFile(htmlPath);
-}
-
 //
 // Handle objects
 //
-export async function diffSection(section: UnifiedSection): Promise<any> {
+async function diffSection(section: UnifiedSection): Promise<void> {
     const heading = section.headingText;
     log(['diff', heading, 'start']);
-    const srcDir = path.join(__dirname, '..', 'formatter', 'data');
-    const outDir = path.join(__dirname, 'data');
 
-    let diffs: LineDiff[] = [];
-    const length = Math.max(section.w3c ? section.w3c.bufferListLength : 0, section.whatwg ? section.whatwg.bufferListLength : 0);
-
-    for (var i = 0; i < length; i++) {
-        const [whatwg, w3c] = await Promise.all([
-            readFileIfExists(section, 'whatwg', srcDir, i),
-            readFileIfExists(section, 'w3c', srcDir, i),
-        ]);
-        diffs = diffs.concat(computeDiff(whatwg.trim(), w3c.trim()));
+    let lineDiffs: LineDiff[] = [];
+    const length = section.formattedHTMLsLength;
+    for (let i = 0; i < length; i++) {
+        const [whatwg, w3c] = await UnifiedSection.readHTMLs(section, i);
+        lineDiffs = lineDiffs.concat(computeDiff(whatwg.trim(), w3c.trim()));
     }
 
-    const jsonPath = path.join(outDir, section.path + '.json');
-    await mkdirp(path.dirname(jsonPath));
-    await writeFile(jsonPath, JSON.stringify(diffs));
+    await UnifiedSection.writeLineDiffs(section, lineDiffs);
     log(['diff', heading, 'end']);
 }
 

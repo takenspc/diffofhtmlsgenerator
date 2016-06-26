@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as Firebase from 'firebase';
 import { readFile, log } from '../utils';
-import { UnifiedSection, nextLeafUnifiedSection } from '../diffEntry';
+import { UnifiedSection } from '../diffEntry';
 import { update } from '../updater';
 import { deployDiff } from './diff';
 import { tweet } from './tweet';
@@ -13,13 +13,6 @@ import { tweet } from './tweet';
 function readUnifiedSectionsFromFirebase(indexRef: Firebase): Promise<UnifiedSection[]> {
     return indexRef.once('value').then((dataSnapshot) => {
         return dataSnapshot.val();
-    });
-}
-
-function readUnifiedSectionsFromJson(rootPath: string): Promise<UnifiedSection[]> {
-    const jsonPath = path.join(rootPath, 'index.json');
-    return readFile(jsonPath).then((text) => {
-        return JSON.parse(text);
     });
 }
 
@@ -41,9 +34,7 @@ export async function deploy(): Promise<void> {
     log(['deploy', 'update', 'start']);
     const indexRef = firebaseRef.child('index');
     const oldUnifiedSections = await readUnifiedSectionsFromFirebase(indexRef);
-
-    const rootPath = path.join(__dirname, '..', 'diff', 'data');
-    const newUnifiedSections = await readUnifiedSectionsFromJson(rootPath);
+    const newUnifiedSections = await UnifiedSection.read();
 
     // update() writes updateData into disk
     await update(oldUnifiedSections, newUnifiedSections);
@@ -74,7 +65,7 @@ export async function deploy(): Promise<void> {
 
     log(['deploy', 'diff', 'start']);
     const diffRef = firebaseRef.child('diff');
-    await deployDiff(rootPath, newUnifiedSections, diffRef);
+    await deployDiff(newUnifiedSections, diffRef);
     log(['deploy', 'diff', 'end']);
 
 

@@ -1,10 +1,8 @@
 import * as path from 'path';
 import { fork } from 'child_process';
 import { IDiffResult } from 'diff';
-import { readFile } from '../utils';
-import { DiffStat } from '../jsonEntry';
-import { UnifiedSection, nextLeafUnifiedSection } from '../diffEntry';
-import { LineDiff } from './htmlDiffChild';
+import { UnifiedSection, nextLeafUnifiedSection, DiffStat } from '../diffEntry';
+
 
 function runChildProcess(modulePath: string, section: UnifiedSection): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -33,9 +31,7 @@ function updateDiffCount(diffStat: DiffStat, diffs: IDiffResult[]): void {
 }
 
 async function updateDiffStat(section: UnifiedSection): Promise<void> {
-    const diffPath = path.join(__dirname, 'data', section.path + '.json');
-    const text = await readFile(diffPath);
-    const lineDiffs = JSON.parse(text) as LineDiff[];
+    const lineDiffs = await UnifiedSection.readLineDiffs(section);
 
     for (const lineDiff of lineDiffs) {
         if (section.whatwg) {

@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { readFile } from '../../utils';
 import { ASTNode, parse } from 'parse5';
 
@@ -5,22 +6,15 @@ import { ASTNode, parse } from 'parse5';
 // Document
 //
 export class Document {
-    private node: ASTNode
     private text: string
+    private node: ASTNode
 
-    constructor(text: string, node: ASTNode) {
-        this.text = text;
-        this.node = node;
-    }
-
-    static parse(htmlPath): Promise<Document> {
+    init(htmlPath: string): Promise<void> {
         return readFile(htmlPath).then((text) => {
-            const node = parse(text, {
+            this.text = text;
+            this.node = parse(text, {
                 locationInfo: true,
             });
-            const doc = new Document(text, node);
-
-            return doc;
         });
     }
 
