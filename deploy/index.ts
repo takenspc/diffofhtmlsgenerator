@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as Firebase from 'firebase';
-import { readFile, log } from '../utils';
-import { UnifiedSection } from '../diffEntry';
+import { readFile, log } from '../shared/utils';
+import { UnifiedSection } from '../diff/unifiedSection';
 import { update } from '../updater';
 import { deployDiff } from './diff';
 import { tweet } from './tweet';

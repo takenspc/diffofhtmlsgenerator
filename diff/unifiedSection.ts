@@ -1,7 +1,7 @@
 import * as path from 'path';
-import { readFile, writeFile } from './utils';
-import { SpecSection, HashStat } from './jsonEntry';
-import { LineDiff } from './diff/htmlDiffChild';
+import { readFile, writeFile } from '../shared/utils';
+import { SpecSection, HashStat } from '../formatter/specSection';
+import { LineDiff } from './htmlDiffChild';
 
 
 export interface DiffStat {
@@ -68,7 +68,7 @@ export class UnifiedSection {
     //
     // LineDiff
     //
-    private static DIFF_DIR_PATH = path.join(__dirname, 'diff', 'data')
+    private static DIFF_DIR_PATH = path.join(__dirname, 'data')
     private static DIFF_JSON_PATH(section: UnifiedSection): string {
         return path.join(this.DIFF_DIR_PATH, `${section.path}.json`);
     }
@@ -110,18 +110,3 @@ export class UnifiedSection {
     }
 }
 
-export function* nextLeafUnifiedSection(entries: UnifiedSection[]): Iterable<UnifiedSection> {
-    for (const entry of entries) {
-        // XXX Firebase makes empty array be undefined
-        // XXX section.sections must be always an array
-        if (!entry.sections) {
-            entry.sections = [];
-        }
-
-        if (entry.sections.length === 0) {
-            yield entry;
-        } else {
-            yield* nextLeafUnifiedSection(entry.sections);
-        }
-    }
-}

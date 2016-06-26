@@ -1,5 +1,5 @@
 import { ASTNode } from 'parse5';
-import { hasClassName } from '../html';
+import { hasClassName } from '../shared/html';
 
 const breakBeforeStartTag: Set<string> = new Set([
     'address',

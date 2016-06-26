@@ -1,5 +1,5 @@
 import { Attr, ASTNode } from 'parse5';
-import { getAttribute, hasClassName } from '../html';
+import { getAttribute, hasClassName } from '../shared/html';
 import * as consts from './consts';
 
 

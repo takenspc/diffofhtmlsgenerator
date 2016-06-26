@@ -1,6 +1,7 @@
 import * as path from 'path';
-import { readFile, writeFile, mkdirp } from '../utils';
-import { UnifiedSection, nextLeafUnifiedSection, DiffStat, FlattedSpecSection } from '../diffEntry';
+import { readFile, writeFile } from '../shared/utils';
+import { nextLeafSection } from '../shared/iterator';
+import { UnifiedSection, DiffStat, FlattedSpecSection } from '../diff/unifiedSection';
 
 
 //
@@ -42,7 +43,7 @@ function createHashData(unifiedSections: UnifiedSection[]): HashData {
     const paths: string[] = [];
     const path2HashEntry = new Map<string, HashEntry>();
 
-    for (const unifiedSection of nextLeafUnifiedSection(unifiedSections)) {
+    for (const unifiedSection of nextLeafSection<UnifiedSection>(unifiedSections)) {
         const path = unifiedSection.path;
         paths.push(path);
 
@@ -188,6 +189,5 @@ export async function update(oldDiffEntries: UnifiedSection[], newDiffEntries: U
     const updatedEntries = createUpdateEntries(oldData, newData);
 
     const jsonPath = path.join(__dirname, 'data', 'update.json');
-    await mkdirp(path.dirname(jsonPath));
     await writeFile(jsonPath, JSON.stringify(updatedEntries));
 }

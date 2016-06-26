@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import * as path from 'path';
-import { SpecSection } from '../jsonEntry';
-import { UnifiedSection } from '../diffEntry';
-import { createUnifiedSections } from './jsonDiff';
+import { SpecSection } from '../formatter/specSection';
+import { UnifiedSection } from './unifiedSection';
+import { createUnifiedSections } from './tocDiff';
 import { computeHTMLDiff } from './htmlDiff';
 
 /**

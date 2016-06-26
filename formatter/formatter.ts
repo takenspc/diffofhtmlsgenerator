@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { getText, hasClassName } from '../html';
+import { getText, hasClassName } from '../shared/html';
 import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
 

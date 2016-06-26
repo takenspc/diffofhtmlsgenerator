@@ -1,37 +1,68 @@
 import * as path from 'path';
 import * as parse5 from 'parse5';
-import { log } from '../utils';
-import { SpecSection, nextLeafSpecSection } from '../jsonEntry';
+import { log, sha256 } from '../shared/utils';
+import { Section } from '../splitter/section';
 import { filter } from '../filter';
 import { formatFragment } from './formatter';
+import { SpecSection, HashStat } from './specSection';
 
 
 //
 // Formatter
 //
-async function computeAndWriteFormattedHTML(specSection: SpecSection): Promise<void> {
-    const originalHTML = await SpecSection.readOriginalHTML(specSection);
+function computeHashStat(originalHTML: string, formattedHTMLs: string[]): HashStat {
+    const hash: HashStat = {
+        splitted: sha256(originalHTML),
+        formatted: sha256(formattedHTMLs.join(''))
+    };
+
+    return hash;
+}
+
+
+async function createLeafSpecSection(section: Section): Promise<SpecSection> {
+    const originalHTML = await Section.readSplittedHTML(section);
 
     let fragmentNode = parse5.parseFragment(originalHTML);
     fragmentNode = filter(fragmentNode);
-
     const formattedHTMLs = formatFragment(fragmentNode);
-    for (let i = 0; i < formattedHTMLs.length; i++) {
+
+    const hash = computeHashStat(originalHTML, formattedHTMLs);
+    const formattedHTMLsLength = formattedHTMLs.length;
+    const specSection = new SpecSection(section, hash, formattedHTMLsLength );
+
+    for (let i = 0; i < formattedHTMLsLength; i++) {
         const formattedHTML = formattedHTMLs[i];
         await SpecSection.writeFormattedHTML(specSection, formattedHTML, i);
     }
 
-    SpecSection.updateHash(specSection, originalHTML, formattedHTMLs);
+    return specSection;
+}
+
+
+async function createSpecSection(section: Section): Promise<SpecSection> {
+    if (section.sections.length === 0) {
+        return await createLeafSpecSection(section);
+    }
+
+    const specSection = new SpecSection(section, null, 0);
+    for (const childSection of section.sections) {
+        const childSpecSection = await createSpecSection(childSection);
+        specSection.sections.push(childSpecSection);
+    }
+
+    return specSection;
 }
 
 
 async function formatOrg(org: string): Promise<void> {
-    const specSections = await SpecSection.read(org);
+    const sections = await Section.read(org);
 
-    // writeFormattedHTML mutates specSection
-    for (const specSection of nextLeafSpecSection(specSections)) {
-        await computeAndWriteFormattedHTML(specSection);
-    }
+    const specSections: SpecSection[] = [];
+    for (const section of sections) {
+        const specSection = await createSpecSection(section);
+        specSections.push(specSection);
+    };
 
     await SpecSection.write(org, specSections);
 }

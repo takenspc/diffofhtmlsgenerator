@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { fork } from 'child_process';
-import { log } from '../utils';
+import { log } from '../shared/utils';
 
 function runChildProcess(modulePath: string) {
     return new Promise((resolve, reject) => {

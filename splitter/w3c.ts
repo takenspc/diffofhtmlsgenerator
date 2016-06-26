@@ -1,10 +1,10 @@
 import * as path from 'path';
 import * as assert from 'assert';
 import { ASTNode } from 'parse5';
-import { getAttribute, hasClassName, getText } from '../html';
+import { getAttribute, hasClassName, getText } from '../shared/html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
-import { Section, addSection, addChildNode, fixupSection } from './utils/section';
+import { Section, addSection, addChildNode, fixupSection } from './section';
 
 
 //

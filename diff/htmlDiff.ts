@@ -1,7 +1,8 @@
 import * as path from 'path';
 import { fork } from 'child_process';
 import { IDiffResult } from 'diff';
-import { UnifiedSection, nextLeafUnifiedSection, DiffStat } from '../diffEntry';
+import { nextLeafSection } from '../shared/iterator';
+import { UnifiedSection, DiffStat } from './unifiedSection';
 
 
 function runChildProcess(modulePath: string, section: UnifiedSection): Promise<void> {
@@ -47,7 +48,7 @@ async function updateDiffStat(section: UnifiedSection): Promise<void> {
 
 export async function computeHTMLDiff(sections: UnifiedSection[]): Promise<void> {
     const modulePath = path.join(__dirname, 'htmlDiffChild');
-    for (const section of nextLeafUnifiedSection(sections)) {
+    for (const section of nextLeafSection<UnifiedSection>(sections)) {
         await runChildProcess(modulePath, section);
         await updateDiffStat(section);
     }

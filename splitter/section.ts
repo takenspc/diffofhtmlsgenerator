@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import { ASTNode } from 'parse5';
-import { hasClassName } from '../../html';
-import { writeFile } from '../../utils';
+import { hasClassName } from '../shared/html';
+import { readFile, writeFile } from '../shared/utils';
 
 
 export class Section {
@@ -30,12 +30,15 @@ export class Section {
     //
     // JSON
     //
-    private DATA_PATH(extension): string {
-        return path.join(__dirname, '..', 'data', this.org, `${this.path}.${extension}`);
+    private static SPLITTER_DIR_PATH(org: string) {
+        return path.join(__dirname, 'data', org);
+    }
+    private static DATA_PATH(org: string, sectionPath: string, extension: string): string {
+        return path.join(Section.SPLITTER_DIR_PATH(org), `${sectionPath}.${extension}`);
     }
 
-    writeJson(): Promise<void> {
-        const jsonPath = this.DATA_PATH('json');
+    writeAstJson(): Promise<void> {
+        const jsonPath = Section.DATA_PATH(this.org, this.path, 'json');
         const text = JSON.stringify(this.nodes.map((node) => {
             return formatNode(node);
         }));
@@ -48,16 +51,21 @@ export class Section {
     // HTML
     //
     writeHTML(html): Promise<void> {
-        const htmlPath = this.DATA_PATH('html');
+        const htmlPath = Section.DATA_PATH(this.org, this.path, 'html');
 
         return writeFile(htmlPath, html);
     }
 
+    static readSplittedHTML(section: Section): Promise<string> {
+        const htmlPath = this.DATA_PATH(section.org, section.path, 'html');
+
+        return readFile(htmlPath);
+    }
 
     //
     // Root
     //
-    get isRoot() {
+    get isRoot(): boolean {
         return this.id === '#root#';
     }
 
@@ -73,6 +81,36 @@ export class Section {
 
         return root;
     }
+
+
+    //
+    // Index
+    //
+    private static INDEX_JSON_PATH(org: string) {
+        return path.join(this.SPLITTER_DIR_PATH(org), 'index.json');
+    }
+
+    static write(org: string, sections: Section[]): Promise<void> {
+        const jsonPath = this.INDEX_JSON_PATH(org);
+        const text = JSON.stringify(sections, (key, value) => {
+            if (key === 'nodes') {
+                return null;
+            }
+
+            return value;
+        });
+
+        return writeFile(jsonPath, text);
+    }
+
+    static read(org: string): Promise<Section[]> {
+        const jsonPath = this.INDEX_JSON_PATH(org);
+
+        return readFile(jsonPath).then((text) => {
+            return JSON.parse(text);
+        });
+    }
+
 }
 
 
@@ -279,16 +317,3 @@ export function fixupSection(parent: Section): void {
     }
 }
 
-
-//
-// iterable
-//
-export function* nextLeafSection(parent: Section): Iterable<Section> {
-    for (const section of parent.sections) {
-        if (section.sections.length === 0) {
-            yield section;
-        } else {
-            yield* nextLeafSection(section);
-        }
-    }
-}

@@ -1,7 +1,7 @@
 import * as path from 'path';
-import { SpecSection } from '../../jsonEntry';
+import { nextLeafSection } from '../../shared/iterator';
 import { Document } from './document';
-import { Section, nextLeafSection } from './section';
+import { Section } from '../section';
 
 export class Spec {
     private org: string
@@ -20,14 +20,14 @@ export class Spec {
     }
 
     async save(): Promise<void> {
-        for (const section of nextLeafSection(this.rootSection)) {
-            await section.writeJson();
+        const sections = this.rootSection.sections;
+        for (const section of nextLeafSection(sections)) {
+            await section.writeAstJson();
 
             const html = this.document.getHTMLText(section.nodes);
             await section.writeHTML(html);
         };
 
-        const rootSpecSection = new SpecSection(this.rootSection);
-        await SpecSection.write(this.org, rootSpecSection.sections);
+        await Section.write(this.org, sections);
     }
 }

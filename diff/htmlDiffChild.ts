@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as diff from 'diff';
-import { log } from '../utils';
-import { UnifiedSection } from '../diffEntry';
+import { log } from '../shared/utils';
+import { UnifiedSection } from './unifiedSection';
 
 
 //

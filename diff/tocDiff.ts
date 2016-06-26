@@ -1,5 +1,5 @@
-import { SpecSection } from '../jsonEntry';
-import { UnifiedSection } from '../diffEntry'
+import { SpecSection } from '../formatter/specSection';
+import { UnifiedSection } from './unifiedSection'
 
 //
 // Utils.

@@ -1,11 +1,11 @@
-import { log } from './utils';
+import { log } from './shared/utils';
 import { diff } from './diff';
 import { fetch } from './fetcher';
 import { format } from './formatter';
 import { split } from './splitter';
 import { deploy } from './deploy';
 
-async function main() {
+async function main(): Promise<void> {
     log(['fetch', '', 'start']);
     await fetch();
     log(['fetch', '', 'end']);

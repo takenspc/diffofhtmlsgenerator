@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { readFile, writeFile, sha256 } from './utils';
-import { Section } from './splitter/utils/section';
+import { readFile, writeFile } from '../shared/utils';
+import { Section } from '../splitter/section';
 
 export interface HashStat {
     splitted: string
@@ -13,53 +13,28 @@ export class SpecSection {
     path: string
     headingText: string
     originalHeadingText: string
-    sections: SpecSection[]
     hash: HashStat = null
     formattedHTMLsLength: number = 0
+    sections: SpecSection[] = []
 
-    constructor(section: Section) {
+    constructor(section: Section, hash: HashStat, formattedHTMLsLength) {
         this.org = section.org;
         this.id = section.id
         this.path = section.path;
         this.headingText = section.headingText;
         this.originalHeadingText = section.originalHeadingText;
 
-        this.sections = section.sections.map((childSection) => {
-            return new SpecSection(childSection);
-        });
-    }
-
-    static updateHash(section: SpecSection, originalHTML: string, formattedHTMLs: string[]): void {
-        section.hash = {
-            splitted: sha256(originalHTML),
-            formatted: sha256(formattedHTMLs.join(''))
-        };
-
-        section.formattedHTMLsLength = formattedHTMLs.length;
-    }
-
-
-    //
-    // Original HTML
-    //
-    private static SPLITTER_DIR_PATH = path.join(__dirname, 'splitter', 'data')
-    private static ORIGINAL_HTML_PATH(section: SpecSection): string {
-        return path.join(SpecSection.SPLITTER_DIR_PATH, section.org, `${section.path}.html`);
-    }
-
-    static readOriginalHTML(section: SpecSection): Promise<string> {
-        const htmlPath = this.ORIGINAL_HTML_PATH(section);
-
-        return readFile(htmlPath);
+        this.hash = hash;
+        this.formattedHTMLsLength = formattedHTMLsLength;
     }
 
 
     //
     // Formatted HTML
     //
-    private static FORMATTER_DIR_PATH = path.join(__dirname, 'formatter', 'data')
+    private static FORMATTER_DIR_PATH = path.join(__dirname, 'data')
     private static FORMATTED_HTML_PATH(org: string, sectionPath: string, index: number): string {
-        return path.join(SpecSection.FORMATTER_DIR_PATH, org, `${path}.${index}.html`);
+        return path.join(SpecSection.FORMATTER_DIR_PATH, org, `${sectionPath}.${index}.html`);
     }
 
     static writeFormattedHTML(section: SpecSection, html: string, index: number): Promise<void> {
@@ -95,15 +70,5 @@ export class SpecSection {
         return readFile(jsonPath).then((text) => {
             return JSON.parse(text);
         });
-    }
-}
-
-export function* nextLeafSpecSection(entries: SpecSection[]): Iterable<SpecSection> {
-    for (const entry of entries) {
-        if (entry.sections.length > 0) {
-            yield* nextLeafSpecSection(entry.sections);
-        } else {
-            yield entry;
-        }
     }
 }

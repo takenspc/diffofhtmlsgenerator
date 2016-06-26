@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { readFile } from '../../utils';
+import { readFile } from '../../shared/utils';
 import { ASTNode, parse } from 'parse5';
 
 //
