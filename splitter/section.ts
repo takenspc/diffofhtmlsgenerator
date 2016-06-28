@@ -22,8 +22,8 @@ export class Section {
 
     sections: Section[] = []
 
-    constructor({ parent, id, headingText, nodes}) {
-        this.org = parent.org;
+    constructor({ org, parent, id, headingText, nodes}) {
+        this.org = org;
         this.id = id;
         [this.headingText, this.originalHeadingText, this.path] = computeHeadings(parent, id, headingText);
 
@@ -49,6 +49,7 @@ export class Section {
 
     static createRootSection(org: string): Section {
         const root: Section = new Section({
+            org: org,
             parent: null,
             id: '#root#',
             headingText: '#root#',
@@ -187,6 +188,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
 
 export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
     const section: Section = new Section({
+        org: parent.org,
         parent: parent,
         id: id,
         headingText: headingText,
