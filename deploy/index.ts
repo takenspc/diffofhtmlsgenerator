@@ -36,14 +36,7 @@ export async function deploy(): Promise<void> {
     const oldUnifiedSections = await readUnifiedSectionsFromFirebase(indexRef);
     const newUnifiedSections = await UnifiedSection.read();
 
-    // update() writes updateData into disk
-    await update(oldUnifiedSections, newUnifiedSections);
-
-    // read updateData previously written
-    // I know this is redundant...
-    const updatePath = path.join(__dirname, '..', 'updater', 'data', 'update.json');
-    const updateText = await readFile(updatePath);
-    const updateData = JSON.parse(updateText);
+    const updateData = await update(oldUnifiedSections, newUnifiedSections);
 
     const fetchPath = path.join(__dirname, '..', 'fetcher', 'data', 'fetch.json');
     const fetchText = await readFile(fetchPath);

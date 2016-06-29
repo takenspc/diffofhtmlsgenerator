@@ -182,12 +182,14 @@ function createUpdateEntries(oldData: HashData, newData: HashData): UpdateEntry[
     return updateEntries;
 }
 
-export async function update(oldDiffEntries: UnifiedSection[], newDiffEntries: UnifiedSection[]): Promise<void> {
-    const oldData = createHashData(oldDiffEntries);
-    const newData = createHashData(newDiffEntries);
+export async function update(oldUnifiedSections: UnifiedSection[], newUnifiedSections: UnifiedSection[]): Promise<UpdateEntry[]> {
+    const oldData = createHashData(oldUnifiedSections);
+    const newData = createHashData(newUnifiedSections);
 
     const updatedEntries = createUpdateEntries(oldData, newData);
 
     const jsonPath = path.join(__dirname, 'data', 'update.json');
     await writeFile(jsonPath, JSON.stringify(updatedEntries));
+
+    return updatedEntries;
 }
