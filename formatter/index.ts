@@ -10,24 +10,19 @@ import { SpecSection, HashStat } from './specSection';
 //
 // Formatter
 //
-function computeHashStat(originalHTML: string, formattedHTMLs: string[]): HashStat {
-    const hash: HashStat = {
-        splitted: sha256(originalHTML),
-        formatted: sha256(formattedHTMLs.join(''))
-    };
-
-    return hash;
-}
-
-
 async function createLeafSpecSection(section: Section): Promise<SpecSection> {
     const originalHTML = await Section.readSplittedHTML(section);
+    const splittedHash = sha256(originalHTML);
 
     let fragmentNode = parse5.parseFragment(originalHTML);
     fragmentNode = filter(fragmentNode);
     const formattedHTMLs = formatFragment(fragmentNode);
+    const formattedHash = sha256(formattedHTMLs.join(''));
 
-    const hash = computeHashStat(originalHTML, formattedHTMLs);
+    const hash: HashStat = {
+        splitted: splittedHash,
+        formatted: formattedHash
+    };
     const formattedHTMLsLength = formattedHTMLs.length;
     const specSection = new SpecSection(section, hash, formattedHTMLsLength );
 
