@@ -65,7 +65,7 @@ export class Section {
     //
     fixup(): void {
         for (const section of this.sections) {
-            section.fixup;
+            section.fixup();
         }
 
         //
