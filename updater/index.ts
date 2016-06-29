@@ -157,9 +157,9 @@ function createUpdateEntries(oldData: HashData, newData: HashData): UpdateEntry[
         const oldHash = oldData.path2HashEntry.get(path);
         const newHash = newData.path2HashEntry.get(path);
 
-        const updateLog: UpdateEntry = createUpdateEntry(path, oldHash, newHash)
-        if (updateLog) {
-            updateEntries.push(updateLog);
+        const updateEntry = createUpdateEntry(path, oldHash, newHash)
+        if (updateEntry) {
+            updateEntries.push(updateEntry);
         }
     }
     
@@ -173,9 +173,9 @@ function createUpdateEntries(oldData: HashData, newData: HashData): UpdateEntry[
             continue;
         }
 
-        const updateLog: UpdateEntry = createUpdateEntry(path, oldHash, newHash)
-        if (updateLog) {
-            updateEntries.push(updateLog);
+        const updateEntry = createUpdateEntry(path, oldHash, newHash)
+        if (updateEntry) {
+            updateEntries.push(updateEntry);
         }
     }
 
