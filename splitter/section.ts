@@ -3,7 +3,7 @@ import * as path from 'path';
 import { ASTNode } from 'parse5';
 import { hasClassName } from '../shared/html';
 import { readFile, writeFile } from '../shared/utils';
-import { computeHeadings} from './utils/headings';
+import { normalizeHeadingText } from './utils/headings';
 import { formatNode, formatStartTag} from './utils/debug';
 
 
@@ -11,6 +11,7 @@ import { formatNode, formatStartTag} from './utils/debug';
 // Section
 //
 export class Section {
+    private type: 'root' | 'pre' | 'normal'
     org: string
     id: string
 
@@ -22,10 +23,12 @@ export class Section {
 
     sections: Section[] = []
 
-    constructor({ org, parent, id, headingText, nodes}) {
+    constructor(type: 'root' | 'pre' | 'normal', org: string, parent: Section, id: string, headingText: string, nodes: ASTNode[]) {
+        this.type = type;
         this.org = org;
         this.id = id;
-        [this.headingText, this.originalHeadingText, this.path] = computeHeadings(parent, id, headingText);
+        [this.headingText, this.originalHeadingText] = this.computeHeadings(parent, headingText);
+        this.path = this.computePath(parent);
 
         // move parent.nodes (h1-h6 elements) to its first section
         if (parent && parent.sections.length === 0) {
@@ -41,21 +44,63 @@ export class Section {
 
 
     //
-    // Root
+    // headings
     //
-    get isRoot(): boolean {
-        return this.id === '#root#';
+    private computeHeadings(parent: Section, originalHeadingText: string): [string, string] {
+        if (this.type === 'root') {
+            return ['', ''];
+        }
+
+        if (this.type === 'pre') {
+            return [
+                `(preface of “${parent.headingText}”)`,
+                `(preface of “${parent.originalHeadingText}”)`
+            ];
+        };
+
+        return [
+            normalizeHeadingText(originalHeadingText),
+            originalHeadingText
+        ];
     }
 
-    static createRootSection(org: string): Section {
-        const root: Section = new Section({
-            org: org,
-            parent: null,
-            id: '#root#',
-            headingText: '#root#',
-            nodes: []
-        });
 
+    //
+    // Path
+    //
+    private getSafePath(value: string): string {
+        let safePath = value;
+        // https://support.microsoft.com/kb/100108
+        const ntfsUnsafe = /[?"/\<>*|:]/g;
+        safePath = value.replace(ntfsUnsafe, '_')
+
+        // Firebase
+        const firebaseUnsafe = /[.#$\[\]]/g;
+        safePath = safePath.replace(firebaseUnsafe, '_')
+        return safePath;
+    }
+
+    private computePath(parent: Section): string {
+        if (this.type === 'root') {
+            return '';
+        }
+
+        // path is not for human, for system
+        let current = this.type === 'pre' ? '__pre__' : this.headingText;
+        current = this.getSafePath(current);
+        if (parent.type === 'root') {
+            return current;
+        }
+
+        return `${parent.path}/${current}`;
+    }
+
+
+    //
+    // Root
+    //
+    static createRootSection(org: string): Section {
+        const root: Section = new Section('root', org, null, '__root__', '', []);
         return root;
     }
 
@@ -74,9 +119,9 @@ export class Section {
         // if parent has only __pre__, merge __pre__ into parent
         if (this.sections.length === 1) {
             const section = this.sections[0];
-            if (section.id === this.id) {
+            if (section.type === 'pre') {
                 // merge __pre__ into root
-                assert(this.nodes.length === 0, `section which have __pre__ must not have nodes: ${this.path}`);
+                assert(this.nodes.length === 0, `section which only has one __pre__ must not have nodes: ${this.path}`);
                 this.nodes = section.nodes;
                 // remove __pre__
                 this.sections = [];
@@ -176,9 +221,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
 
         // preface contents
         assert(parent, `__pre__ must have a parent: ${formatStartTag(childNode)}`);
-        const id = '__pre__';
-        const headingText = '__pre__';
-        return addSection(parent, id, headingText, childNode);
+        return new Section('pre', parent.org, parent, parent.id, '', [childNode]);
     }
 
     // normal
@@ -187,13 +230,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
 }
 
 export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
-    const section: Section = new Section({
-        org: parent.org,
-        parent: parent,
-        id: id,
-        headingText: headingText,
-        nodes: [childNode]
-    });
+    const section: Section = new Section('normal', parent.org, parent, id, headingText, [childNode]);
     return section;
 }
 

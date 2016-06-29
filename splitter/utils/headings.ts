@@ -54,63 +54,11 @@ const HEADING_REPLACEMENT_MAP = new Map<any, string>([
     ['Serializing', 'Serialising'],
 ]);
 
-function normalizeHeadingText(original: string): string {
+export function normalizeHeadingText(original: string): string {
     let headingText = original;
     for (const [target, replacement] of HEADING_REPLACEMENT_MAP) {
         headingText = headingText.replace(target, replacement);
     }
 
     return headingText;
-}
-
-
-//
-// Path
-//
-function getSafePath(value: string): string {
-    let safePath = value;
-    // https://support.microsoft.com/kb/100108
-    const ntfsUnsafe = /[?"/\<>*|:]/g;
-    safePath = value.replace(ntfsUnsafe, '_')
-
-    // Firebase
-    const firebaseUnsafe = /[.#$\[\]]/g;
-    safePath = safePath.replace(firebaseUnsafe, '_')
-    return safePath;
-}
-
-function computePath(parent: Section, headingText: string): string {
-    // path is not for human, for system
-    const currentPath = getSafePath(headingText);
-    if (parent.isRoot) {
-        return currentPath;
-    }
-
-    return `${parent.path}/${currentPath}`;
-}
-
-export function computeHeadings(parent: Section, id: string, originalHeadingText: string): [string, string, string] {
-    if (id === '#root#') {
-        return [
-            id,
-            id,
-            ''
-        ];
-    }
-
-    if (id === '__pre__') {
-        return [
-            `(preface of “${parent.headingText}”)`,
-            `(preface of “${parent.originalHeadingText}”)`,
-            computePath(parent, id)
-        ];
-    }
-
-    const headingText = normalizeHeadingText(originalHeadingText);
-
-    return [
-        headingText,
-        originalHeadingText,
-        computePath(parent, headingText),
-    ];
 }
