@@ -17,7 +17,7 @@ export class SpecSection {
     formattedHTMLsLength: number = 0
     sections: SpecSection[] = []
 
-    constructor(section: Section, hash: HashStat, formattedHTMLsLength) {
+    constructor(section: Section, hash: HashStat, formattedHTMLsLength: number) {
         this.org = section.org;
         this.id = section.id
         this.path = section.path;
