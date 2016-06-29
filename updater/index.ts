@@ -88,37 +88,37 @@ function createUpdateSubEntry(splitted: string, formatted: string, diffStat: Dif
     };
 }
 
-function compareHashSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): UpdateSubEntry {
+function compareHashSubEntry(oldHashSubEntry: HashSubEntry, newHashSubEntry: HashSubEntry): UpdateSubEntry {
     // not modified (not exist at all)
-    if (!oldSubEntry && !newSubEntry) {
+    if (!oldHashSubEntry && !newHashSubEntry) {
         return null;
     }
     
     // added
-    if (!oldSubEntry) {
-        return createUpdateSubEntry('added', 'added', newSubEntry.diffStat);
+    if (!oldHashSubEntry) {
+        return createUpdateSubEntry('added', 'added', newHashSubEntry.diffStat);
     }
 
     // removed
-    if (!newSubEntry) {
+    if (!newHashSubEntry) {
         const diffStat: DiffStat = {
-            diffCount: -oldSubEntry.diffStat.diffCount,
-            total: -oldSubEntry.diffStat.total
+            diffCount: -oldHashSubEntry.diffStat.diffCount,
+            total: -oldHashSubEntry.diffStat.total
         };
         return createUpdateSubEntry('removed', 'removed', diffStat);
     }
 
     // in case, newSubEntry && oldSubEntry
-    const splitted = (oldSubEntry.splitted !== newSubEntry.splitted);
-    const formatted = (oldSubEntry.formatted !== newSubEntry.formatted);
+    const isSplittedUpdated = (oldHashSubEntry.splitted !== newHashSubEntry.splitted);
+    const isFormattedUpdated = (oldHashSubEntry.formatted !== newHashSubEntry.formatted);
 
     const diffStat = {
-        diffCount: newSubEntry.diffStat.diffCount - oldSubEntry.diffStat.diffCount,
-        total: newSubEntry.diffStat.total - oldSubEntry.diffStat.total
+        diffCount: newHashSubEntry.diffStat.diffCount - oldHashSubEntry.diffStat.diffCount,
+        total: newHashSubEntry.diffStat.total - oldHashSubEntry.diffStat.total
     };
 
-    if (splitted || formatted) {
-        return createUpdateSubEntry(splitted ? 'modified' : '', formatted ? 'modified' : '', diffStat);
+    if (isSplittedUpdated || isFormattedUpdated) {
+        return createUpdateSubEntry(isSplittedUpdated ? 'modified' : '', isFormattedUpdated ? 'modified' : '', diffStat);
     }
 
     // not modified
