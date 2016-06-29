@@ -70,7 +70,7 @@ function createHashData(unifiedSections: UnifiedSection[]): HashData {
 interface UpdateSubEntry {
     splitted: string
     formatted: string
-    diffStat: string
+    diffStat: DiffStat
 }
 
 export interface UpdateEntry {
@@ -80,7 +80,7 @@ export interface UpdateEntry {
     w3c: UpdateSubEntry
 }
 
-function createUpdateSubEntry(splitted: string, formatted: string, diffStat: string): UpdateSubEntry {
+function createUpdateSubEntry(splitted: string, formatted: string, diffStat: DiffStat): UpdateSubEntry {
     return {
         splitted: splitted,
         formatted: formatted,
@@ -88,7 +88,7 @@ function createUpdateSubEntry(splitted: string, formatted: string, diffStat: str
     };
 }
 
-function compareSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): UpdateSubEntry {
+function compareHashSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): UpdateSubEntry {
     // not modified (not exist at all)
     if (!oldSubEntry && !newSubEntry) {
         return null;
@@ -96,26 +96,26 @@ function compareSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): 
     
     // added
     if (!oldSubEntry) {
-        return createUpdateSubEntry('added', 'added', '');
+        return createUpdateSubEntry('added', 'added', newSubEntry.diffStat);
     }
 
     // removed
     if (!newSubEntry) {
-        return createUpdateSubEntry('removed', 'removed', '');
+        const diffStat: DiffStat = {
+            diffCount: -oldSubEntry.diffStat.diffCount,
+            total: -oldSubEntry.diffStat.total
+        };
+        return createUpdateSubEntry('removed', 'removed', diffStat);
     }
 
     // in case, newSubEntry && oldSubEntry
     const splitted = (oldSubEntry.splitted !== newSubEntry.splitted);
     const formatted = (oldSubEntry.formatted !== newSubEntry.formatted);
 
-    const oldDiffCount = oldSubEntry.diffStat.diffCount;
-    const newDiffCount = newSubEntry.diffStat.diffCount;
-    let diffStat = '';
-    if (oldDiffCount > newDiffCount) {
-        diffStat = 'decreased';
-    } else if (oldDiffCount < newDiffCount) {
-        diffStat = 'increased';
-    }
+    const diffStat = {
+        diffCount: newSubEntry.diffStat.diffCount - oldSubEntry.diffStat.diffCount,
+        total: newSubEntry.diffStat.total - oldSubEntry.diffStat.total
+    };
 
     if (splitted || formatted) {
         return createUpdateSubEntry(splitted ? 'modified' : '', formatted ? 'modified' : '', diffStat);
@@ -127,10 +127,8 @@ function compareSubEntry(oldSubEntry: HashSubEntry, newSubEntry: HashSubEntry): 
 
 function createUpdateEntry(path: string, oldHash: HashEntry, newHash: HashEntry): UpdateEntry {
     // check modification
-    const whatwg = compareSubEntry(oldHash ? oldHash.whatwg : null,
-        newHash ? newHash.whatwg : null);
-    const w3c = compareSubEntry(oldHash ? oldHash.w3c : null,
-        newHash ? newHash.w3c : null);
+    const whatwg = compareHashSubEntry(oldHash ? oldHash.whatwg : null, newHash ? newHash.whatwg : null);
+    const w3c = compareHashSubEntry(oldHash ? oldHash.w3c : null, newHash ? newHash.w3c : null);
 
     // not modified
     if (!whatwg && !w3c) {
