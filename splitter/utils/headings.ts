@@ -12,13 +12,10 @@ const HEADING_REPLACEMENT_MAP = new Map<any, string>([
     // Common infrastructure
     ['Plugin Content Handlers', 'Plugins'],
     ['Colors', 'Colours'],
+    ['TransferHelper ( input, targetRealm )', 'Transfer ( input, targetRealm )'],
 
     // The elements of HTML
     ['The root element', 'The document element'],
-
-    // Requirements for providing text to act as an alternative for images
-    ['A link or button containing nothing but an image', 'A link or button containing nothing but the image'],
-    ['Images of text', 'Text that has been rendered to a graphic for typographical effect'],
 
     // Media elements
     // Synchronising multiple media elements
@@ -29,15 +26,12 @@ const HEADING_REPLACEMENT_MAP = new Map<any, string>([
     ['Color ', 'Colour '],
     // Common event behaviours
     ['behaviors', 'behaviours'],
-    // APIs for text field selections
-    ['APIs for text field selections', 'APIs for the text field selections'],
+    // APIs for the text field selections
+    ['APIs for the text field selections', 'APIs for the text control selections'],
 
     // The canvas element
     // Colour spaces and colour correction
     ['color ', 'colour '],
-
-    // Navigating to a fragment
-    ['fragment identifier', 'fragment'],
 
     // Scripting
     // HostPromiseRejectionTracker(promise, operation)
