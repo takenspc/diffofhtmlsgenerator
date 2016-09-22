@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --ext .ts ."
   },
   "keywords": [],
   "author": "Takeshi Kurosawa <taken.spc@gmail.com>",
@@ -25,6 +26,9 @@
     "node": "6.x"
   },
   "devDependencies": {
-    "dtsm": "^1.1.0"
+    "dtsm": "^1.1.0",
+    "eslint": "^3.0.0",
+    "eslint-plugin-node": "^2.0.0",
+    "typescript-eslint-parser": "^0.3.0"
   }
 }
