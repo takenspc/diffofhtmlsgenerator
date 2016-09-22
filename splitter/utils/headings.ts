@@ -27,7 +27,7 @@ const HEADING_REPLACEMENT_MAP = new Map<any, string>([
     // Common event behaviours
     ['behaviors', 'behaviours'],
     // APIs for the text field selections
-    ['APIs for the text field selections', 'APIs for the text control selections'],
+    ['APIs for text field selections', 'APIs for the text control selections'],
 
     // The canvas element
     // Colour spaces and colour correction
