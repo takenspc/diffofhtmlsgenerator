@@ -19,9 +19,6 @@
     "mkdirp/mkdirp.d.ts": {
       "ref": "73110d92bdab2367e326f297bef3574285cba329"
     },
-    "moment/moment.d.ts": {
-      "ref": "73110d92bdab2367e326f297bef3574285cba329"
-    },
     "node/node.d.ts": {
       "ref": "73110d92bdab2367e326f297bef3574285cba329"
     },

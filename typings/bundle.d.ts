@@ -3,6 +3,4 @@
 /// <reference path="minimatch/minimatch.d.ts" />
 /// <reference path="form-data/form-data.d.ts" />
 /// <reference path="diff/diff.d.ts" />
-/// <reference path="moment/moment.d.ts" />
-/// <reference path="moment/moment-node.d.ts" />
 /// <reference path="firebase/firebase.d.ts" />
