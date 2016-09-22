@@ -13,7 +13,7 @@
   "author": "Takeshi Kurosawa <taken.spc@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "diff": "^2.2.3",
+    "diff": "^3.0.0",
     "firebase": "^2.4.2",
     "mkdirp": "^0.5.1",
     "moment": "^2.15.1",
