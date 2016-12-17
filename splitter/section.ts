@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as path from 'path';
-import { ASTNode } from 'parse5';
+import { AST } from 'parse5';
 import { hasClassName } from '../shared/html';
 import { readFile, writeFile } from '../shared/utils';
 import { normalizeHeadingText } from './utils/headings';
@@ -19,11 +19,11 @@ export class Section {
     headingText: string
     originalHeadingText: string
 
-    nodes: ASTNode[]
+    nodes: AST.Default.Node[]
 
     sections: Section[] = []
 
-    constructor(type: 'root' | 'pre' | 'normal', org: string, parent: Section, id: string, headingText: string, nodes: ASTNode[]) {
+    constructor(type: 'root' | 'pre' | 'normal', org: string, parent: Section, id: string, headingText: string, nodes: AST.Default.Node[]) {
         this.type = type;
         this.org = org;
         this.id = id;
@@ -132,7 +132,7 @@ export class Section {
         // remove trailing whitespace text nodes
         //
         for (let i = this.nodes.length - 1; 0 <= i; --i) {
-            const node = this.nodes[i];
+            const node = this.nodes[i] as AST.Default.TextNode;
             if (node.nodeName !== '#text' || node.value.trim() !== '') {
                 break;
             }
@@ -210,17 +210,17 @@ export class Section {
 //
 // Add children
 // 
-export function addChildNode(parent: Section, current: Section, childNode: ASTNode): Section {
+export function addChildNode(parent: Section, current: Section, childNode: AST.Default.Element | AST.Default.TextNode): Section {
     // adding preface contents
     if (!current) {
         // skip inrelevant nodes
-        if ((childNode.nodeName === '#text' && childNode.value.trim() === '') ||
-            hasClassName(childNode, 'div', 'status')) {
+        if ((childNode.nodeName === '#text' && (childNode as AST.Default.TextNode).value.trim() === '') ||
+            hasClassName(childNode as AST.Default.Element, 'div', 'status')) {
             return current;
         }
 
         // preface contents
-        assert(parent, `__pre__ must have a parent: ${formatStartTag(childNode)}`);
+        assert(parent, `__pre__ must have a parent: ${formatStartTag(childNode as AST.Default.Element)}`);
         return new Section('pre', parent.org, parent, parent.id, '', [childNode]);
     }
 
@@ -229,7 +229,7 @@ export function addChildNode(parent: Section, current: Section, childNode: ASTNo
     return current;
 }
 
-export function addSection(parent: Section, id: string, headingText: string, childNode: ASTNode): Section {
+export function addSection(parent: Section, id: string, headingText: string, childNode: AST.Default.Node): Section {
     const section: Section = new Section('normal', parent.org, parent, id, headingText, [childNode]);
     return section;
 }

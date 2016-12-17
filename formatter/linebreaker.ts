@@ -1,4 +1,4 @@
-import { ASTNode } from 'parse5';
+import { AST } from 'parse5';
 import { hasClassName } from '../shared/html';
 
 const breakBeforeStartTag: Set<string> = new Set([
@@ -75,12 +75,12 @@ const breakBeforeEndTag: Set<string> = new Set([
 
 
 export class LineBreaker {
-    private node: ASTNode
+    private node: AST.Default.Element
     private nodeName: string
     depth: number
     private didBreakAfterStartTag: boolean
     
-    constructor(node: ASTNode, depth: number) {
+    constructor(node: AST.Default.Element, depth: number) {
         this.node = node;
         this.nodeName = node.nodeName;
         this.depth = (this.willBreakBeforeStartTag(node)) ? ++depth : depth;
@@ -99,7 +99,7 @@ export class LineBreaker {
     }
 
 
-    private willBreakBeforeStartTag(node: ASTNode): boolean {
+    private willBreakBeforeStartTag(node: AST.Default.Element): boolean {
         if (hasClassName(node, 'div', 'impl')) {
             return false;
         }
@@ -126,20 +126,20 @@ export class LineBreaker {
         return breakAfterStartTag.has(this.nodeName);
     }
 
-    breakAfterStartTag(node: ASTNode): string {
+    breakAfterStartTag(node: AST.Default.Element | AST.Default.TextNode): string {
         // we did, do nothing
         if (this.didBreakAfterStartTag) {
             return '';
         }
 
         // skip white space text nodes
-        if (node.nodeName === '#text' && node.value.trim() === '') {
+        if (node.nodeName === '#text' && (node as AST.Default.TextNode).value.trim() === '') {
             return '';
         }
 
         this.didBreakAfterStartTag = true;
         // if the start tag of a node inserts a line break, do nothing
-        if (this.willBreakBeforeStartTag(node)) {
+        if (this.willBreakBeforeStartTag(node as AST.Default.Element)) {
             return '';
         }
 

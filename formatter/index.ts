@@ -14,7 +14,7 @@ async function createLeafSpecSection(section: Section): Promise<SpecSection> {
     const originalHTML = await Section.readSplittedHTML(section);
     const splittedHash = sha256(originalHTML);
 
-    let fragmentNode = parse5.parseFragment(originalHTML);
+    let fragmentNode = parse5.parseFragment(originalHTML) as parse5.AST.Default.DocumentFragment;
     fragmentNode = filter(fragmentNode);
     const formattedHTMLs = formatFragment(fragmentNode);
     const formattedHash = sha256(formattedHTMLs.join(''));

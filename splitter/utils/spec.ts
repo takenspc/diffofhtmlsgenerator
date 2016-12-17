@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { AST } from 'parse5';
 import { nextLeafSection } from '../../shared/iterator';
 import { Document } from './document';
 import { Section } from '../section';
@@ -24,7 +25,7 @@ export class Spec {
         for (const section of nextLeafSection(sections)) {
             await section.writeDebugJson();
 
-            const html = this.document.getHTMLText(section.nodes);
+            const html = this.document.getHTMLText(section.nodes as AST.Default.Element[]);
             await section.writeHTML(html);
         };
 

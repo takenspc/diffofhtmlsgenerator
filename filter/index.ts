@@ -1,4 +1,4 @@
-import { Attr, ASTNode } from 'parse5';
+import { AST } from 'parse5';
 import { getAttribute, hasClassName } from '../shared/html';
 import * as consts from './consts';
 
@@ -7,9 +7,9 @@ import * as consts from './consts';
 // Context
 //
 class FilterContext {
-    private parentStack: ASTNode[] = []
+    private parentStack: AST.Default.Node[] = []
     
-    get parent(): ASTNode {
+    get parent(): AST.Default.Node {
         const length = this.parentStack.length;
         if (length === 0) {
             return null;
@@ -17,7 +17,7 @@ class FilterContext {
         return this.parentStack[length - 1];
     }
     
-    push(parent: ASTNode): void {
+    push(parent: AST.Default.Node): void {
         this.parentStack.push(parent);
     }
     
@@ -30,7 +30,7 @@ class FilterContext {
 //
 // Attr
 //
-function includeAttr(attr: Attr): boolean {
+function includeAttr(attr: AST.Default.Attribute): boolean {
     const name = attr.name;
     const value = attr.value;
 
@@ -49,7 +49,7 @@ function includeAttr(attr: Attr): boolean {
     return true;
 }
 
-function filterAttrValue(attr: Attr): void {
+function filterAttrValue(attr: AST.Default.Attribute): void {
     const name = attr.name;
     const value = attr.value;
     
@@ -62,8 +62,8 @@ function filterAttrValue(attr: Attr): void {
     }
 }
 
-function filterAttrs(context: FilterContext, node: ASTNode): void {
-    const newAttrs: Attr[] = []
+function filterAttrs(context: FilterContext, node: AST.Default.Element): void {
+    const newAttrs: AST.Default.Attribute[] = []
 
     for (const attr of node.attrs) {
         filterAttrValue(attr);
@@ -80,7 +80,7 @@ function filterAttrs(context: FilterContext, node: ASTNode): void {
 //
 // Element
 //
-function includeElement(context: FilterContext, node: ASTNode): boolean {
+function includeElement(context: FilterContext, node: AST.Default.Element): boolean {
     if (hasClassName(node, 'a', 'self-link') ||
         hasClassName(node, 'span', 'dfn-panel') ||
         hasClassName(node, 'div', 'status')) {
@@ -97,7 +97,7 @@ function includeElement(context: FilterContext, node: ASTNode): boolean {
     return true;
 }
 
-function flattenElement(context: FilterContext, node: ASTNode): boolean {
+function flattenElement(context: FilterContext, node: AST.Default.Element): boolean {
     const nodeName = node.nodeName;
     
     if (consts.textLevelElements.has(nodeName)) {
@@ -129,8 +129,8 @@ function flattenElement(context: FilterContext, node: ASTNode): boolean {
 }
 
 
-function* nextElement(context: FilterContext, node: ASTNode): Iterable<ASTNode> {
-    for (const childNode of node.childNodes) {
+function* nextElement(context: FilterContext, node: AST.Default.Element): Iterable<AST.Default.Element> {
+    for (const childNode of (node.childNodes as AST.Default.Element[])) {
         // if childNode is a non element
         if (childNode.nodeName.startsWith('#')) {
             yield childNode;
@@ -148,7 +148,7 @@ function* nextElement(context: FilterContext, node: ASTNode): Iterable<ASTNode> 
 //
 // Tree
 //
-function filterNode(context: FilterContext, node: ASTNode): void {
+function filterNode(context: FilterContext, node: AST.Default.Element): void {
     const createContext = consts.contextElements.has(node.nodeName);
     if (createContext) {
         context.push(node);
@@ -173,10 +173,15 @@ function filterNode(context: FilterContext, node: ASTNode): void {
     }
 }
 
-export function filter(node: ASTNode): ASTNode  {
+
+/**
+ * @param {AST.Default.DocumentFragment | AST.Default.Element} node node must be DocumentFragment
+ * @returns {AST.Default.DocumentFragment}
+ */
+export function filter(node: AST.Default.DocumentFragment | AST.Default.Element): AST.Default.DocumentFragment {
     const context: FilterContext = new FilterContext();
 
-    filterNode(context, node);
+    filterNode(context, node as AST.Default.Element);
 
-    return node;
+    return node as AST.Default.DocumentFragment;
 }

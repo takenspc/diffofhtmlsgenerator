@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as assert from 'assert';
-import { ASTNode } from 'parse5';
+import { AST } from 'parse5';
 import { getText, getAttribute } from '../shared/html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
@@ -39,7 +39,7 @@ const h4HavingH6: Set<string> = new Set([
 //
 // Header text
 //
-function getHeadingText(node: ASTNode): string {
+function getHeadingText(node: AST.Default.Element): string {
     const text = getText(node);
     return text.replace(/\s+/g, ' ').replace(/^\d+(?:\.\d+)* /, '').trim();
 }
@@ -61,7 +61,7 @@ export function parseSpec(spec: Spec): void {
     const body = spec.document.getBody();
     const root = spec.rootSection;
 
-    for (const childNode of body.childNodes) {
+    for (const childNode of body.childNodes as AST.Default.Element[]) {
         //
         // The structure of WHATWG HTML Standard
         //

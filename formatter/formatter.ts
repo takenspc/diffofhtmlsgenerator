@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { ASTNode } from 'parse5';
+import { AST } from 'parse5';
 import { getText, hasClassName } from '../shared/html';
 import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
@@ -8,7 +8,7 @@ import * as consts from './consts';
 // Context
 //
 class FormatContext {
-    private parentStack: ASTNode[] = []
+    private parentStack: AST.Default.Node[] = []
     private buffers: string[][] = []
     
     constructor() {
@@ -33,7 +33,7 @@ class FormatContext {
         this.buffer.push(text);
     }
 
-    get parent(): ASTNode {
+    get parent(): AST.Default.Node {
         const length = this.parentStack.length;
         if (length === 0) {
             return null;
@@ -41,7 +41,7 @@ class FormatContext {
         return this.parentStack[length - 1];
     }
     
-    push(parent: ASTNode): void {
+    push(parent: AST.Default.Node): void {
         this.parentStack.push(parent);
     }
     
@@ -89,7 +89,7 @@ function sortAttr(a: Attr, b: Attr): number {
 //
 // Tag
 //
-function formatStartTag(context: FormatContext, node: ASTNode): string {
+function formatStartTag(context: FormatContext, node: AST.Default.Element): string {
     const buff: string[] = []
 
     buff.push('<');
@@ -108,7 +108,7 @@ function formatStartTag(context: FormatContext, node: ASTNode): string {
     return buff.join('');
 }
 
-function formatEndTag(context: FormatContext, node: ASTNode): string {
+function formatEndTag(context: FormatContext, node: AST.Default.Element): string {
     const buff: string[] = [];
 
     buff.push('</');
@@ -122,7 +122,7 @@ function formatEndTag(context: FormatContext, node: ASTNode): string {
 //
 // Node
 //
-function formatText(context: FormatContext, node: ASTNode): void {
+function formatText(context: FormatContext, node: AST.Default.TextNode): void {
     let value = node.value;
 
     if (!context.parent || context.parent.nodeName !== 'pre') {
@@ -133,7 +133,7 @@ function formatText(context: FormatContext, node: ASTNode): void {
 }
 
 
-function formatElement(context: FormatContext, node: ASTNode, depth: number): void {
+function formatElement(context: FormatContext, node: AST.Default.Element, depth: number): void {
     // const buff: string[] = [];
 
     const createContext = consts.contextElements.has(node.nodeName);
@@ -149,7 +149,7 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): vo
     const isElementInfo = hasClassName(node, 'dl', 'element');
 
     const newDepth = lineBreaker.depth;
-    const childNodes = node.childNodes;    
+    const childNodes = node.childNodes as AST.Default.Element[];
     for (let i = 0; i < childNodes.length; i++) {
         const childNode = childNodes[i];
 
@@ -182,18 +182,18 @@ function formatElement(context: FormatContext, node: ASTNode, depth: number): vo
 //
 // Tree
 //
-function format(context: FormatContext, node: ASTNode, depth: number): void {
+function format(context: FormatContext, node: AST.Default.Element | AST.Default.TextNode, depth: number): void {
     if (node.nodeName === '#text') {
-        formatText(context, node);
+        formatText(context, node as AST.Default.TextNode);
     } else {
-        formatElement(context, node, depth);
+        formatElement(context, node as AST.Default.Element, depth);
     }
 }
 
-export function formatFragment(node: ASTNode): string[] {
+export function formatFragment(node: AST.Default.DocumentFragment): string[] {
     const context: FormatContext = new FormatContext();
 
-    for (const childNode of node.childNodes) {
+    for (const childNode of node.childNodes as AST.Default.Element[]) {
         format(context, childNode, -1);
     }
     

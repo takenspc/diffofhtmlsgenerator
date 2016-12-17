@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as assert from 'assert';
-import { ASTNode } from 'parse5';
+import { AST } from 'parse5';
 import { getAttribute, hasClassName, getText } from '../shared/html';
 import { Spec } from './utils/spec';
 import { Document } from './utils/document';
@@ -39,21 +39,22 @@ const h4HavingH6: Set<string> = new Set([
 //
 // Heading text
 //
-function* nextText(node: ASTNode): Iterable<ASTNode> {
+function* nextText(node: AST.Default.Element): Iterable<AST.Default.TextNode> {
     for (const childNode of node.childNodes) {
         if (childNode.nodeName === '#text') {
-            yield childNode;
+            yield childNode as AST.Default.TextNode;
         } else {
-            if (!hasClassName(childNode, 'span', 'secno') &&
-                !hasClassName(childNode, 'span', 'dfn-panel') &&
-                !hasClassName(childNode, 'a', 'self-link')) {
-                yield* nextText(childNode);
+            const childNodeAsElement = childNode as AST.Default.Element;
+            if (!hasClassName(childNodeAsElement, 'span', 'secno') &&
+                !hasClassName(childNodeAsElement, 'span', 'dfn-panel') &&
+                !hasClassName(childNodeAsElement, 'a', 'self-link')) {
+                yield* nextText(childNodeAsElement);
             }
         }
     }
 }
 
-function getHeadingText(node: ASTNode): string {
+function getHeadingText(node: AST.Default.Element): string {
     const buff: string[] = [];
 
     for (const textNode of nextText(node)) {
@@ -67,8 +68,8 @@ function getHeadingText(node: ASTNode): string {
 //
 // Iterate child node of sectionElement
 //
-function* nextElement(sectionElement: ASTNode): Iterable<ASTNode> {
-    for (const childNode of sectionElement.childNodes) {
+function* nextElement(sectionElement: AST.Default.Element): Iterable<AST.Default.Element> {
+    for (const childNode of sectionElement.childNodes as AST.Default.Element[]) {
         if (childNode.nodeName === 'div' || childNode.nodeName === 'section') {
             yield* nextElement(childNode);
         } else {
@@ -81,7 +82,7 @@ function* nextElement(sectionElement: ASTNode): Iterable<ASTNode> {
 //
 // parse section element
 //
-function parseSectionElement(sectionNode: ASTNode, root: Section): Section {
+function parseSectionElement(sectionNode: AST.Default.Element, root: Section): Section {
     let h2Section: Section = null;
     let h3Section: Section = null;
     let h4Section: Section = null;
@@ -203,8 +204,8 @@ function parseSectionElement(sectionNode: ASTNode, root: Section): Section {
 }
 
 
-function parseMainElement(root: Section, mainNode: ASTNode): void {
-    for (const sectionNode of mainNode.childNodes) {
+function parseMainElement(root: Section, mainNode: AST.Default.Element): void {
+    for (const sectionNode of mainNode.childNodes as AST.Default.Element[]) {
         if (sectionNode.nodeName === 'section') {
             const section = parseSectionElement(sectionNode, root);
             if (!section) {
@@ -219,7 +220,7 @@ function parseMainElement(root: Section, mainNode: ASTNode): void {
 function parseSpec(spec: Spec): void {
     const bodyNode = spec.document.getBody();
 
-    for (const childNode of bodyNode.childNodes) {
+    for (const childNode of bodyNode.childNodes as AST.Default.Element[]) {
         //
         // The structure of W3C HTML
         //
