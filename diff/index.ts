@@ -69,12 +69,6 @@ function reoderW3C(sections: SpecSection[]): void {
     assert(semantics, 'w3c entries must have #semantics section');
     // Move 'Links' before 'Edits'
     semantics.sections = moveEntryBefore(semantics.sections, 'links', 'edits');
-    
-    // Embedded content
-    const embedded = getEntryById(sections, 'semantics-embedded-content');
-    assert(embedded, 'w3c entries must have #semantics-embedded-content section');
-    // Move 'The source element' before 'The source element when used with the picture element'
-    embedded.sections = moveEntryBefore(embedded.sections, 'the-source-element', 'the-source-element-when-used-with-the-picture-element');
 }
 
 
