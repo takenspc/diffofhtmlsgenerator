@@ -205,8 +205,10 @@ export function addChildNode(parent: Section, current: Section, childNode: AST.D
     // adding preface contents
     if (!current) {
         // skip inrelevant nodes
+        const childElement = childNode as AST.Default.Element;
         if ((childNode.nodeName === '#text' && (childNode as AST.Default.TextNode).value.trim() === '') ||
-            hasClassName(childNode as AST.Default.Element, 'div', 'status')) {
+            hasClassName(childElement, 'div', 'status') ||
+            (childElement.tagName && childElement.tagName === 'p' && childElement.childNodes.length === 0)) {
             return current;
         }
 

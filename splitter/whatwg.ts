@@ -25,7 +25,7 @@ const h2HavingH4: Set<string> = new Set([
 ]);
 
 const h4HavingH6: Set<string> = new Set([
-    'The elements of HTML/Embedded content/The img element',
+    'The elements of HTML/Embedded content/Images',
     'The elements of HTML/Embedded content/Media elements',
     'The elements of HTML/Forms/The input element',
     'The elements of HTML/Scripting/The script element',

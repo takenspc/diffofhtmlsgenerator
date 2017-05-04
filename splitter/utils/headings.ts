@@ -9,10 +9,11 @@ const HEADING_REPLACEMENT_MAP = new Map<any, string>([
     //
     ['’', '\''],
 
+    // Introduction
+    ['XML Syntax', 'XML syntax'],
+
     // Common infrastructure
-    ['Plugin Content Handlers', 'Plugins'],
     ['Colors', 'Colours'],
-    ['TransferHelper ( input, targetRealm )', 'Transfer ( input, targetRealm )'],
 
     // The elements of HTML
     ['The root element', 'The document element'],
@@ -39,6 +40,9 @@ const HEADING_REPLACEMENT_MAP = new Map<any, string>([
 
     // Matching HTML elements using selectors and CSS
     [/^Matching HTML elements using selectors$/, 'Matching HTML elements using selectors and CSS'],
+
+    // User interaction
+    ['The designMode IDL attribute', 'the designMode IDL attribute'],
 
     // Drag-and-drop processing model
     ['Drag-and-drop processing model', 'Processing model'],
