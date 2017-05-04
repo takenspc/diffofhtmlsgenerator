@@ -1,8 +1,8 @@
-import * as path from 'path';
 import { AST } from 'parse5';
+import * as path from 'path';
 import { nextLeafSection } from '../../shared/iterator';
-import { Document } from './document';
 import { Section } from '../section';
+import { Document } from './document';
 
 export class Spec {
     private org: string
@@ -27,7 +27,7 @@ export class Spec {
 
             const html = this.document.getHTMLText(section.nodes as AST.Default.Element[]);
             await section.writeHTML(html);
-        };
+        }
 
         await Section.write(this.org, sections);
     }

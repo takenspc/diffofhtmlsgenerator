@@ -1,6 +1,6 @@
+import { AST, parse } from 'parse5';
 import * as path from 'path';
 import { readFile } from '../../shared/utils';
-import { AST, parse } from 'parse5';
 
 //
 // Document

@@ -1,7 +1,7 @@
 import { Section } from '../section';
 
 //
-// Heading 
+// Heading
 //
 const HEADING_REPLACEMENT_MAP = new Map<any, string>([
     // Format:

@@ -23,5 +23,5 @@ export function formatNode(node: AST.Default.Node): string {
 export function formatStartTag(node: AST.Default.Element): string {
     return `<${node.tagName} ${node.attrs.map((attr) => {
         return `${attr.name}="${attr.value}"`;
-    }).join(' ')}>`
+    }).join(' ')}>`;
 }
