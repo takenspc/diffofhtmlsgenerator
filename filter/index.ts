@@ -48,11 +48,8 @@ function includeAttr(attr: AST.Default.Attribute): boolean {
 }
 
 function filterAttrValue(attr: AST.Default.Attribute): void {
-    const name = attr.name;
-    const value = attr.value;
-
-    if (name === 'class') {
-        let values = value.trim().replace(/\s+/g, ' ').split(' ');
+    if (attr.name === 'class') {
+        let values = attr.value.trim().replace(/\s+/g, ' ').split(' ');
         values = values.filter((value) => {
             return !consts.excludeClassNames.has(value);
         });
