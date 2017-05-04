@@ -49,7 +49,6 @@ const breakBeforeStartTag: Set<string> = new Set([
     'svg',
 ]);
 
-
 const breakAfterStartTag: Set<string> = new Set([
     'blockquote',
     'dd',
@@ -73,20 +72,19 @@ const breakBeforeEndTag: Set<string> = new Set([
     'ul',
 ]);
 
-
 export class LineBreaker {
-    private node: AST.Default.Element
-    private nodeName: string
-    depth: number
-    private didBreakAfterStartTag: boolean
-    
+    private node: AST.Default.Element;
+    private nodeName: string;
+    depth: number;
+    private didBreakAfterStartTag: boolean;
+
     constructor(node: AST.Default.Element, depth: number) {
         this.node = node;
         this.nodeName = node.nodeName;
         this.depth = (this.willBreakBeforeStartTag(node)) ? ++depth : depth;
         this.didBreakAfterStartTag = !this.willBreakAfterStartTag();
     }
-    
+
     private breakAndIndent(): string {
         const buff: string[] = [];
 
@@ -98,15 +96,14 @@ export class LineBreaker {
         return buff.join('');
     }
 
-
     private willBreakBeforeStartTag(node: AST.Default.Element): boolean {
         if (hasClassName(node, 'div', 'impl')) {
             return false;
         }
 
         return breakBeforeStartTag.has(node.nodeName);
-    }    
-    
+    }
+
     breakBeforeStartTag(): string {
         if (this.willBreakBeforeStartTag(this.node)) {
             return this.breakAndIndent();
@@ -146,12 +143,11 @@ export class LineBreaker {
         return this.breakAndIndent();
     }
 
-
     private willBreakBeforeEndTag(): boolean {
         if (hasClassName(this.node, 'div', 'impl')) {
             return false;
         }
-        
+
         return breakBeforeEndTag.has(this.nodeName);
     }
 
@@ -162,7 +158,7 @@ export class LineBreaker {
 
         return '';
     }
-    
+
     unbreakBeforeEndTag(buffer: string[]): void {
         if (this.nodeName === 'pre') {
             const index = buffer.length - 1;

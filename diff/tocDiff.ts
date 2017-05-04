@@ -1,5 +1,5 @@
 import { SpecSection } from '../formatter/specSection';
-import { UnifiedSection } from './unifiedSection'
+import { UnifiedSection } from './unifiedSection';
 
 //
 // Utils.
@@ -7,7 +7,7 @@ import { UnifiedSection } from './unifiedSection'
 function compare(whatwg: SpecSection, w3c: SpecSection): boolean {
     const whatwgHeading = whatwg.headingText;
     const w3cHeading = w3c.headingText;
-    
+
     if (whatwgHeading === w3cHeading) {
         return true;
     }
@@ -31,7 +31,6 @@ function findIndexOfTargetEntry(target: SpecSection, base: SpecSection[], limit:
     return -1;
 }
 
-
 //
 // Entry point
 //
@@ -48,7 +47,7 @@ export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[])
         // insert both `whatwgEntry` and ``w3cEntry`
         if (w3cSection && compare(whatwgSection, w3cSection)) {
             sectionPairs.push([whatwgSection, w3cSection]);
-            continue
+            continue;
         }
 
         // check whether `w3cRemains` contains `whatwgEntry`
@@ -100,7 +99,6 @@ export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[])
             unifiedSection.sections = createUnifiedSections(whatwgChildren, w3cChildren);
         }
     }
-
 
     return unifiedSections;
 }

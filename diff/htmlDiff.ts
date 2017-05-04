@@ -1,9 +1,8 @@
-import * as path from 'path';
 import { fork } from 'child_process';
 import { IDiffResult } from 'diff';
+import * as path from 'path';
 import { nextLeafSection } from '../shared/iterator';
-import { UnifiedSection, DiffStat } from './unifiedSection';
-
+import { DiffStat, UnifiedSection } from './unifiedSection';
 
 function runChildProcess(modulePath: string, section: UnifiedSection): Promise<void> {
     return new Promise<void>((resolve, reject) => {

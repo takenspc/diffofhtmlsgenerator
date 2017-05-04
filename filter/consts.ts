@@ -12,7 +12,6 @@ export const excludeClassNames: Set<string> = new Set([
     'highlight',
 ]);
 
-
 //
 //
 //
@@ -101,7 +100,6 @@ export const pygmentsClassNames: Set<string> = new Set([
     'nb',
     'nx',
 ]);
-
 
 //
 // Context

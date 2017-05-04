@@ -21,7 +21,6 @@ export const voidElements: Set<string> = new Set([
     'wbr',
 ]);
 
-
 export const contextElements: Set<string> = new Set([
     'pre',
 ]);

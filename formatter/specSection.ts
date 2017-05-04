@@ -3,23 +3,23 @@ import { readFile, writeFile } from '../shared/utils';
 import { Section } from '../splitter/section';
 
 export interface HashStat {
-    splitted: string
-    formatted: string
+    splitted: string;
+    formatted: string;
 }
 
 export class SpecSection {
-    org: string
-    id: string
-    path: string
-    headingText: string
-    originalHeadingText: string
-    hash: HashStat = null
-    formattedHTMLsLength: number = 0
-    sections: SpecSection[] = []
+    org: string;
+    id: string;
+    path: string;
+    headingText: string;
+    originalHeadingText: string;
+    hash: HashStat = null;
+    formattedHTMLsLength: number = 0;
+    sections: SpecSection[] = [];
 
     constructor(section: Section, hash: HashStat, formattedHTMLsLength: number) {
         this.org = section.org;
-        this.id = section.id
+        this.id = section.id;
         this.path = section.path;
         this.headingText = section.headingText;
         this.originalHeadingText = section.originalHeadingText;
@@ -28,11 +28,10 @@ export class SpecSection {
         this.formattedHTMLsLength = formattedHTMLsLength;
     }
 
-
     //
     // Formatted HTML
     //
-    private static FORMATTER_DIR_PATH = path.join(__dirname, 'data')
+    private static FORMATTER_DIR_PATH = path.join(__dirname, 'data');
     private static FORMATTED_HTML_PATH(org: string, sectionPath: string, index: number): string {
         return path.join(SpecSection.FORMATTER_DIR_PATH, org, `${sectionPath}.${index}.html`);
     }
@@ -48,7 +47,6 @@ export class SpecSection {
 
         return readFile(htmlPath);
     }
-
 
     //
     // Index

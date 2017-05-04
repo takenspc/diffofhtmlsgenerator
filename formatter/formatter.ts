@@ -1,16 +1,16 @@
 import * as assert from 'assert';
 import { AST } from 'parse5';
 import { getText, hasClassName } from '../shared/html';
-import { LineBreaker } from './linebreaker';
 import * as consts from './consts';
+import { LineBreaker } from './linebreaker';
 
 //
 // Context
 //
 class FormatContext {
-    private parentStack: AST.Default.Node[] = []
-    private buffers: string[][] = []
-    
+    private parentStack: AST.Default.Node[] = [];
+    private buffers: string[][] = [];
+
     constructor() {
         this.createNextBuffer();
     }
@@ -40,16 +40,15 @@ class FormatContext {
         }
         return this.parentStack[length - 1];
     }
-    
+
     push(parent: AST.Default.Node): void {
         this.parentStack.push(parent);
     }
-    
+
     pop(): void {
         this.parentStack.pop();
     }
 }
-
 
 //
 // Utils
@@ -61,7 +60,6 @@ function escapeHTML(text: string): string {
     escaped = escaped.replace(/</g, '&lt;');
     return escaped;
 }
-
 
 //
 // Attr
@@ -85,12 +83,11 @@ function sortAttr(a: Attr, b: Attr): number {
     return 0;
 }
 
-
 //
 // Tag
 //
 function formatStartTag(context: FormatContext, node: AST.Default.Element): string {
-    const buff: string[] = []
+    const buff: string[] = [];
 
     buff.push('<');
     buff.push(node.nodeName);
@@ -118,7 +115,6 @@ function formatEndTag(context: FormatContext, node: AST.Default.Element): string
     return buff.join('');
 }
 
-
 //
 // Node
 //
@@ -131,7 +127,6 @@ function formatText(context: FormatContext, node: AST.Default.TextNode): void {
 
     return context.write(escapeHTML(value));
 }
-
 
 function formatElement(context: FormatContext, node: AST.Default.Element, depth: number): void {
     // const buff: string[] = [];
@@ -178,7 +173,6 @@ function formatElement(context: FormatContext, node: AST.Default.Element, depth:
     }
 }
 
-
 //
 // Tree
 //
@@ -196,6 +190,6 @@ export function formatFragment(node: AST.Default.DocumentFragment): string[] {
     for (const childNode of node.childNodes as AST.Default.Element[]) {
         format(context, childNode, -1);
     }
-    
+
     return context.getHTMLs();
 }

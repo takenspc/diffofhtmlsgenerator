@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as https from 'https';
+import * as path from 'path';
 import { log, mkdirp, writeFile } from '../shared/utils';
 
 function prepare(org: string) {
@@ -52,18 +52,18 @@ function download(org: string, url: string, htmlPath: string): Promise<void> {
 function prepareThenDownload(org: string, url: string): Promise<void> {
     return prepare(org).then((htmlPath) => {
         return download(org, url, htmlPath);
-    })
+    });
 }
 
 export function fetch() {
     return Promise.all([
         prepareThenDownload('whatwg', 'https://html.spec.whatwg.org/'),
-        prepareThenDownload('w3c', 'https://w3c.github.io/html/single-page.html')
+        prepareThenDownload('w3c', 'https://w3c.github.io/html/single-page.html'),
     ]).then(() => {
         const jsonPath = path.join(__dirname, 'data', 'fetch.json');
         const data = JSON.stringify({
             time: Date.now(),
         });
         return writeFile(jsonPath, data);
-    })
+    });
 }

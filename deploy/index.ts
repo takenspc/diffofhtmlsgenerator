@@ -1,11 +1,10 @@
-import * as path from 'path';
 import * as admin from 'firebase-admin';
-import { readFile, log } from '../shared/utils';
+import * as path from 'path';
 import { UnifiedSection } from '../diff/unifiedSection';
+import { log, readFile } from '../shared/utils';
 import { update } from '../updater';
 import { deployDiff } from './diff';
 import { tweet } from './tweet';
-
 
 //
 // Index
@@ -15,7 +14,6 @@ function readUnifiedSectionsFromFirebase(indexRef: admin.database.Reference): Pr
         return dataSnapshot.val();
     });
 }
-
 
 //
 // Entry point

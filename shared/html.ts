@@ -24,7 +24,6 @@ export function hasClassName(node: AST.Default.Element, nodeName: string, classN
     return value.indexOf(' ' + className + ' ') !== -1;
 }
 
-
 export function getText(node: AST.Default.Node): string {
     if (node.nodeName === '#text') {
         return (node as AST.Default.TextNode).value;

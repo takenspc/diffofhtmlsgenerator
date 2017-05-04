@@ -1,11 +1,10 @@
-import * as path from 'path';
 import * as parse5 from 'parse5';
+import * as path from 'path';
+import { filter } from '../filter';
 import { log, sha256 } from '../shared/utils';
 import { Section } from '../splitter/section';
-import { filter } from '../filter';
 import { formatFragment } from './formatter';
-import { SpecSection, HashStat } from './specSection';
-
+import { HashStat, SpecSection } from './specSection';
 
 //
 // Formatter
@@ -21,7 +20,7 @@ async function createLeafSpecSection(section: Section): Promise<SpecSection> {
 
     const hash: HashStat = {
         splitted: splittedHash,
-        formatted: formattedHash
+        formatted: formattedHash,
     };
     const formattedHTMLsLength = formattedHTMLs.length;
     const specSection = new SpecSection(section, hash, formattedHTMLsLength );
@@ -33,7 +32,6 @@ async function createLeafSpecSection(section: Section): Promise<SpecSection> {
 
     return specSection;
 }
-
 
 async function createSpecSection(section: Section): Promise<SpecSection> {
     if (section.sections.length === 0) {
@@ -49,7 +47,6 @@ async function createSpecSection(section: Section): Promise<SpecSection> {
     return specSection;
 }
 
-
 async function formatOrg(org: string): Promise<void> {
     const sections = await Section.read(org);
 
@@ -57,7 +54,7 @@ async function formatOrg(org: string): Promise<void> {
     for (const section of sections) {
         const specSection = await createSpecSection(section);
         specSections.push(specSection);
-    };
+    }
 
     await SpecSection.write(org, specSections);
 }

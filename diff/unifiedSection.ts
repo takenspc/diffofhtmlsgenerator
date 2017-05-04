@@ -1,19 +1,18 @@
 import * as path from 'path';
+import { HashStat, SpecSection } from '../formatter/specSection';
 import { readFile, writeFile } from '../shared/utils';
-import { SpecSection, HashStat } from '../formatter/specSection';
 import { LineDiff } from './htmlDiffChild';
 
-
 export interface DiffStat {
-    total: number
-    diffCount: number
+    total: number;
+    diffCount: number;
 }
 
 export class FlattedSpecSection {
-    id: string
-    originalHeadingText: string
-    hash: HashStat
-    diffStat: DiffStat
+    id: string;
+    originalHeadingText: string;
+    hash: HashStat;
+    diffStat: DiffStat;
 
     constructor(specSection: SpecSection) {
         this.id = specSection.id;
@@ -21,19 +20,19 @@ export class FlattedSpecSection {
         this.hash = specSection.hash;
         this.diffStat = {
             total: 0,
-            diffCount: 0
+            diffCount: 0,
         };
     }
 }
 
 export class UnifiedSection {
-    path: string
-    headingText: string
-    originalHeadingText: string
-    sections: UnifiedSection[]
-    whatwg: FlattedSpecSection
-    w3c: FlattedSpecSection
-    formattedHTMLsLength: number
+    path: string;
+    headingText: string;
+    originalHeadingText: string;
+    sections: UnifiedSection[];
+    whatwg: FlattedSpecSection;
+    w3c: FlattedSpecSection;
+    formattedHTMLsLength: number;
 
     constructor(whatwg: SpecSection, w3c: SpecSection) {
         const specSection = whatwg ? whatwg : w3c;
@@ -46,7 +45,6 @@ export class UnifiedSection {
         this.w3c = w3c ? new FlattedSpecSection(w3c) : null;
         this.formattedHTMLsLength = this.computeFormattedHtmlsLength(whatwg, w3c);
     }
-
 
     //
     // Formatted HTML
@@ -64,11 +62,10 @@ export class UnifiedSection {
         ]);
     }
 
-
     //
     // LineDiff
     //
-    private static DIFF_DIR_PATH = path.join(__dirname, 'data')
+    private static DIFF_DIR_PATH = path.join(__dirname, 'data');
     private static DIFF_JSON_PATH(section: UnifiedSection): string {
         return path.join(this.DIFF_DIR_PATH, `${section.path}.json`);
     }
@@ -76,7 +73,7 @@ export class UnifiedSection {
     static writeLineDiffs(section: UnifiedSection, lineDiffs: LineDiff[]): Promise<void> {
         const jsonPath = this.DIFF_JSON_PATH(section);
 
-        return writeFile(jsonPath, JSON.stringify(lineDiffs))
+        return writeFile(jsonPath, JSON.stringify(lineDiffs));
     }
 
     static readLineDiffs(section: UnifiedSection): Promise<LineDiff[]> {
@@ -109,4 +106,3 @@ export class UnifiedSection {
         });
     }
 }
-

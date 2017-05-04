@@ -1,5 +1,5 @@
 interface Sectionable {
-    sections: any[]
+    sections: any[];
 }
 
 export function* nextLeafSection<T extends Sectionable>(sections: T[]): Iterable<T> {

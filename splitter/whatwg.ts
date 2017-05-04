@@ -1,10 +1,10 @@
-import * as path from 'path';
 import * as assert from 'assert';
 import { AST } from 'parse5';
-import { getText, getAttribute } from '../shared/html';
-import { Spec } from './utils/spec';
+import * as path from 'path';
+import { getAttribute, getText } from '../shared/html';
+import { addChildNode, addSection, Section } from './section';
 import { Document } from './utils/document';
-import { Section, addSection, addChildNode } from './section';
+import { Spec } from './utils/spec';
 
 //
 // Config
@@ -33,8 +33,6 @@ const h4HavingH6: Set<string> = new Set([
     'Web application APIs/Scripting/Processing model',
     'Web application APIs/System state and capabilities/The Navigator object',
 ]);
-
-
 
 //
 // Header text
@@ -111,7 +109,7 @@ export function parseSpec(spec: Spec): void {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
 
-            assert(h2Section, `h2 section must be initialized before adding an h3 section: ${headingText}`)
+            assert(h2Section, `h2 section must be initialized before adding an h3 section: ${headingText}`);
             h3Section = addSection(h2Section, id, headingText, childNode);
 
             h4Section = null;
@@ -127,12 +125,11 @@ export function parseSpec(spec: Spec): void {
             continue;
         }
 
-
         if (nodeName === 'h4') {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
 
-            assert(h3Section, `h3 section must be initialized before adding an h4 section: ${headingText}`)
+            assert(h3Section, `h3 section must be initialized before adding an h4 section: ${headingText}`);
             h4Section = addSection(h3Section, id, headingText, childNode);
 
             h5Section = null;
@@ -152,12 +149,11 @@ export function parseSpec(spec: Spec): void {
             continue;
         }
 
-
         if (nodeName === 'h5') {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
 
-            assert(h4Section, `h4 section must be initialized before adding an h5 section: ${headingText}`)
+            assert(h4Section, `h4 section must be initialized before adding an h5 section: ${headingText}`);
             h5Section = addSection(h4Section, id, headingText, childNode);
 
             h6Section = null;
@@ -168,11 +164,10 @@ export function parseSpec(spec: Spec): void {
             const id = getAttribute(childNode, 'id');
             const headingText = getHeadingText(childNode);
 
-            assert(h5Section, `h5 section must be initialized before adding an h6 section: ${headingText}`)
+            assert(h5Section, `h5 section must be initialized before adding an h6 section: ${headingText}`);
             h6Section = addSection(h5Section, id, headingText, childNode);
             continue;
         }
-
 
         // add child Node
         if (!h5Section) {
@@ -186,7 +181,6 @@ export function parseSpec(spec: Spec): void {
 
     root.fixup();
 }
-
 
 //
 // Entry point

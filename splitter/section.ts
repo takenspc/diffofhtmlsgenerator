@@ -1,27 +1,26 @@
 import * as assert from 'assert';
-import * as path from 'path';
 import { AST } from 'parse5';
+import * as path from 'path';
 import { hasClassName } from '../shared/html';
 import { readFile, writeFile } from '../shared/utils';
-import { normalizeHeadingText } from './utils/headings';
 import { formatNode, formatStartTag} from './utils/debug';
-
+import { normalizeHeadingText } from './utils/headings';
 
 //
 // Section
 //
 export class Section {
-    private type: 'root' | 'pre' | 'normal'
-    org: string
-    id: string
+    private type: 'root' | 'pre' | 'normal';
+    org: string;
+    id: string;
 
-    path: string
-    headingText: string
-    originalHeadingText: string
+    path: string;
+    headingText: string;
+    originalHeadingText: string;
 
-    nodes: AST.Default.Node[]
+    nodes: AST.Default.Node[];
 
-    sections: Section[] = []
+    sections: Section[] = [];
 
     constructor(type: 'root' | 'pre' | 'normal', org: string, parent: Section, id: string, headingText: string, nodes: AST.Default.Node[]) {
         this.type = type;
@@ -42,7 +41,6 @@ export class Section {
         }
     }
 
-
     //
     // headings
     //
@@ -54,16 +52,15 @@ export class Section {
         if (this.type === 'pre') {
             return [
                 `(preface of “${parent.headingText}”)`,
-                `(preface of “${parent.originalHeadingText}”)`
+                `(preface of “${parent.originalHeadingText}”)`,
             ];
-        };
+        }
 
         return [
             normalizeHeadingText(originalHeadingText),
-            originalHeadingText
+            originalHeadingText,
         ];
     }
-
 
     //
     // Path
@@ -72,11 +69,11 @@ export class Section {
         let safePath = value;
         // https://support.microsoft.com/kb/100108
         const ntfsUnsafe = /[?"/\<>*|:]/g;
-        safePath = value.replace(ntfsUnsafe, '_')
+        safePath = value.replace(ntfsUnsafe, '_');
 
         // Firebase
         const firebaseUnsafe = /[.#$\[\]]/g;
-        safePath = safePath.replace(firebaseUnsafe, '_')
+        safePath = safePath.replace(firebaseUnsafe, '_');
         return safePath;
     }
 
@@ -95,7 +92,6 @@ export class Section {
         return `${parent.path}/${current}`;
     }
 
-
     //
     // Root
     //
@@ -103,7 +99,6 @@ export class Section {
         const root: Section = new Section('root', org, null, '__root__', '', []);
         return root;
     }
-
 
     //
     // Fixup
@@ -140,7 +135,6 @@ export class Section {
         }
     }
 
-
     //
     // JSON
     //
@@ -160,7 +154,6 @@ export class Section {
         return writeFile(jsonPath, text);
     }
 
-
     //
     // HTML
     //
@@ -175,7 +168,6 @@ export class Section {
 
         return readFile(htmlPath);
     }
-
 
     //
     // Index
@@ -206,10 +198,9 @@ export class Section {
     }
 }
 
-
 //
 // Add children
-// 
+//
 export function addChildNode(parent: Section, current: Section, childNode: AST.Default.Element | AST.Default.TextNode): Section {
     // adding preface contents
     if (!current) {
@@ -233,4 +224,3 @@ export function addSection(parent: Section, id: string, headingText: string, chi
     const section: Section = new Section('normal', parent.org, parent, id, headingText, [childNode]);
     return section;
 }
-

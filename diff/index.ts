@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import { SpecSection } from '../formatter/specSection';
-import { UnifiedSection } from './unifiedSection';
-import { createUnifiedSections } from './tocDiff';
 import { computeHTMLDiff } from './htmlDiff';
+import { createUnifiedSections } from './tocDiff';
+import { UnifiedSection } from './unifiedSection';
 
 /**
  * move targetId section before referenceId
@@ -30,7 +30,7 @@ function moveEntryBefore(sections: SpecSection[], targetId: string, referenceId:
         assert(reference, `There must be #${referenceId} section`);
     }
 
-    let reorderd: SpecSection[]= [];
+    let reorderd: SpecSection[] = [];
     if (referenceId) {
         for (const section of tmp) {
             if (section === reference) {
@@ -71,7 +71,6 @@ function reoderW3C(sections: SpecSection[]): void {
     semantics.sections = moveEntryBefore(semantics.sections, 'links', 'edits');
 }
 
-
 //
 // Entry point
 //
@@ -81,7 +80,7 @@ export async function diff(): Promise<void> {
         SpecSection.read('w3c'),
     ]);
 
-    // reorder 
+    // reorder
     reoderW3C(w3c);
 
     const unifiedSections = createUnifiedSections(whatwg, w3c);

@@ -1,16 +1,15 @@
 import * as assert from 'assert';
-import * as path from 'path';
 import * as diff from 'diff';
+import * as path from 'path';
 import { log } from '../shared/utils';
 import { UnifiedSection } from './unifiedSection';
-
 
 //
 // Diff
 //
 export interface LineDiff {
-    a: diff.IDiffResult[]
-    b: diff.IDiffResult[]
+    a: diff.IDiffResult[];
+    b: diff.IDiffResult[];
 }
 
 function insertEmptyLinesIfNeeded(lineDiff: LineDiff): void {
@@ -54,8 +53,8 @@ function convertDiffResultsToLineDiff(rawDiffs: diff.IDiffResult[]): LineDiff {
         for (const line of lines) {
             const hunk = {
                 value: line,
-                added: added,
-                removed: removed,
+                added,
+                removed,
             };
 
             if (hunk.removed || isLineSame) {
@@ -95,7 +94,7 @@ function splitLineIntoWordDiffs(wordDiff: LineDiff, lineA: string, lineB: string
 
 function splitLinesIntoWordDiffs(lineDiff: LineDiff): LineDiff[] {
     const wordDiffs: LineDiff[] = [];
-    
+
     const a = lineDiff.a;
     const b = lineDiff.b;
 
@@ -105,7 +104,7 @@ function splitLinesIntoWordDiffs(lineDiff: LineDiff): LineDiff[] {
 
         const lineHunkA = a[i];
         const lineHunkB = b[i];
-        
+
         // in case, the line is same
         if (!lineHunkA.removed && !lineHunkB.added) {
             wordDiff.a.push(lineHunkA);
@@ -124,9 +123,9 @@ function computeDiff(a: string, b: string): LineDiff[] {
     // XXX strip trailing spaces
     a = a.replace(/ +\n/g, '\n');
     b = b.replace(/ +\n/g, '\n');
-    
+
     const rawDiffs = diff.diffLines(a, b, {
-        newlineIsToken: true
+        newlineIsToken: true,
     });
 
     const lineDiff = convertDiffResultsToLineDiff(rawDiffs);
@@ -152,7 +151,6 @@ async function diffSection(section: UnifiedSection): Promise<void> {
     await UnifiedSection.writeLineDiffs(section, lineDiffs);
     log(['diff', heading, 'end']);
 }
-
 
 process.on('message', (section: UnifiedSection) => {
     diffSection(section).then(() => {

@@ -1,5 +1,5 @@
-import * as path from 'path';
 import { fork } from 'child_process';
+import * as path from 'path';
 import { log } from '../shared/utils';
 
 function runChildProcess(modulePath: string) {
@@ -15,7 +15,6 @@ function runChildProcess(modulePath: string) {
         });
     });
 }
-
 
 //
 // Entry point

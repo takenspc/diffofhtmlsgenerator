@@ -1,8 +1,8 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as mkdirpModule from 'mkdirp';
 import * as moment from 'moment';
+import * as path from 'path';
 
 //
 // I/O
@@ -17,7 +17,7 @@ export function readFile(srcPath: string): Promise<string> {
 
             resolve(str);
         });
-    });    
+    });
 }
 
 export function writeFile(outPath: string, str: string): Promise<void> {
@@ -44,10 +44,9 @@ export function mkdirp(dirname): Promise<void> {
             }
 
             resolve();
-        })
-    })
+        });
+    });
 }
-
 
 //
 // logging
@@ -56,7 +55,6 @@ export function log(args): void {
     const message = [moment().utc().format()].concat(args).join('\t');
     console.log(message);
 }
-
 
 //
 // Hash

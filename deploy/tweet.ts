@@ -1,8 +1,7 @@
-import * as path from 'path';
 import * as moment from 'moment';
+import * as path from 'path';
 import * as Twitter from 'twitter';
 import { UpdateEntry } from '../updater';
-
 
 function createMessage(updateEntries: UpdateEntry[], org: string, orgTitle: string): string {
     const updated = updateEntries.filter((updateEntry) => {
@@ -19,7 +18,7 @@ function createMessage(updateEntries: UpdateEntry[], org: string, orgTitle: stri
 function createTweet(updatedTime: number, updateEntries: UpdateEntry[]): any {
     const messages = [];
 
-    const updated = moment(updatedTime).utc()
+    const updated = moment(updatedTime).utc();
     const momentFormat = 'YYYY-M-D (UTC): ';
     messages.push(updated.format(momentFormat));
 
@@ -31,7 +30,7 @@ function createTweet(updatedTime: number, updateEntries: UpdateEntry[]): any {
 
     const tweet = {
         status: message,
-    }
+    };
     return tweet;
 }
 

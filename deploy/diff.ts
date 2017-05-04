@@ -1,10 +1,9 @@
-import * as path from 'path';
 import * as admin from 'firebase-admin';
-import { readFile } from '../shared/utils';
-import { nextLeafSection } from '../shared/iterator';
+import * as path from 'path';
 import { LineDiff } from '../diff/htmlDiffChild';
 import { UnifiedSection } from '../diff/unifiedSection';
-
+import { nextLeafSection } from '../shared/iterator';
+import { readFile } from '../shared/utils';
 
 //
 // Diff Entry

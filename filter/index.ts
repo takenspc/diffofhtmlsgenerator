@@ -2,13 +2,12 @@ import { AST } from 'parse5';
 import { getAttribute, hasClassName } from '../shared/html';
 import * as consts from './consts';
 
-
 //
 // Context
 //
 class FilterContext {
-    private parentStack: AST.Default.Node[] = []
-    
+    private parentStack: AST.Default.Node[] = [];
+
     get parent(): AST.Default.Node {
         const length = this.parentStack.length;
         if (length === 0) {
@@ -16,16 +15,15 @@ class FilterContext {
         }
         return this.parentStack[length - 1];
     }
-    
+
     push(parent: AST.Default.Node): void {
         this.parentStack.push(parent);
     }
-    
+
     pop(): void {
         this.parentStack.pop();
     }
 }
-
 
 //
 // Attr
@@ -52,7 +50,7 @@ function includeAttr(attr: AST.Default.Attribute): boolean {
 function filterAttrValue(attr: AST.Default.Attribute): void {
     const name = attr.name;
     const value = attr.value;
-    
+
     if (name === 'class') {
         let values = value.trim().replace(/\s+/g, ' ').split(' ');
         values = values.filter((value) => {
@@ -63,7 +61,7 @@ function filterAttrValue(attr: AST.Default.Attribute): void {
 }
 
 function filterAttrs(context: FilterContext, node: AST.Default.Element): void {
-    const newAttrs: AST.Default.Attribute[] = []
+    const newAttrs: AST.Default.Attribute[] = [];
 
     for (const attr of node.attrs) {
         filterAttrValue(attr);
@@ -75,7 +73,6 @@ function filterAttrs(context: FilterContext, node: AST.Default.Element): void {
 
     node.attrs = newAttrs;
 }
-
 
 //
 // Element
@@ -99,16 +96,16 @@ function includeElement(context: FilterContext, node: AST.Default.Element): bool
 
 function flattenElement(context: FilterContext, node: AST.Default.Element): boolean {
     const nodeName = node.nodeName;
-    
+
     if (consts.textLevelElements.has(nodeName)) {
         return true;
     }
-    
+
     // XXX Structure of this specification
     if (node.nodeName === 'div' && node.attrs.length === 0) {
         return true;
     }
-    
+
     const parent = context.parent;
     if (parent) {
         const parentNodeName = parent.nodeName;
@@ -124,10 +121,9 @@ function flattenElement(context: FilterContext, node: AST.Default.Element): bool
             return true;
         }
     }
-    
+
     return false;
 }
-
 
 function* nextElement(context: FilterContext, node: AST.Default.Element): Iterable<AST.Default.Element> {
     for (const childNode of (node.childNodes as AST.Default.Element[])) {
@@ -142,8 +138,7 @@ function* nextElement(context: FilterContext, node: AST.Default.Element): Iterab
             }
         }
     }
-} 
-
+}
 
 //
 // Tree
@@ -157,9 +152,9 @@ function filterNode(context: FilterContext, node: AST.Default.Element): void {
     if (node.attrs) {
         filterAttrs(context, node);
     }
-    
+
     if (node.childNodes) {
-        let newChildNodes = [];
+        const newChildNodes = [];
         for (const childNode of nextElement(context, node)) {
             newChildNodes.push(childNode);
             filterNode(context, childNode);
@@ -172,7 +167,6 @@ function filterNode(context: FilterContext, node: AST.Default.Element): void {
         context.pop();
     }
 }
-
 
 /**
  * @param {AST.Default.DocumentFragment | AST.Default.Element} node node must be DocumentFragment
