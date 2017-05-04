@@ -185,15 +185,15 @@ export function parseSpec(spec: Spec): void {
 //
 // Entry point
 //
-(async function() {
+if (require.main === module) {
     const org = 'whatwg';
-
     const spec = new Spec(org);
-    await spec.init();
-    parseSpec(spec);
-    await spec.save();
-})().catch((err) => {
-    console.error(err);
-    console.error(err.stack);
-    process.exit(-1);
-});
+    spec.init().then(() => {
+        parseSpec(spec);
+        return spec.save();
+    }).catch((err) => {
+        console.error(err);
+        console.error(err.stack);
+        throw err;
+    });
+}

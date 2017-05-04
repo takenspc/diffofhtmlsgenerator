@@ -1,9 +1,9 @@
-import { log } from './shared/utils';
+import { deploy } from './deploy';
 import { diff } from './diff';
 import { fetch } from './fetcher';
 import { format } from './formatter';
+import { log } from './shared/utils';
 import { split } from './splitter';
-import { deploy } from './deploy';
 
 async function main(): Promise<void> {
     log(['fetch', '', 'start']);
@@ -27,13 +27,13 @@ async function main(): Promise<void> {
     log(['deploy', '', 'end']);
 }
 
-
-main().then(() => {
-    console.log('done');
-    process.exit(0);
-}).catch((err) => {
-    console.log('err');
-    console.error(err);
-    console.error(err.stack);
-    process.exit(-1);
-});
+if (require.main === module) {
+    main().then(() => {
+        console.log('done');
+    }).catch((err) => {
+        console.log('err');
+        console.error(err);
+        console.error(err.stack);
+        throw err;
+    });
+}

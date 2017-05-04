@@ -227,7 +227,7 @@ function parseSpec(spec: Spec): void {
         //     section
         //     ...
         //
-       if (childNode.nodeName === 'main') {
+        if (childNode.nodeName === 'main') {
             parseMainElement(spec.rootSection, childNode);
         }
     }
@@ -238,15 +238,15 @@ function parseSpec(spec: Spec): void {
 //
 // Entry point
 //
-(async function() {
+if (require.main === module) {
     const org = 'w3c';
-
     const spec = new Spec(org);
-    await spec.init();
-    parseSpec(spec);
-    await spec.save();
-})().catch((err) => {
-    console.error(err);
-    console.error(err.stack);
-    process.exit(-1);
-});
+    spec.init().then(() => {
+        parseSpec(spec);
+        return spec.save();
+    }).catch((err) => {
+        console.error(err);
+        console.error(err.stack);
+        throw err;
+    });
+}

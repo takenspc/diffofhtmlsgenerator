@@ -153,11 +153,9 @@ async function diffSection(section: UnifiedSection): Promise<void> {
 }
 
 process.on('message', (section: UnifiedSection) => {
-    diffSection(section).then(() => {
-        process.exit(0);
-    }).catch((err) => {
+    diffSection(section).catch((err) => {
         console.error(err);
         console.error(err.stack);
-        process.exit(-1);
+        throw err;
     });
 });

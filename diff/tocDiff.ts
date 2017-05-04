@@ -31,10 +31,7 @@ function findIndexOfTargetEntry(target: SpecSection, base: SpecSection[], limit:
     return -1;
 }
 
-//
-// Entry point
-//
-export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[]): UnifiedSection[] {
+function makeSectionPairs(whatwg: SpecSection[], w3c: SpecSection[]): SpecSection[][] {
     const sectionPairs: SpecSection[][] = [];
 
     const whatwgRemains: SpecSection[] = [].concat(whatwg);
@@ -44,7 +41,7 @@ export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[])
         let w3cSection = w3cRemains.shift();
 
         // if `whatwgEntry === w3cEntry`,
-        // insert both `whatwgEntry` and ``w3cEntry`
+        // insert both `whatwgEntry` and `w3cEntry`
         if (w3cSection && compare(whatwgSection, w3cSection)) {
             sectionPairs.push([whatwgSection, w3cSection]);
             continue;
@@ -87,18 +84,33 @@ export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[])
         sectionPairs.push([null, w3cEntry]);
     }
 
-    // process recursively
+    return sectionPairs;
+}
+
+function convertSectionPairsToUnifiedSections(sectionPairs: SpecSection[][]): UnifiedSection[] {
     const unifiedSections: UnifiedSection[] = [];
+
     for (const [whatwg, w3c] of sectionPairs) {
         const unifiedSection = new UnifiedSection(whatwg, w3c);
         unifiedSections.push(unifiedSection);
 
         const whatwgChildren = whatwg ? whatwg.sections : [];
         const w3cChildren = w3c ? w3c.sections : [];
+
+        // process recursively
         if (whatwgChildren.length > 0 || w3cChildren.length > 0) {
             unifiedSection.sections = createUnifiedSections(whatwgChildren, w3cChildren);
         }
     }
 
     return unifiedSections;
+}
+
+//
+// Entry point
+//
+export function createUnifiedSections(whatwg: SpecSection[], w3c: SpecSection[]): UnifiedSection[] {
+    const sectionPairs = makeSectionPairs(whatwg, w3c);
+
+    return convertSectionPairsToUnifiedSections(sectionPairs);
 }

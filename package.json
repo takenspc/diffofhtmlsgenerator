@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .ts ."
+    "lint": "tslint -C tsconfig.json **/*.ts"
   },
   "keywords": [],
   "author": "Takeshi Kurosawa <taken.spc@gmail.com>",

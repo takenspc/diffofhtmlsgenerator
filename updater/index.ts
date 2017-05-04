@@ -29,9 +29,9 @@ function createHashSubEntry(specSection: FlattedSpecSection): HashSubEntry {
     }
 
     const hashSubEntry: HashSubEntry = {
-        splitted: specSection.hash.splitted,
-        formatted: specSection.hash.formatted,
         diffStat: specSection.diffStat,
+        formatted: specSection.hash.formatted,
+        splitted: specSection.hash.splitted,
     };
 
     return hashSubEntry;
