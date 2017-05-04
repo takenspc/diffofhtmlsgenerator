@@ -49,14 +49,6 @@ export function mkdirp(dirname): Promise<void> {
 }
 
 //
-// logging
-//
-export function log(args): void {
-    const message = [moment().utc().format()].concat(args).join('\t');
-    console.log(message);
-}
-
-//
 // Hash
 //
 export function sha256(text: string): string {

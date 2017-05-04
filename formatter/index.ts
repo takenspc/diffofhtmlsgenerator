@@ -1,7 +1,8 @@
+import * as log4js from 'log4js';
 import * as parse5 from 'parse5';
 import * as path from 'path';
 import { filter } from '../filter';
-import { log, sha256 } from '../shared/utils';
+import { sha256 } from '../shared/utils';
 import { Section } from '../splitter/section';
 import { formatFragment } from './formatter';
 import { HashStat, SpecSection } from './specSection';
@@ -59,13 +60,12 @@ async function formatOrg(org: string): Promise<void> {
     await SpecSection.write(org, specSections);
 }
 
-export async function format(): Promise<void> {
-    log(['format', 'whatwg', 'start']);
+export async function format(logger: log4js.Logger): Promise<void> {
+    logger.info('format - whatwg - start');
     await formatOrg('whatwg');
-    log(['format', 'whatwg', 'end']);
+    logger.info('format - whatwg - end');
 
-    log(['format', 'w3c', 'start']);
+    logger.info('format - w3c - start');
     await formatOrg('w3c');
-    log(['format', 'w3c', 'end']);
-
+    logger.info('format - w3c - end');
 }

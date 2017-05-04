@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as log4js from 'log4js';
 import * as path from 'path';
 import { SpecSection } from '../formatter/specSection';
 import { computeHTMLDiff } from './htmlDiff';
@@ -74,7 +75,7 @@ function reoderW3C(sections: SpecSection[]): void {
 //
 // Entry point
 //
-export async function diff(): Promise<void> {
+export async function diff(logger: log4js.Logger): Promise<void> {
     const [whatwg, w3c] = await Promise.all([
         SpecSection.read('whatwg'),
         SpecSection.read('w3c'),
@@ -86,7 +87,7 @@ export async function diff(): Promise<void> {
     const unifiedSections = createUnifiedSections(whatwg, w3c);
 
     // computeHTMLDiff mutates unifiedSections
-    await computeHTMLDiff(unifiedSections);
+    await computeHTMLDiff(logger, unifiedSections);
 
     await UnifiedSection.write(unifiedSections);
 }

@@ -1,7 +1,8 @@
 import * as admin from 'firebase-admin';
+import * as log4js from 'log4js';
 import * as path from 'path';
 import { UnifiedSection } from '../diff/unifiedSection';
-import { log, readFile } from '../shared/utils';
+import { readFile } from '../shared/utils';
 import { update } from '../updater';
 import { deployDiff } from './diff';
 import { tweet } from './tweet';
@@ -18,11 +19,11 @@ function readUnifiedSectionsFromFirebase(indexRef: admin.database.Reference): Pr
 //
 // Entry point
 //
-export async function deploy(): Promise<void> {
-    const SERVICE_ACCOUNT = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+export async function deploy(logger: log4js.Logger): Promise<void> {
+    const SERVICE_ACCOUNT = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || null);
     const DATABASE_URL = process.env.FIREBASE_DATABASE_URL || null;
     if (!SERVICE_ACCOUNT || !DATABASE_URL) {
-        log(['deploy', 'skip', 'deploy']);
+        logger.info('deploy - skip');
         return;
     }
 
@@ -36,7 +37,7 @@ export async function deploy(): Promise<void> {
     });
     const firebaseRef = admin.database().ref('/');
 
-    log(['deploy', 'update', 'start']);
+    logger.info('deploy - update - start');
     const indexRef = firebaseRef.child('index');
     const oldUnifiedSections = await readUnifiedSectionsFromFirebase(indexRef);
     const newUnifiedSections = await UnifiedSection.read();
@@ -55,14 +56,14 @@ export async function deploy(): Promise<void> {
     const updateRef = firebaseRef.child('update');
     await updateRef.push(data);
     await tweet(fetchData.time, updateData);
-    log(['deploy', 'update', 'end']);
+    logger.info('deploy - update - end');
 
-    log(['deploy', 'index', 'start']);
+    logger.info('deploy - index - start');
     indexRef.set(newUnifiedSections);
-    log(['deploy', 'index', 'end']);
+    logger.info('deploy - index - end');
 
-    log(['deploy', 'diff', 'start']);
+    logger.info('deploy - diff - start');
     const diffRef = firebaseRef.child('diff');
     await deployDiff(newUnifiedSections, diffRef);
-    log(['deploy', 'diff', 'end']);
+    logger.info('deploy - diff - end');
 }

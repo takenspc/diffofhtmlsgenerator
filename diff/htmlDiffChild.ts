@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import * as diff from 'diff';
 import * as path from 'path';
-import { log } from '../shared/utils';
 import { UnifiedSection } from './unifiedSection';
 
 //
@@ -138,9 +137,6 @@ function computeDiff(a: string, b: string): LineDiff[] {
 // Handle objects
 //
 async function diffSection(section: UnifiedSection): Promise<void> {
-    const heading = section.headingText;
-    log(['diff', heading, 'start']);
-
     let lineDiffs: LineDiff[] = [];
     const length = section.formattedHTMLsLength;
     for (let i = 0; i < length; i++) {
@@ -149,13 +145,12 @@ async function diffSection(section: UnifiedSection): Promise<void> {
     }
 
     await UnifiedSection.writeLineDiffs(section, lineDiffs);
-    log(['diff', heading, 'end']);
 }
 
 process.on('message', (section: UnifiedSection) => {
-    diffSection(section).catch((err) => {
-        console.error(err);
-        console.error(err.stack);
+    diffSection(section).then(() => {
+        process.disconnect();
+    }).catch((err) => {
         throw err;
     });
 });

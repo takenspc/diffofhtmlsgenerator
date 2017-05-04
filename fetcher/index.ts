@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as https from 'https';
+import * as log4js from 'log4js';
 import * as path from 'path';
-import { log, mkdirp, writeFile } from '../shared/utils';
+import { mkdirp, writeFile } from '../shared/utils';
 
 function prepare(org: string) {
     const dirPath = path.join(__dirname, 'data', org);
@@ -10,27 +11,26 @@ function prepare(org: string) {
     });
 }
 
-function download(org: string, url: string, htmlPath: string): Promise<void> {
+function download(logger: log4js.Logger, org: string, url: string, htmlPath: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        log(['fetch', org, 'start']);
+        logger.info(`fetch - ${org} - start`);
 
         // write stream
         const writeStream = fs.createWriteStream(htmlPath);
 
         writeStream.on('error', (err) => {
-            log(['error', org]);
-            console.error(org, err);
+            logger.error(`fetch - ${org} - error`, err);
             reject(err);
         });
 
         writeStream.on('finish', () => {
-            log(['fetch', org, 'end']);
+            logger.info(`fetch - ${org} - end`);
             resolve();
         });
 
         // request
         const request = https.get(url, (res) => {
-            log(['fetch', org, res.statusCode]);
+            logger.info(`fetch - ${org} - ${res.statusCode}`);
 
             res.on('data', (data) => {
                 writeStream.write(data);
@@ -42,23 +42,22 @@ function download(org: string, url: string, htmlPath: string): Promise<void> {
         });
 
         request.on('error', (err) => {
-            log(['error', org]);
-            console.error(org, err);
+            logger.error(`fetch - ${org} - error`, err);
             reject(err);
         });
     });
 }
 
-function prepareThenDownload(org: string, url: string): Promise<void> {
+function prepareThenDownload(logger: log4js.Logger, org: string, url: string): Promise<void> {
     return prepare(org).then((htmlPath) => {
-        return download(org, url, htmlPath);
+        return download(logger, org, url, htmlPath);
     });
 }
 
-export function fetch() {
+export function fetch(logger: log4js.Logger) {
     return Promise.all([
-        prepareThenDownload('whatwg', 'https://html.spec.whatwg.org/'),
-        prepareThenDownload('w3c', 'https://w3c.github.io/html/single-page.html'),
+        prepareThenDownload(logger, 'whatwg', 'https://html.spec.whatwg.org/'),
+        prepareThenDownload(logger, 'w3c', 'https://w3c.github.io/html/single-page.html'),
     ]).then(() => {
         const jsonPath = path.join(__dirname, 'data', 'fetch.json');
         const data = JSON.stringify({

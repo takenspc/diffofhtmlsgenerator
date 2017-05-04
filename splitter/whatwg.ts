@@ -192,8 +192,6 @@ if (require.main === module) {
         parseSpec(spec);
         return spec.save();
     }).catch((err) => {
-        console.error(err);
-        console.error(err.stack);
         throw err;
     });
 }

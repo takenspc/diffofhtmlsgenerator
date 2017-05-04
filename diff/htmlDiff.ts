@@ -1,18 +1,23 @@
 import { fork } from 'child_process';
 import { IDiffResult } from 'diff';
+import * as log4js from 'log4js';
 import * as path from 'path';
 import { nextLeafSection } from '../shared/iterator';
 import { DiffStat, UnifiedSection } from './unifiedSection';
 
-function runChildProcess(modulePath: string, section: UnifiedSection): Promise<void> {
+function runChildProcess(logger: log4js.Logger, modulePath: string, section: UnifiedSection): Promise<void> {
+    const headingText = section.headingText;
+
     return new Promise<void>((resolve, reject) => {
+        logger.info(`diff - ${headingText} - start`);
         const child = fork(modulePath);
         child.on('exit', () => {
+            logger.info(`diff - ${headingText} - end`);
             resolve();
         });
 
         child.on('error', (err) => {
-            console.error(err);
+            logger.error(`diff - ${headingText} - error`, err);
             reject(err);
         });
 
@@ -45,10 +50,10 @@ async function updateDiffStat(section: UnifiedSection): Promise<void> {
 
 }
 
-export async function computeHTMLDiff(sections: UnifiedSection[]): Promise<void> {
+export async function computeHTMLDiff(logger: log4js.Logger, sections: UnifiedSection[]): Promise<void> {
     const modulePath = path.join(__dirname, 'htmlDiffChild');
     for (const section of nextLeafSection<UnifiedSection>(sections)) {
-        await runChildProcess(modulePath, section);
+        await runChildProcess(logger, modulePath, section);
         await updateDiffStat(section);
     }
 }
