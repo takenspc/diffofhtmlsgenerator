@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as Firebase from 'firebase';
+import * as admin from 'firebase-admin';
 import { readFile, log } from '../shared/utils';
 import { UnifiedSection } from '../diff/unifiedSection';
 import { update } from '../updater';
@@ -10,7 +10,7 @@ import { tweet } from './tweet';
 //
 // Index
 //
-function readUnifiedSectionsFromFirebase(indexRef: Firebase): Promise<UnifiedSection[]> {
+function readUnifiedSectionsFromFirebase(indexRef: admin.database.Reference): Promise<UnifiedSection[]> {
     return indexRef.once('value').then((dataSnapshot) => {
         return dataSnapshot.val();
     });
@@ -21,15 +21,22 @@ function readUnifiedSectionsFromFirebase(indexRef: Firebase): Promise<UnifiedSec
 // Entry point
 //
 export async function deploy(): Promise<void> {
-    const URL = process.env.FIREBASE_URL || null;
-    const AUTH_TOKEN = process.env.FIREBASE_ADMIN_AUTH_TOKEN || null;
-    if (!URL || !AUTH_TOKEN) {
+    const SERVICE_ACCOUNT = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    const DATABASE_URL = process.env.FIREBASE_DATABASE_URL || null;
+    if (!SERVICE_ACCOUNT || !DATABASE_URL) {
         log(['deploy', 'skip', 'deploy']);
         return;
     }
 
-    const firebaseRef = new Firebase(URL);
-    await firebaseRef.authWithCustomToken(AUTH_TOKEN);
+    admin.initializeApp({
+        credential: admin.credential.cert(SERVICE_ACCOUNT),
+        databaseURL: DATABASE_URL,
+        databaseAuthVariableOverride: {
+            canRead: true,
+            canWrite: true,
+        },
+    });
+    const firebaseRef = admin.database().ref('/');
 
     log(['deploy', 'update', 'start']);
     const indexRef = firebaseRef.child('index');
@@ -54,13 +61,10 @@ export async function deploy(): Promise<void> {
 
     log(['deploy', 'index', 'start']);
     indexRef.set(newUnifiedSections);
-    log(['deploy', 'index', 'end']);  
+    log(['deploy', 'index', 'end']);
 
     log(['deploy', 'diff', 'start']);
     const diffRef = firebaseRef.child('diff');
     await deployDiff(newUnifiedSections, diffRef);
     log(['deploy', 'diff', 'end']);
-
-
-    Firebase.goOffline();
 }
